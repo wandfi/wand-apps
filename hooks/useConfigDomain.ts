@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 
 export const DomainRef = {
-  value: 'zoofi.io',
+  value: 'wand.fi',
 }
 
-const supportDomain = ['zoofi.io', 'zoofi.xyz']
+const supportDomain = ['wandfi.io', 'wandfi.xyz']
 
 export const getAvilableDomain = () => {
   if (location.hostname == 'localhost') return supportDomain[0]

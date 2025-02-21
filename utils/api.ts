@@ -10,7 +10,7 @@ const instance = () => {
 
   const chain = SUPPORT_CHAINS.find((item) => item.id == getCurrentChainId())
 
-  const baseurl = (isPROD || !chain?.testnet) ? `https://api.${DomainRef.value}` : `https://beta-api.${DomainRef.value}`
+  const baseurl = (isPROD || !chain?.testnet) ? `https://story-api.${DomainRef.value}` : `https://story-api.${DomainRef.value}`
   if (!api || api.defaults.baseURL !== baseurl) {
     api = axios.create({
       baseURL: baseurl,

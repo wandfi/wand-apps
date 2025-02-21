@@ -21,11 +21,11 @@ export type BVaultConfig = {
 
 export const ZooProtocolAddress: { [k: number]: Address } = {
   [storyTestnet.id]: '0x8685CE9Db06D40CBa73e3d09e6868FE476B5dC89',
-  [story.id]: '0xc0fA386aE92f18A783476d09121291A1972C30Dc',
+  [story.id]: '0x555ad3261c0eD6119Ab291b8dC383111d83C67c7',
 }
 export const ZooProtocolSettingsAddress: { [k: number]: Address } = {
   [storyTestnet.id]: '0x97d82C639835F4EfaCC366fdE78CA0c4EC2a2A83',
-  [story.id]: '0x8c6E434Bb1C51728BdCc250255c1F654471d85eB',
+  [story.id]: '0xa6802e65C764712841330E58814Be43b6A4C3496',
 }
 export const CrocQueryAddress: { [k: number]: Address } = {
   [storyTestnet.id]: '0x8685CE9Db06D40CBa73e3d09e6868FE476B5dC89',
@@ -38,23 +38,23 @@ export const HONEY_Address: { [k: number]: Address } = {
 }
 export const BQueryAddress: { [k: number]: Address } = {
   [storyTestnet.id]: '0xDf1126d3627b7f5D2a44d978A7180AcbD3c34aB6',
-  [story.id]: '0x6E603014ACE3Ae06F34Ffe259106Af77c056d913',
+  [story.id]: '0x413a55fe2CFD42799af68Cbd3514a55439B7cf5c',
 }
 
 export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
-  [storyTestnet.id]: [
+  [storyTestnet.id]: [],
+  [story.id]: [
     {
-      vault: '0x9700FEa232560E4048DD924623491926282125bE',
-      asset: '0xd28d852cbcc68dcec922f6d5c7a8185dbaa104b7',
-      pToken: '0x575287Cd8CB9A49e0EE00Bf0C71Eac337Ab8FeBa',
+      vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
+      asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
+      pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d4',
       assetSymbol: 'vIP',
       pTokenSymbol: 'pvIP',
       yTokenSymbol: 'yvIP',
-      protocolAddress: ZooProtocolAddress[storyTestnet.id],
-      protocolSettingsAddress: ZooProtocolSettingsAddress[storyTestnet.id],
-      bQueryAddres: BQueryAddress[storyTestnet.id],
+      protocolAddress: ZooProtocolAddress[story.id],
+      protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
+      bQueryAddres: BQueryAddress[story.id],
       onEnv: ['test'],
     },
   ],
-  [story.id]: [],
 }

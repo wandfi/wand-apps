@@ -109,10 +109,10 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
       // for testnet
       const chain = getCurrentChain()
       if (chain.id === storyTestnet.id) {
-        await updateLPTokensStatForTest(mLps)
+        // await updateLPTokensStatForTest(mLps)
       } else if (chain.id === story.id) {
-        const map = await getBeraTokensPrices()
-        set({ prices: { ...get().prices, ...map } })
+        // const map = await getBeraTokensPrices()
+        // set({ prices: { ...get().prices, ...map } })
       }
     }
     return {}
@@ -166,6 +166,7 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
     prices: {
       '0x549943e04f40284185054145c6E4e9568C1D3241': DECIMAL,
       '0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce': DECIMAL,
+      '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': DECIMAL,
     },
     updateTokenPrices,
 

@@ -3,6 +3,58 @@ export default [
     inputs: [
       {
         internalType: 'address',
+        name: 'ipAsset',
+        type: 'address',
+      },
+    ],
+    name: 'addIpAsset',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'ipAsset',
+        type: 'address',
+      },
+    ],
+    name: 'removeIpAsset',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'newMaxIpAssets',
+        type: 'uint256',
+      },
+    ],
+    name: 'updateMaxIpAssets',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'newC',
+        type: 'uint256',
+      },
+    ],
+    name: 'updateC',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
         name: '_protocol',
         type: 'address',
       },
