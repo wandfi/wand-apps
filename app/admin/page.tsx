@@ -301,7 +301,7 @@ export default function AdminPage() {
       <div className='w-full flex'>
         <div className='flex flex-col gap-4 w-full max-w-[840px] mx-auto px-5'>
           <Select classNames={selectClassNames} defaultValue={options[0]} options={options} onChange={(e) => e && setState({ current: e as any })} />
-          {current.type == 'L-Vault' && (
+          {current?.type == 'L-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={LVaultParams} protocoSettingAddress={PROTOCOL_SETTINGS_ADDRESS[chainId]} />
               <UpdateVaultPrice vc={current.data} />
@@ -313,7 +313,7 @@ export default function AdminPage() {
               {chain?.testnet && <SetTester vc={current.data} />}
             </>
           )}
-          {current.type == 'P-Vault' && (
+          {current?.type == 'P-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={PValutParams} protocoSettingAddress={PROTOCOL_SETTINGS_ADDRESS[chainId]} />
               {['configureBlastYieldsAndGas', 'configureBlastPoints'].map((action) => (
@@ -321,7 +321,7 @@ export default function AdminPage() {
               ))}
             </>
           )}
-          {current.type == 'B-Vault' && (
+          {current?.type == 'B-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={BVaultParams} protocoSettingAddress={current.data.protocolSettingsAddress} />
               {['addIpAsset', 'removeIpAsset', 'updateMaxIpAssets', 'updateC', 'close', 'pause', 'unpause', 'pauseRedeemPool', 'unpauseRedeemPool', 'addBribeToken', 'addBribes', 'setBriber'].map((functionName) => (
@@ -332,7 +332,7 @@ export default function AdminPage() {
             </>
           )}
           {
-            current.type == 'Lnt-Vault' && (
+            current?.type == 'Lnt-Vault' && (
               <>
                 <UpdateVaultParams vault={current.data.vault} paramList={LntVaultParams} protocoSettingAddress={current.data.protocolSettingsAddress} />
                 <InitReinit vault={current.data.vault} />

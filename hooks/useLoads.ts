@@ -71,8 +71,6 @@ export function useLoadBVaults() {
     queryKey: ['UpdateBvautlsTokens', tokens],
     queryFn: async () => {
       await Promise.all([useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(tokens), useBoundStore.getState().sliceTokenStore.updateTokenPrices(tokens)])
-      // await useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(tokens)
-      // await useBoundStore.getState().sliceTokenStore.updateTokenPrices(tokens)
       return true
     },
     throwOnError(error, query) {
