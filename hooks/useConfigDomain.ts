@@ -4,7 +4,7 @@ export const DomainRef = {
   value: 'wand.fi',
 }
 
-const supportDomain = ['wandfi.io', 'wandfi.xyz']
+const supportDomain = ['wand.fi', 'wandfi.xyz']
 
 export const getAvilableDomain = () => {
   if (location.hostname == 'localhost') return supportDomain[0]
