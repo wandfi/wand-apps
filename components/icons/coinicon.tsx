@@ -50,17 +50,23 @@ const SupportICONS: { [k: string]: string } = {
   xiBGT: 'xiBGT.svg',
   yiRED: 'yiRED.svg',
   ZUSD: 'ZUSD.svg',
-  
+  PToken: 'PToken.svg',
+  YToken: 'YToken.svg',
+  verio: 'verio.svg',
+  vIP: 'vIP.svg',
+  pvIP: 'PToken.svg',
+  yvIP: 'YToken.svg',
 }
 
 export function CoinIcon({ symbol, size = 48, url, ...p }: { symbol: string; className?: string; style?: CSSProperties; size?: number; url?: string }) {
   const supportIcon = SupportICONS[symbol]
   const src = `${BASE_PATH}/${supportIcon}`
+  if (!symbol) return null;
   if (!supportIcon && !url) {
     return (
       <svg {...p} width={size} height={size} viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
         <text className='fill-primary/60' width='20' x='12' y='12' textAnchor='middle' fontSize={12} dominantBaseline='middle'>
-          {symbol.slice(0, 2)}
+          {(symbol).slice(0, 2)}
         </text>
         <circle className='stroke-primary/60' cx='12' cy='12' r='11.5' strokeWidth={1} />
       </svg>

@@ -57,75 +57,77 @@ export function useTVL() {
   const bvaults = useStore((s) => s.sliceBVaultsStore.bvaults)
   const tprices = useStore((s) => s.sliceTokenStore.prices)
 
-  const tvlItems = [{ name: USBSymbol, symbol: USBSymbol, address: USB_ADDRESS[chainId] }]
-    .concat(
-      vcs.map((v) => ({
+  const tvlItems =
+    //  [
+    //   { name: USBSymbol, symbol: USBSymbol, address: USB_ADDRESS[chainId] }
+    // ]
+    vcs
+      .map((v) => ({
         name: v.xTokenSymbol + v.version,
         symbol: v.xTokenSymbol,
         address: v.xTokenAddress,
-      })),
-    )
-    .map((item) => {
-      const price = prices[item.address]
-      const amount = item.symbol == USBSymbol ? vaultUsbTotal : totalSupply[item.address] || 0n
-      const usdAmount = (price * amount) / DECIMAL
-      return {
-        ...item,
-        price,
-        amount,
-        usdAmount,
-      }
-    })
-    .concat(
-      vcs
-        .filter((vc) => !vc.isStable)
-        .map((vc) => {
-          const lvd = lvaults[vc.vault]
-          const amount = (lvd?.sellPoolTotalStaking || 0n) + (lvd?.buyPoolBalance || 0n)
-          const price = prices[vc.assetTokenAddress]
-          const usdAmount = (price * amount) / DECIMAL
-          return {
-            name: vc.assetTokenSymbol + vc.version,
-            symbol: vc.assetTokenSymbol,
-            address: vc.assetTokenAddress,
-            price,
-            amount,
-            usdAmount,
-          }
-        }),
-    )
-    .concat(
-      _.chain(bvcs)
-        .mapValues((bvc) => {
-          const isLP = LP_TOKENS[bvc.asset]
+      }))
+      .map((item) => {
+        const price = prices[item.address]
+        const amount = item.symbol == USBSymbol ? vaultUsbTotal : totalSupply[item.address] || 0n
+        const usdAmount = (price * amount) / DECIMAL
+        return {
+          ...item,
+          price,
+          amount,
+          usdAmount,
+        }
+      })
+      .concat(
+        vcs
+          .filter((vc) => !vc.isStable)
+          .map((vc) => {
+            const lvd = lvaults[vc.vault]
+            const amount = (lvd?.sellPoolTotalStaking || 0n) + (lvd?.buyPoolBalance || 0n)
+            const price = prices[vc.assetTokenAddress]
+            const usdAmount = (price * amount) / DECIMAL
+            return {
+              name: vc.assetTokenSymbol + vc.version,
+              symbol: vc.assetTokenSymbol,
+              address: vc.assetTokenAddress,
+              price,
+              amount,
+              usdAmount,
+            }
+          }),
+      )
+      .concat(
+        _.chain(bvcs)
+          .mapValues((bvc) => {
+            const isLP = LP_TOKENS[bvc.asset]
 
-          const bvd = bvaults[bvc.vault]
-          const lpEnable = isLP && bvd && bvd.lpLiq && bvd.lpBase && bvd.lpQuote && tprices[isLP.base] && tprices[isLP.quote]
-          const price = lpEnable ? (tprices[isLP.base] * bvd.lpBase! + tprices[isLP.quote] * bvd.lpQuote!) / bvd.lpLiq! : tprices[bvc.asset] || DECIMAL
-          // const amount = lpEnable ? bvd.lpLiq! : 0n
-          // const price = tprices[bvc.asset] || DECIMAL
-          const amount = bvd?.lpLiq || bvd?.lockedAssetTotal || 0n
-          return {
-            name: bvc.assetSymbol,
-            symbol: bvc.assetSymbol,
-            address: bvc.asset,
-            price,
-            amount,
-            usdAmount: (price * amount) / DECIMAL,
-          }
-        })
-        .values()
-        .reduce((uniqList: any[], item) => {
-          const uItem = uniqList.find((u) => u.symbol == item.symbol)
-          if (uItem) {
-            uItem.amount += item.amount
-            uItem.usdAmount += item.usdAmount
-            return uniqList
-          }
-          return [...uniqList, item]
-        }, [])
-        .value(),
-    )
+            const bvd = bvaults[bvc.vault]
+            const lpEnable = isLP && bvd && bvd.lpLiq && bvd.lpBase && bvd.lpQuote && tprices[isLP.base] && tprices[isLP.quote]
+            const price = lpEnable ? (tprices[isLP.base] * bvd.lpBase! + tprices[isLP.quote] * bvd.lpQuote!) / bvd.lpLiq! : tprices[bvc.asset] || DECIMAL
+            // const amount = lpEnable ? bvd.lpLiq! : 0n
+            // const price = tprices[bvc.asset] || DECIMAL
+            const amount = bvd?.lpLiq || bvd?.lockedAssetTotal || 0n
+            return {
+              name: bvc.assetSymbol,
+              symbol: bvc.assetSymbol,
+              address: bvc.asset,
+              price,
+              amount,
+              usdAmount: (price * amount) / DECIMAL,
+            }
+          })
+          .values()
+          .reduce((uniqList: any[], item) => {
+            const uItem = uniqList.find((u) => u.symbol == item.symbol)
+            if (uItem) {
+              uItem.amount += item.amount
+              uItem.usdAmount += item.usdAmount
+              return uniqList
+            }
+            return [...uniqList, item]
+          }, [])
+          .value(),
+      )
 
   const tvl = tvlItems.reduce((_sum, item) => _sum + item.usdAmount, 0n)
   return { tvl, tvlItems }

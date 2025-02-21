@@ -5,7 +5,7 @@ import _ from 'lodash'
 import { Address, erc20Abi, PublicClient } from 'viem'
 import { getPC } from './publicClient'
 import { SliceFun } from './types'
-import { berachain, getCurrentChainId } from '@/config/network'
+import { story, getCurrentChainId } from '@/config/network'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { DECIMAL } from '@/constants'
 import { toDecimal18 } from '@/lib/utils'
@@ -101,7 +101,7 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
             .then((item) => ({ vault: bvc.vault, item })),
         ),
       ),
-      berachain.id == getCurrentChainId()
+      story.id == getCurrentChainId()
         ? Promise.all(bvcs.map((bvc) => (LP_TOKENS[bvc.asset]?.poolId ? getBvaultLpData(pc, bvc) : Promise.resolve(null))))
         : Promise.resolve(null),
     ])

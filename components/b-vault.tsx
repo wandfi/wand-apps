@@ -1,6 +1,5 @@
 import { toBVault } from '@/app/routes'
 import PandaLine from '@/components/icons/PandaLine'
-import VenomLine from '@/components/icons/VenomLine'
 import { abiAdhocBribesPool, abiBVault, abiRedeemPool, abiStakingBribesPool } from '@/config/abi'
 import { BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
@@ -24,7 +23,7 @@ import { useWalletClient } from 'wagmi'
 import { ApproveAndTx } from './approve-and-tx'
 import { AssetInput } from './asset-input'
 import BvaultEpochYtPrices from './bvault-epoch-ytprices'
-import { GetLP } from './get-lp'
+import { GetvIP } from './get-lp'
 import { CoinIcon } from './icons/coinicon'
 import STable from './simple-table'
 import { SimpleTabs } from './simple-tabs'
@@ -53,7 +52,7 @@ export function BVaultRedeem({ bvc }: { bvc: BVaultConfig }) {
   const waitTimeFmt = bvd.current.duration > 0n ? `Waiting Time: ~${fmtDuration((bvd.current.duration + bvd.current.startTime) * 1000n - BigInt(_.now()))}` : ''
   return (
     <div className={cn('flex flex-col gap-1')}>
-      <AssetInput asset={bvc.pTokenSymbol} assetIcon='Panda' amount={inputPToken} balance={pTokenBalance} setAmount={setInputPToken} />
+      <AssetInput asset={bvc.pTokenSymbol} amount={inputPToken} balance={pTokenBalance} setAmount={setInputPToken} />
       <div className='text-xs font-medium text-center'>
         {waitTimeFmt} <Tip>Wait to claim after the Epoch ends.</Tip>
       </div>
@@ -119,7 +118,7 @@ export function BVaultClaim({ bvc }: { bvc: BVaultConfig }) {
         <div className='text-black/60 dark:text-white/60 mb-4'>Pending Requests</div>
         {
           <div className='flex items-center gap-4'>
-            <PandaLine showBg className='text-2xl' />
+            <CoinIcon symbol={bvc.pTokenSymbol} size={24} />
             <span className='font-semibold'>{bvc.pTokenSymbol}</span>
             <span className='text-black/60 dark:text-white/60'>{displayBalance(redeemingBalance)}</span>
             <div className='ml-auto text-xs text-black/60 dark:text-white/60 '>
@@ -167,7 +166,7 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
       content: (
         <div className='flex flex-col gap-1'>
           <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} />
-          <GetLP address={bvc.asset} />
+          <GetvIP address={bvc.asset} />
           <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div>
           <ApproveAndTx
             className='mx-auto mt-4'
@@ -204,8 +203,8 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
   return (
     <div className={cn('flex flex-col gap-5', maxClassname, 'max-w-xl')}>
       <div className='card !p-0 overflow-hidden w-full'>
-        <div className='flex p-5 bg-[#A3D395] gap-5'>
-          <PandaLine className='text-[3.375rem]' showBg />
+        <div className='flex p-5 bg-[#10B98126] gap-5'>
+          <CoinIcon size={54} symbol='PToken' />
           <div className='flex flex-col gap-2'>
             <div className='text-xl text-black font-semibold'>{bvc.pTokenSymbol}</div>
             <div className='text-xs text-black/60 font-medium'>Interest bearing rebase principal token</div>
@@ -249,8 +248,8 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
   }
   return (
     <div className='card !p-0 overflow-hidden flex flex-col'>
-      <div className='flex p-5 bg-[#F0D187] gap-5'>
-        <VenomLine className='text-[3.375rem]' showBg />
+      <div className='flex p-5 bg-[#6366F126] gap-5'>
+        <CoinIcon size={54} symbol='YToken' />
         <div className='flex flex-col gap-2'>
           <div className='text-xl text-black font-semibold'>{bvc.yTokenSymbol}</div>
           <div className='text-xs text-black/60 font-medium'>Yield token</div>
@@ -318,9 +317,9 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   return (
     <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
       <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} />
-      <GetLP address={bvc.asset} />
+      <GetvIP address={bvc.asset} />
       <div className='text-base font-bold my-2'>Receive</div>
-      <AssetInput asset={bvc.yTokenSymbol} assetIcon='Venom' loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
+      <AssetInput asset={bvc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
       <div className='text-xs font-medium  flex justify-between select-none'>
         <div className='flex items-center gap-2'>
           <RiLoopLeftFill className='text-sm text-primary cursor-pointer inline-block' onClick={() => togglePriceSwap()} />
@@ -657,8 +656,8 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
           <div className='text-sm font-medium'>${displayBalance(lpTvlBn, 2)}</div>
         </div>
       </div>
-      {renderToken(token1, lpBase, lpBaseTvlBn)}
-      {renderToken(token2, lpQuote, lpQuoteTvlBn, true)}
+      {lp && renderToken(token1, lpBase, lpBaseTvlBn)}
+      {lp && renderToken(token2, lpQuote, lpQuoteTvlBn, true)}
       {renderStat(
         'Settlement Time',
         bvd.closed ? 'status-red' : 'status-green',
@@ -674,30 +673,31 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
           </div>
         ),
       )}
-      {renderStat('Reward', vc.rewardSymbol || 'iBGT', vc.rewardSymbol || 'iBGT', true)}
+      {renderStat('Reward', vc.rewardSymbol || 'vIP', vc.rewardSymbol || 'vIP', true)}
       {renderChoseSide(
-        'Panda',
-        'Principal Panda',
+        'PToken',
+        'Principal Token',
         fmtApy,
-        'Venom',
-        'Boost Venom',
+        'YToken',
+        'Yield Token',
         `${fmtBoost}x`,
         (e) => {
           e.stopPropagation()
-          toBVault(r, vc.vault, 'principal_panda')
+          toBVault(r, vc.vault, 'principal_token')
         },
         (e) => {
           e.stopPropagation()
-          toBVault(r, vc.vault, 'boost_venom')
+          toBVault(r, vc.vault, 'yield_token')
         },
       )}
     </div>
   )
 }
 
-export function BVaultCardComming({ symbol }: { symbol: string }) {
+export function BVaultCardComming({ symbol = '' }: { symbol?: string }) {
+
   return (
-    <div className={cn('card cursor-pointer !p-0 grid grid-cols-2 overflow-hidden h-[419px]', {})}>
+    <div className={cn('card cursor-pointer !p-0 grid grid-cols-2 overflow-hidden h-[20rem]', {})}>
       <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center h-20')}>
         <CoinIcon symbol={symbol} size={44} />
         <div>

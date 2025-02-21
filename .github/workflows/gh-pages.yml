@@ -33,7 +33,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
-          cname: zoofi.io
+          cname: story.wand.fi
   test:
     if: contains(github.event.head_commit.message, '[test]') || contains(github.event.head_commit.message, '[all]')
     runs-on: ubuntu-latest
@@ -58,61 +58,7 @@ jobs:
       - name: Deploy Gh-Pages 🚀
         uses: XueMoMo/actions-gh-pages@v4.0.1
         with:
-          deploy_key: ${{ secrets.DK_TEST }}
+          deploy_key: ${{ secrets.DK_STORY_TEST }}
           publish_dir: ./out
-          external_repository: zoofiio/zoofi-ui-site-test
-          cname: test.zoofi.io
-  beta:
-    if: contains(github.event.head_commit.message, '[beta]') || contains(github.event.head_commit.message, '[all]')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
-
-      - name: Set pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      - name: Install dependencies & build
-        env:
-          NEXT_PUBLIC_ENV: 'beta'
-        run: |
-          pnpm install --frozen-lockfile   
-          pnpm build
-
-      - name: Deploy Gh-Pages 🚀
-        uses: XueMoMo/actions-gh-pages@v4.0.1
-        with:
-          deploy_key: ${{ secrets.DK_BETA }}
-          publish_dir: ./out
-          external_repository: zoofiio/zoofi-ui-site-beta
-          cname: beta.zoofi.io
-  betalnt:
-    if: contains(github.event.head_commit.message, '[betalnt]') || contains(github.event.head_commit.message, '[all]')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
-
-      - name: Set pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      - name: Install dependencies & build
-        env:
-          NEXT_PUBLIC_ENV: 'betalnt'
-        run: |
-          pnpm install --frozen-lockfile   
-          pnpm build
-
-      - name: Deploy Gh-Pages 🚀
-        uses: XueMoMo/actions-gh-pages@v4.0.1
-        with:
-          deploy_key: ${{ secrets.DK_BETALNT }}
-          publish_dir: ./out
-          external_repository: zoofiio/zoofi-ui-site-betalnt
-          cname: betalnt.zoofi.io
+          external_repository: wandfi/wand-ui-site-story-test
+          cname: test.story.wand.fi

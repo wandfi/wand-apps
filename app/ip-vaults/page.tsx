@@ -63,7 +63,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
   })
   const odata = [
     {
-      tab: bvd.closed ? 'Redeem' : 'Principal Panda',
+      tab: bvd.closed ? 'Redeem' : 'Principal Token',
       content: bvd.closed ? (
         <div className='max-w-4xl mx-auto pt-8'>
           <BVaultRedeem bvc={bvc} />
@@ -73,7 +73,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
       ),
     },
     {
-      tab: 'Boost Venom',
+      tab: 'Yield Token',
       content: <BVaultB bvc={bvc} />,
     },
   ]
@@ -117,28 +117,28 @@ export default function Vaults() {
       <div className='w-full max-w-[1232px] px-4 mx-auto md:pb-8'>
         {!currentVc ? (
           <>
-            <div className='page-title'>B-Vaults</div>
-            <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for Proof-of-Liquidity (POL).' />
+            <div className='page-title'>IP-Vaults</div>
+            <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
             <Grid numItems={1} numItemsMd={2} numItemsLg={3} className='gap-5 mt-4'>
               {bvcs.map((item, index) => (
                 <BVaultCard key={`group_vault_item_${index}`} vc={item} />
               ))}
               {bvcs.length == 0 && (
                 <>
-                  <BVaultCardComming symbol='HONEY-USDC' />
-                  <BVaultCardComming symbol='HONEY-WBERA' />
-                  <BVaultCardComming symbol='HONEY-WETH' />
+                  <BVaultCardComming />
+                  <BVaultCardComming />
+                  <BVaultCardComming />
                 </>
               )}
               {bvcs.length == 1 && (
                 <>
-                  <BVaultCardComming symbol='HONEY-WBERA' />
-                  <BVaultCardComming symbol='HONEY-WETH' />
+                  <BVaultCardComming />
+                  <BVaultCardComming />
                 </>
               )}
               {bvcs.length == 2 && (
                 <>
-                  <BVaultCardComming symbol='HONEY-WETH' />
+                  <BVaultCardComming />
                 </>
               )}
             </Grid>

@@ -8,7 +8,7 @@ import { SimpleDialog } from './simple-dialog'
 
 export type ThemeType = 'light' | 'dark'
 export type ThemeModeType = ThemeType | 'system'
-const defTheme: ThemeType = 'dark'
+const defTheme: ThemeType = 'light'
 
 const getSystemTheme = (): ThemeType => (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 const getThemeState = () => {

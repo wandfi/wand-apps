@@ -15,3 +15,12 @@ export function GetLP({ address }: { address: Address }) {
         </Link>
     </div>
 }
+
+export function GetvIP({ address }: { address: Address }) {
+    return <div className='text-xs font-medium flex gap-2 justify-end items-center'>
+        <CoinIcon symbol="verio" size={18} />
+        <Link target='_blank' className='underline' href={getBexPoolURL(address)}>
+            Get vIP on Verio
+        </Link>
+    </div>
+}

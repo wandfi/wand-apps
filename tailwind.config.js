@@ -35,7 +35,7 @@ module.exports = {
       colors: {
         // light mode
         primary: { 
-          DEFAULT: '#1ECA53',
+          DEFAULT: '#5A3FFF',
         },
         border: {
           DEFAULT: '#4A5546',
@@ -45,7 +45,7 @@ module.exports = {
             faint: colors.blue[50],
             muted: colors.blue[200],
             subtle: colors.blue[400],
-            DEFAULT: '#1ECA53',
+            DEFAULT: '#5A3FFF',
             emphasis: colors.blue[700],
             inverted: colors.white,
           },
@@ -75,7 +75,7 @@ module.exports = {
             faint: '#0B1229',
             muted: colors.blue[950],
             subtle: colors.blue[800],
-            DEFAULT: '#1ECA53',
+            DEFAULT: '#5A3FFF',
             emphasis: colors.blue[400],
             inverted: colors.blue[950],
           },

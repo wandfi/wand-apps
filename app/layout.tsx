@@ -13,8 +13,8 @@ import PageLayout from './pagelayout'
 const inter = Inter({ subsets: ['latin'] })
 
 const baseMeta = {
-  title: 'Zoo Finance',
-  description: 'A Structured Protocol for Better Liquidity Utilization',
+  title: 'Wand Finance',
+  description: 'A Structured Protocol for Better Asset Utilization',
 }
 
 export const metadata: Metadata = {
@@ -22,13 +22,13 @@ export const metadata: Metadata = {
   openGraph: {
     ...baseMeta,
     type: 'website',
-    images: 'https://zoofi.io/Welcome.jpg'
+    // images: 'https://zoofi.io/Welcome.jpg'
   },
   twitter: {
     ...baseMeta,
-    images: 'https://zoofi.io/Welcome.jpg'
+    // images: 'https://zoofi.io/Welcome.jpg'
   },
-  
+
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

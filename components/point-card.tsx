@@ -1,6 +1,6 @@
 import { fmtPercent } from '@/lib/utils'
 
-import { isBerachain } from '@/config/network'
+import { isStorychain } from '@/config/network'
 import { NATIVE_TOKEN_ADDRESS, USB_ADDRESS, USBSymbol, VaultConfig } from '@/config/swap'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useElementSizeCheck } from '@/hooks/useElementSizeCheck'
@@ -73,7 +73,7 @@ export function useVcPoints(vc: VaultConfig) {
     })
     const tit = 'Leverage the Bull'
     const sub =
-      vc.isStable && isBerachain() ? `~ ${levrages[vc.vault].toFixed(2)}x Berachain Native Yield` : `~ ${levrages[vc.vault].toFixed(2)}x Leveraged long on ${vc.assetTokenSymbol}`
+      vc.isStable && isStorychain() ? `~ ${levrages[vc.vault].toFixed(2)}x Berachain Native Yield` : `~ ${levrages[vc.vault].toFixed(2)}x Leveraged long on ${vc.assetTokenSymbol}`
     points.push({
       symbol: vc.xTokenSymbol,
       symbolPrice: `$${displayBalance(prices[vc.xTokenAddress])}`,

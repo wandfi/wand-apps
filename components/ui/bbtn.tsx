@@ -23,7 +23,7 @@ import { Spinner } from '../spinner'
 // }
 
 export function BBtn(p: ButtonHTMLAttributes<HTMLButtonElement> & { borderWidth?: number; busy?: boolean; busyShowContent?: boolean; hiddenBorder?: boolean }) {
-  const { borderWidth = 1, children, busy, busyShowContent = true, className, hiddenBorder, ...props } = p
+  const { borderWidth = 1, children, busy, busyShowContent = true, className, hiddenBorder = true, ...props } = p
   const btnRef = useRef<HTMLButtonElement>(null)
   const [_size, setSize] = useState('0_0')
   let clipPath = 'unset'
@@ -63,9 +63,12 @@ export function BBtn(p: ButtonHTMLAttributes<HTMLButtonElement> & { borderWidth?
     <button
       {...props}
       ref={btnRef}
-      style={{ background: 'radial-gradient(76.25% 76.25% at 50.3% 23.75%,rgba(27, 205, 89, 0.2) 0%,rgba(179, 232, 84, 0.2) 100%)' }}
+      style={{
+        // backgroundColor: '#64738B'
+        // background: 'radial-gradient(76.25% 76.25% at 50.3% 23.75%,rgba(27, 205, 89, 0.2) 0%,rgba(179, 232, 84, 0.2) 100%)'
+      }}
       className={cn(
-        'group/bbtn relative px-3 cursor-pointer w-full transition-all leading-[2.375] ring-0 text-base text-black dark:text-white font-medium h-10 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed',
+        'group/bbtn bg-[#64738B] hover:bg-primary disabled:hover:bg-[#64738B] relative px-3 cursor-pointer w-full transition-all leading-[2.375] ring-0 text-base text-white font-medium h-10 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed',
         className,
       )}
     >

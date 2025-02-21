@@ -165,7 +165,7 @@ export default function Dashboard() {
     <PageWrap>
       <div className='w-full max-w-[1200px] px-4 mx-auto flex flex-col gap-5 md:pb-8'>
         <TVLItem />
-        {chainId !== 80094 && <LVaultsItem />}
+        {/* <LVaultsItem /> */}
         <BVaultsItem />
       </div>
     </PageWrap>

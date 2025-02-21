@@ -37,7 +37,7 @@ export const renderStat = (tit: string, icon: string, sub: ReactNode, borderL: b
 const BtnWrap = (p: ButtonHTMLAttributes<HTMLButtonElement>) => {
   const { children, onClick, ...props } = p
   return p.onClick ? (
-    <BBtn {...props} onClick={onClick}>
+    <BBtn hiddenBorder {...props} onClick={onClick}>
       {children}
     </BBtn>
   ) : (
@@ -47,36 +47,35 @@ const BtnWrap = (p: ButtonHTMLAttributes<HTMLButtonElement>) => {
   )
 }
 export const renderChoseSide = (
-  leftSymbol: keyof typeof IconsMap,
+  leftSymbol: string,
   leftTitle: string,
   leftSub: string,
-  rightSymbol: keyof typeof IconsMap,
+  rightSymbol: string,
   rightTitle: string,
   rightSub: string,
   onClickLeft?: MouseEventHandler<HTMLDivElement>,
   onClickRight?: MouseEventHandler<HTMLDivElement>,
 ) => {
-  const LeftIcon = IconsMap[leftSymbol]
-  const RightIcon = IconsMap[rightSymbol]
+  
 
   return (
     <div className={cn(itemClassname, 'col-span-2 gap-4')}>
       <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>Choose your side</div>
       <div className='grid grid-cols-2 gap-4 w-full px-4'>
-        <BtnWrap className={cn('h-[4.25rem] w-full relative')} onClick={onClickLeft as any}>
+        <BtnWrap  className={cn('h-[4.25rem] w-full relative')} onClick={onClickLeft as any}>
           <div className='flex gap-2 items-center p-4 w-full h-[4.25rem] absolute left-0 top-0'>
-            <LeftIcon className='text-4xl' showBg />
+            <CoinIcon symbol={leftSymbol} size={36} />
             <div className='flex flex-col items-start gap-2'>
-              <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>{leftTitle}</div>
+              <div className='text-white/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>{leftTitle}</div>
               <span className=' text-[14px] leading-[14px] font-medium'>{leftSub}</span>
             </div>
           </div>
         </BtnWrap>
         <BtnWrap className={cn('h-[4.25rem] w-full relative')} onClick={onClickRight as any}>
           <div className='flex flex-row-reverse gap-2 items-center p-4 w-full h-[4.25rem] absolute left-0 top-0'>
-            <RightIcon className='text-4xl' showBg />
+            <CoinIcon symbol={rightSymbol} size={36} />
             <div className='flex flex-col items-end gap-2'>
-              <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>{rightTitle}</div>
+              <div className='text-white text-xs font-semibold leading-[12px] whitespace-nowrap'>{rightTitle}</div>
               <span className=' text-[14px] leading-[14px] font-medium'>{rightSub}</span>
             </div>
           </div>

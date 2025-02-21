@@ -5,7 +5,7 @@ import { AssetInput } from '@/components/asset-input'
 import { Tip } from '@/components/ui/tip'
 import { LVaultAdvance } from '@/components/lvault-advance'
 import { abiStableVault, abiVault, abiVaultQuery } from '@/config/abi'
-import { isBerachain, SUPPORT_CHAINS } from '@/config/network'
+import { isStorychain, SUPPORT_CHAINS } from '@/config/network'
 import { NATIVE_TOKEN_ADDRESS, USB_ADDRESS, USBSymbol, VAULT_QUERY_ADDRESS, VaultConfig } from '@/config/swap'
 import { DECIMAL } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
@@ -299,7 +299,7 @@ export function LVaultSimpleWrap({ vc }: { vc: VaultConfig }) {
           <div className='card text-[#64748B] w-full flex-1 dark:text-slate-50/60 text-xs font-medium leading-[12px] px-[30px] py-[23px] rounded-2xl'>
             <div className='flex items-center mb-[16px] whitespace-nowrap'>
               {cycle}
-              {leverage.toFixed(2)}x {isBerachain() && vc.isStable ? 'Blast Native Yield' : `Leveraged long on ${vc.assetTokenSymbol}`}
+              {leverage.toFixed(2)}x {isStorychain() && vc.isStable ? 'Blast Native Yield' : `Leveraged long on ${vc.assetTokenSymbol}`}
             </div>
             <div className='flex items-center mb-[16px] cursor-pointer whitespace-nowrap' onClick={onAddXtoken}>
               {cycle}Add {vc.xTokenSymbol} to wallet

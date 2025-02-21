@@ -5,7 +5,7 @@ import { BBtn } from './ui/bbtn'
 
 export default function ConnectBtn() {
   const size = useWindowSize(1024)
-  const { isConnected } = useAccount()
+  const { isConnected, chainId } = useAccount()
   const showConnect = !isConnected
   const cm = useConnectModal()
   if (showConnect)
@@ -14,5 +14,5 @@ export default function ConnectBtn() {
         <span className='font-medium text-sm px-5'>Connect Wallet</span>
       </BBtn>
     )
-  return <ConnectButton chainStatus={size.width > 600 ? 'full' : 'icon'} showBalance={false} />
+  return <ConnectButton chainStatus={'none'} showBalance={false} />
 }

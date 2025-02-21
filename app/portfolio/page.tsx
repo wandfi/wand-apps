@@ -53,13 +53,12 @@ function PortfolioItem({
   )
 }
 
-const IconMap = { BeraLine, BullLine, PandaLine, VenomLine } as const
-
-function IconTitle(p: { icon: keyof typeof IconMap; tit: string }) {
-  const Micon = IconMap[p.icon]
+function IconTitle(p: { icon: string; tit: string }) {
+  // const Micon = IconMap[p.icon]
   return (
     <div className='flex text-2xl leading-none font-semibold items-center gap-4'>
-      <Micon className='text-[2rem]' showBg />
+      {/* <Micon className='text-[2rem]' showBg /> */}
+      <CoinIcon symbol={p.icon} size={32} />
       <span>{p.tit}</span>
     </div>
   )
@@ -196,7 +195,7 @@ function PrincipalItem() {
   }, [bvcs, useBoundStore.getState()])
   return (
     <PortfolioItem
-      title={<IconTitle tit='Principal Panda' icon='PandaLine' />}
+      title={<IconTitle tit='Principal Token' icon='PToken' />}
       tHeader={['', 'Balance', 'In Redemption', 'Claimable', 'Total Amount', 'APY', 'Est.Yield/day']}
       tData={data}
     />
@@ -277,7 +276,7 @@ function BoostItem() {
   }, [bvcs, useBoundStore.getState()])
   return (
     <PortfolioItem
-      title={<IconTitle tit='Boost Venom' icon='VenomLine' />}
+      title={<IconTitle tit='Yield Token' icon='YToken' />}
       tHeader={['', 'Epoch', 'YT Balance', 'YT Points', 'Status']}
       tData={data}
       tableProps={{ cellClassName: (_index, celIndex) => (celIndex == 0 ? 'flex flex-col' : 'leading-[30px]') }}
@@ -316,11 +315,11 @@ export default function Dashboard() {
   return (
     <PageWrap>
       <div className='w-full max-w-[1200px] px-4 mx-auto flex flex-col gap-5 md:pb-8'>
-        {chainId !== 80094 && <InterestItem />}
-        <LeverageItem />
+        {/* {<InterestItem />} */}
+        {/* <LeverageItem /> */}
         <PrincipalItem />
         <BoostItem />
-        {chainId !== 80094 && <StakedPoolsItem />}
+        {/* {chainId !== 80094 && <StakedPoolsItem />} */}
       </div>
     </PageWrap>
   )
