@@ -56,18 +56,5 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
       onEnv: ['test'],
     },
   ],
-  [story.id]: [
-    {
-      vault: '0x33C42E171cFD7Ec85D3dB34D7f6d3D8121f64E63',
-      asset: '0xf961a8f6d8c69e7321e78d254ecafbcc3a637621',
-      pToken: '0x70B851f6877D16D6D5aD546B17d06281b8aBDd4b',
-      assetSymbol: 'vIP',
-      pTokenSymbol: 'pvIP',
-      yTokenSymbol: 'yvIP',
-      protocolAddress: ZooProtocolAddress[story.id],
-      protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
-      bQueryAddres: BQueryAddress[story.id],
-      onEnv: ['test', 'prod'],
-    },
-  ],
+  [story.id]: [],
 }
