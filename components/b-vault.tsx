@@ -533,7 +533,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
           </div>
           <div className='flex-1 overflow-y-auto flex flex-col gap-4 font-semibold text-sm'>
             <div className='flex gap-8 items-end font-semibold'>
-              <span className='text-sm'>YT Balance</span>
+              <span className='text-sm'>{bvc.yTokenSymbol} Balance</span>
               <span className='text-xs dark:text-white/60'>{displayBalance(userBalanceYToken)}</span>
             </div>
 
@@ -542,7 +542,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
                 <BribeTit name={item.bribeSymbol} />
                 <div className='absolute left-1/2'>{displayBalance(item.bribeAmount)}</div>
               </div>)}
-              <span className='absolute left-0 top-0'>Berachain Emission</span>
+              <span className='absolute left-0 top-0'>Restaking Earnings</span>
               <span className='absolute left-1/2 top-0 dark:text-white/60'>Claimable</span>
               <ApproveAndTx
                 className='absolute w-28 top-0 right-0'

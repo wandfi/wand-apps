@@ -292,6 +292,15 @@ function InitReinit(props: { vault: Address }) {
   return <GeneralAction key={`lnt-vault-init`} abi={abiLntVault} tit="InitOrReinit" txProps={{ disabled: typeof inited !== 'boolean' }} functionName={functionName} address={vault} argsDef={argsDef} />
 }
 
+function DeleteIpAssets(props: { vault: Address }) {
+  const { data } = useWandContractRead({
+    abi: abiBVault,
+    address: props.vault,
+    functionName: 'ipAssets'
+  })
+  return <GeneralAction key={`b-vault-removeIpAsset`} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={JSON.stringify(data || '', undefined, 2)} />
+}
+
 export default function AdminPage() {
   const chainId = useCurrentChainId()
   const { current, setState, options } = useVaultsConfigs()
@@ -324,7 +333,8 @@ export default function AdminPage() {
           {current?.type == 'B-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={BVaultParams} protocoSettingAddress={current.data.protocolSettingsAddress} />
-              {['addIpAsset', 'removeIpAsset', 'updateMaxIpAssets', 'updateC', 'close', 'pause', 'unpause', 'pauseRedeemPool', 'unpauseRedeemPool', 'addBribeToken', 'addBribes', 'setBriber'].map((functionName) => (
+              <DeleteIpAssets vault={current.data.vault} />
+              {['addIpAsset', 'updateMaxIpAssets', 'updateC', 'close', 'pause', 'unpause', 'pauseRedeemPool', 'unpauseRedeemPool', 'addBribeToken', 'addBribes', 'setBriber'].map((functionName) => (
                 <GeneralAction key={`b-vault-${functionName}`} abi={abiBVault} functionName={functionName} address={current.data.vault} />
               ))}
               <GeneralAction tit='transferOwnership' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocolAddress} />
