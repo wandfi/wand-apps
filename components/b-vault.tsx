@@ -206,8 +206,8 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
         <div className='flex p-5 bg-[#10B98126] gap-5'>
           <CoinIcon size={54} symbol='PToken' />
           <div className='flex flex-col gap-2'>
-            <div className='text-xl text-black font-semibold'>{bvc.pTokenSymbol}</div>
-            <div className='text-xs text-black/60 font-medium'>Interest bearing rebase principal token</div>
+            <div className='text-xl text-black dark:text-white font-semibold'>{bvc.pTokenSymbol}</div>
+            <div className='text-xs text-black/60 dark:text-white/60 font-medium'>Interest bearing rebase principal token</div>
           </div>
         </div>
         <div className='flex items-baseline justify-between px-5 pt-5 gap-5'>
@@ -251,8 +251,8 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
       <div className='flex p-5 bg-[#6366F126] gap-5'>
         <CoinIcon size={54} symbol='YToken' />
         <div className='flex flex-col gap-2'>
-          <div className='text-xl text-black font-semibold'>{bvc.yTokenSymbol}</div>
-          <div className='text-xs text-black/60 font-medium'>Yield token</div>
+          <div className='text-xl text-black dark:text-white font-semibold'>{bvc.yTokenSymbol}</div>
+          <div className='text-xs text-black/60 dark:text-white/60 font-medium'>Yield token</div>
         </div>
       </div>
       <div className='flex flex-col justify-between p-5 gap-5 flex-1'>
