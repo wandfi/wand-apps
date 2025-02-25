@@ -8,7 +8,7 @@ import _ from 'lodash'
 import { Address, erc20Abi } from 'viem'
 import { getPC } from './publicClient'
 import { SliceFun } from './types'
-import { getBeraTokensPrices, getNftTokenIdsByUser, getNftTokensIdsByUser } from '@/config/api'
+import { getBeraTokensPrices, getNftTokenIdsByUser, getNftTokensIdsByUser, getTokenPricesBySymbol } from '@/config/api'
 
 export type TokenItem = {
   address: Address
@@ -115,6 +115,11 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
         // set({ prices: { ...get().prices, ...map } })
       }
     }
+    const prices = await getTokenPricesBySymbol(['IP'])
+    if (prices.length) {
+      set({ prices: { ...get().prices, '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': prices[0].price } })
+    }
+    // const  getTokenPricesBySymbol()
     return {}
   }
 
@@ -166,7 +171,6 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
     prices: {
       '0x549943e04f40284185054145c6E4e9568C1D3241': DECIMAL,
       '0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce': DECIMAL,
-      '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': DECIMAL,
     },
     updateTokenPrices,
 

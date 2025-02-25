@@ -41,6 +41,11 @@ export const BQueryAddress: { [k: number]: Address } = {
   [story.id]: '0x413a55fe2CFD42799af68Cbd3514a55439B7cf5c',
 }
 
+export const VerioStakePool: { [k: number]: Address } = {
+  [storyTestnet.id]: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27',
+  [story.id]: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27',
+}
+
 export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
   [storyTestnet.id]: [],
   [story.id]: [
@@ -57,4 +62,5 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
       onEnv: ['test'],
     },
   ],
+
 }

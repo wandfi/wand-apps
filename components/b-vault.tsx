@@ -333,6 +333,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
       <ApproveAndTx
         className='mx-auto mt-auto'
         tx='Buy'
+        skipSimulate
         disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance}
         config={{
           abi: abiBVault,
@@ -635,7 +636,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   // console.info('lpTypes', lpBaseTvlBn, lpQuoteTvlBn , lpQuoteTvlBn == lpBaseTvlBn)
   let lpTvlBn = lpBaseTvlBn + lpQuoteTvlBn
   if (lpTvlBn === 0n) {
-    lpTvlBn = bvd.lockedAssetTotal;
+    lpTvlBn = bvd.lockedAssetTotal * prices[vc.asset] / DECIMAL;
   }
   const [fmtBoost] = useBVaultBoost(vc.vault)
   const [fmtApy] = useBVaultApy(vc.vault)

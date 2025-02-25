@@ -20,14 +20,15 @@ import abiCalcLiq from './CalcLiq'
 import abiBQueryOld from './BQueryOld'
 import abiBQuery from './BQuery'
 import { abiAdhocBribesPool, abiStakingBribesPool } from './BribesPool'
-import abiLntQuery from './LntQuery';
-import abiLntVault from './LntVault';
-import abiLntYtRewardsPool from './LntYtRewardsPool';
-import abiMockERC20 from './MockERC20';
-import abiMockERC721 from './MockERC721';
-import abiLntNftStakingPool from './LntNftStakingPool';
-import abiBeraVault from './BeraVault';
+import abiLntQuery from './LntQuery'
+import abiLntVault from './LntVault'
+import abiLntYtRewardsPool from './LntYtRewardsPool'
+import abiMockERC20 from './MockERC20'
+import abiMockERC721 from './MockERC721'
+import abiLntNftStakingPool from './LntNftStakingPool'
+import abiBeraVault from './BeraVault'
 import abiBeraLP from './BeraLP'
+import abiVerioStakePool from './VerioStakePool'
 export {
   abiPriceFeed,
   abiPtyPool,
@@ -45,7 +46,6 @@ export {
   abiRedeemPool,
   abiCrocQuery,
   abiCalcLiq,
-
   abiBQueryOld,
   abiBQuery,
   abiAdhocBribesPool,
@@ -54,9 +54,9 @@ export {
   abiLntVault,
   abiLntYtRewardsPool,
   abiLntNftStakingPool,
-  
   abiMockERC20,
   abiMockERC721,
   abiBeraVault,
-  abiBeraLP
+  abiBeraLP,
+  abiVerioStakePool
 }

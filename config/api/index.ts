@@ -1,4 +1,4 @@
-import { Address } from 'viem'
+import { Address, parseEther } from 'viem'
 import api from '../../utils/api'
 import axios from 'axios'
 import { parseEthers } from '@/lib/utils'
@@ -27,7 +27,7 @@ export const getBeraTokensPrices = (
     '0x549943e04f40284185054145c6E4e9568C1D3241', // USDC
     '0x779Ded0c9e1022225f8E0630b35a9b54bE713736', // USDT
     '0x688e72142674041f8f6Af4c808a4045cA1D6aC82', // BYUSD
-    '0x0555E30da8f98308EdB960aa94C0Db47230d2B9c', // WBTC, 
+    '0x0555E30da8f98308EdB960aa94C0Db47230d2B9c', // WBTC,
     '0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590', // WETH,
     '0x9b6761bf2397Bb5a6624a856cC84A3A14Dcd3fe5', // iBERA
     '0xac03CABA51e17c86c921E1f6CBFBdC91F8BB2E6b', // iBGT
@@ -72,9 +72,18 @@ export const getBeraTokensPrices = (
       const priceMap: { [k: Address]: bigint } = {}
       for (const token of tokens) {
         const pd = priceDataMap[token.toLowerCase() as Address]
-        if(pd){
+        if (pd) {
           priceMap[token] = parseEthers(pd.price.toFixed(6))
         }
       }
       return priceMap
     })
+
+export const getTokenPricesBySymbol = (symbols: string[] = ['IP']) => {
+  // https://api.g.alchemy.com/prices/v1/7UXJgo01vxWHLJDk09Y0qZct8Y3zMDbX/tokens/by-symbol?symbols=IP
+  return axios
+    .get<{ data: { symbol: string; prices: { currency: string; value: string; lastUpdatedAt: string }[] }[] }>(
+      `https://api.g.alchemy.com/prices/v1/7UXJgo01vxWHLJDk09Y0qZct8Y3zMDbX/tokens/by-symbol?${symbols.map((symbol) => 'symbols=' + symbol).join('&')}`,
+    )
+    .then((res) => res.data.data.filter((item) => item.prices.length).map((item) => ({ symbol: item.symbol, price: parseEther(item.prices[0].value) })))
+}
