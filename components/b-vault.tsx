@@ -636,7 +636,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   // console.info('lpTypes', lpBaseTvlBn, lpQuoteTvlBn , lpQuoteTvlBn == lpBaseTvlBn)
   let lpTvlBn = lpBaseTvlBn + lpQuoteTvlBn
   if (lpTvlBn === 0n) {
-    lpTvlBn = bvd.lockedAssetTotal * prices[vc.asset] / DECIMAL;
+    lpTvlBn = (bvd.lockedAssetTotal || 0n) * (prices[vc.asset] || 0n) / DECIMAL;
   }
   const [fmtBoost] = useBVaultBoost(vc.vault)
   const [fmtApy] = useBVaultApy(vc.vault)
