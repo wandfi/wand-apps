@@ -78,7 +78,7 @@ export function AssetInput({
           {price && <div className='text-neutral-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>{price}</div>}
           {exchange && <div className='text-slate-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>~${exchange}</div>}
         </div>
-        <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2'>
+        <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2' ref={coinSymbolRef}>
           <CoinIcon size={24} symbol={assetIcon || asset} url={assetURL} className='rounded-full' />
           <div className={clsx('relative', price || exchange ? '-top-[6px]' : '')}>
             {hasInput ? (
