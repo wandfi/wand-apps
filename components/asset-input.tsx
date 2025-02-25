@@ -9,6 +9,8 @@ import { formatUnits } from 'viem'
 import { CoinIcon } from './icons/coinicon'
 import { useThemeState } from './theme-mode'
 import { Spinner } from './spinner'
+import { useMeasure } from 'react-use'
+import _ from 'lodash'
 
 export function AssetInput({
   asset = 'ETH',
@@ -63,6 +65,7 @@ export function AssetInput({
     checkBalance && typeof balance !== 'undefined' && parseEthers(typeof amount == 'number' ? amount + '' : amount || '', decimals) > (typeof balance == 'bigint' ? balance : 0n)
   const isDark = useThemeState((t) => t.theme == 'dark')
   const isError = balanceInsufficient
+  const [coinSymbolRef, { width: coinSymbolWidth }] = useMeasure<HTMLDivElement>()
   return (
     <div
       className='relative w-full'
@@ -128,6 +131,7 @@ export function AssetInput({
           ref={inputRef}
           type='number'
           disabled={disable}
+          style={{ paddingLeft: `${_.round((coinSymbolWidth + 32) / 16, 3)}rem` }}
           className={clsx(
             readonly ? 'bg-slate-50 cursor-not-allowed dark:bg-slate-800' : 'bg-white dark:bg-transparent',
             {
@@ -135,7 +139,7 @@ export function AssetInput({
               'border-red-400 !border-2 focus:border-red-400': isError,
               'border-slate-400  focus:border-primary': !isError && !selected,
             },
-            'w-full h-14 text-right pr-4 pl-[8rem] font-bold text-2xl border-[#4A5546] border focus:border-2 text-slate-700 rounded-lg outline-none dark:text-slate-50',
+            'w-full h-14 text-right pr-4 font-bold text-lg border-[#4A5546] border focus:border-2 text-slate-700 rounded-lg outline-none dark:text-slate-50',
           )}
           placeholder='0.000'
           maxLength={36}

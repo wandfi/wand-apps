@@ -13,7 +13,7 @@ import { useLoadBVaults } from '@/hooks/useLoads'
 import { tabToSearchParams } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useBoundStore } from '@/providers/useBoundStore'
-import { useBVault, useBVaultEpoches, useEpochesData } from '@/providers/useBVaultsData'
+import { useBVault, useBVaultEpoches } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
 import { Grid } from '@tremor/react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -25,7 +25,7 @@ function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
 
-const SupportTabs = ['redeem', 'principal_panda', 'boost_venom'] as const
+const SupportTabs = ['redeem', 'principal_panda', 'yield_token', 'add_reward'] as const
 
 function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: string }) {
   const { address } = useAccount()
