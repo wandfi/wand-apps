@@ -30,6 +30,7 @@ import { SimpleTabs } from './simple-tabs'
 import { Switch } from './ui/switch'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
+import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 
 function TupleTxt(p: { tit: string; sub: ReactNode; subClassname?: string }) {
   return (
@@ -141,7 +142,7 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
   const assetSymbolShort = isLP ? 'LP' : bvc.assetSymbol
   const bvd = useBVault(bvc.vault)
   const assetBalance = useStore((s) => s.sliceTokenStore.balances[bvc.asset] || 0n, [`sliceTokenStore.balances.${bvc.asset}`])
-  const [fmtApy] = useBVaultApy(bvc.vault)
+  // const [fmtApy] = useBVaultApy(bvc.vault)
   const { data: walletClient } = useWalletClient()
   const upForUserAction = useUpBVaultForUserAction(bvc)
   const onAddPToken = () => {
@@ -211,7 +212,7 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
           </div>
         </div>
         <div className='flex items-baseline justify-between px-5 pt-5 gap-5'>
-          <TupleTxt tit='APY Est.' sub={fmtApy} />
+          <TupleTxt tit='APY Est.' sub={<BVaultApy bvc={bvc} showTip />} />
           <TupleTxt tit='Total Supply' sub={<>{displayBalance(bvd.pTokenTotal)}</>} />
         </div>
         <div className='flex px-2 pb-5'>
@@ -609,6 +610,18 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   )
 }
 
+export function BVaultApy({ bvc, showTip = false }: { bvc: BVaultConfig, showTip?: boolean }) {
+  const [fmtApy, apy] = useBVaultApy(bvc.vault)
+  const { data: stakeApy } = useVerioStakeApy()
+  const fmtTotal = fmtPercent(apy + stakeApy, 10)
+  if (showTip)
+    return <Tip className='underline underline-offset-[3px]' node={fmtTotal}>
+      <div>vIP Base: {fmtPercent(stakeApy, 10)}</div>
+      <div>YT Income: {fmtApy}</div>
+    </Tip>
+  return <>{fmtTotal}</>
+}
+
 export function BVaultB({ bvc }: { bvc: BVaultConfig }) {
   const bvd = useBVault(bvc.vault)
   return (
@@ -639,7 +652,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
     lpTvlBn = (bvd.lockedAssetTotal || 0n) * (prices[vc.asset] || 0n) / DECIMAL;
   }
   const [fmtBoost] = useBVaultBoost(vc.vault)
-  const [fmtApy] = useBVaultApy(vc.vault)
+  // const [fmtApy] = useBVaultApy(vc.vault)
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
   const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
@@ -678,7 +691,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
       {renderChoseSide(
         'PToken',
         'Principal Token',
-        fmtApy,
+        <BVaultApy bvc={vc} />,
         'YToken',
         'Yield Token',
         `${fmtBoost}x`,

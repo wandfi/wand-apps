@@ -49,7 +49,7 @@ const BtnWrap = (p: ButtonHTMLAttributes<HTMLButtonElement>) => {
 export const renderChoseSide = (
   leftSymbol: string,
   leftTitle: string,
-  leftSub: string,
+  leftSub: ReactNode,
   rightSymbol: string,
   rightTitle: string,
   rightSub: string,

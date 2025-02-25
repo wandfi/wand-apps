@@ -3,19 +3,20 @@ import { CoinIcon } from '@/components/icons/coinicon'
 import { PageWrap } from '@/components/page-wrap'
 import STable from '@/components/simple-table'
 import { BVAULTS_CONFIG } from '@/config/bvaults'
-import { USBSymbol, VAULTS_CONFIG } from '@/config/swap'
 import { LP_TOKENS } from '@/config/lpTokens'
+import { USBSymbol, VAULTS_CONFIG } from '@/config/swap'
 import { DECIMAL, ENV } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useLoadBVaults, useLoadLVaults } from '@/hooks/useLoads'
 import { useTVL } from '@/hooks/useTVL'
-import { fmtAAR, fmtPercent, getBigint } from '@/lib/utils'
+import { fmtAAR, getBigint } from '@/lib/utils'
 import { FetcherContext } from '@/providers/fetcher'
 import { useStore } from '@/providers/useBoundStore'
-import { calcBVaultBoost, calcBVaultPTApy } from '@/providers/useBVaultsData'
+import { calcBVaultBoost } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { TableCell as _TableCell } from '@tremor/react'
 
+import { BVaultApy } from '@/components/b-vault'
 import { ReactNode, useContext, useMemo } from 'react'
 
 const TableCell = (p: React.TdHTMLAttributes<HTMLTableCellElement> & React.RefAttributes<HTMLTableCellElement>) => {
@@ -151,7 +152,7 @@ function BVaultsItem() {
         {greenPoint}
         <span>Epoch {getBigint(bvaults, [bvc.vault, 'epochCount']).toString()}</span>
       </div>,
-      fmtPercent(calcBVaultPTApy(bvc.vault), 10),
+      <BVaultApy key={'apy'} bvc={bvc} />,
       `${displayBalance(calcBVaultBoost(bvc.vault), 2)}X`,
     ])
   }, [bvcs, bvaults, prices])

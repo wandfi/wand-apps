@@ -9,6 +9,7 @@ import { Address } from 'viem'
 import { useAccount } from 'wagmi'
 import { BVaultEpochDTO } from './sliceBVaultsStore'
 import { BoundStoreType, useBoundStore, useStore } from './useBoundStore'
+import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 
 export function useResetBVaultsData() {
   const chainId = useCurrentChainId()
@@ -99,6 +100,7 @@ export function calcBVaultPTApy(vault: Address) {
 }
 export function useBVaultApy(vault: Address): [string, bigint] {
   const apy = useStore(() => calcBVaultPTApy(vault), [`sliceBVaultsStore.bvaults.${vault}`, `sliceBVaultsStore.yTokenSythetic.${vault}`])
+  // const { data: stakingApy} = useVerioStakeApy()
   return [fmtPercent(apy, 10), apy]
 }
 

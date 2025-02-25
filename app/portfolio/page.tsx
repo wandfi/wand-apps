@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation'
 import { FiShare } from 'react-icons/fi'
 import { MdArrowOutward } from 'react-icons/md'
 import { toBVault } from '../routes'
+import { BVaultApy } from '@/components/b-vault'
 
 function PortfolioItem({
   title,
@@ -188,7 +189,7 @@ function PrincipalItem() {
             </div>
           )}
         </div>,
-        fmtPercent(calcBVaultPTApy(bvc.vault), 10),
+        <BVaultApy key={'apy'} bvc={bvc} />,
         displayBalance(yieldDay(bvc)),
       ]
     })

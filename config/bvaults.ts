@@ -42,7 +42,6 @@ export const BQueryAddress: { [k: number]: Address } = {
 }
 
 export const VerioStakePool: { [k: number]: Address } = {
-  [storyTestnet.id]: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27',
   [story.id]: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27',
 }
 
