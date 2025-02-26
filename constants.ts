@@ -1,8 +1,8 @@
 import { TypeENV } from './config/env'
 import { DomainRef } from './hooks/useConfigDomain'
 
-const TWITTER_LINK = 'https://x.com/ZooFinanceIO'
-const DISCORD_LINK = 'https://t.co/RJwdwdawe5'
+const TWITTER_LINK = 'https://twitter.com/WandProtocol'
+const DISCORD_LINK = 'https://discord.gg/fy6A7JCE5N'
 
 const DECIMAL = BigInt(1e18)
 const DECIMAL_PRICE = BigInt(1e8)
