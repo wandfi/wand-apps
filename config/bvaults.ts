@@ -58,7 +58,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
       protocolAddress: ZooProtocolAddress[story.id],
       protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
       bQueryAddres: BQueryAddress[story.id],
-      onEnv: ['test'],
+      onEnv: ['test','prod'],
     },
   ],
 
