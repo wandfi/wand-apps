@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import _ from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ReactNode, useMemo, useState } from 'react'
+import { Fragment, ReactNode, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useMeasure, useToggle } from 'react-use'
 import { List, ListRowProps } from 'react-virtualized'
@@ -31,6 +31,7 @@ import { Switch } from './ui/switch'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
+import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 
 function TupleTxt(p: { tit: string; sub: ReactNode; subClassname?: string }) {
   return (
@@ -247,6 +248,8 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
     const progress = ((now - epoch.startTime) * 100n) / ep.duration
     return parseInt(progress.toString())
   }
+
+  const [apy1, apy2] = useBvaultROI(bvc.vault)
   return (
     <div className='card !p-0 overflow-hidden flex flex-col'>
       <div className='flex p-5 bg-[#6366F126] gap-5'>
@@ -258,11 +261,18 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
       </div>
       <div className='flex flex-col justify-between p-5 gap-5 flex-1'>
         <div className='flex justify-between items-baseline gap-4 flex-wrap'>
-          <div className='text-base font-semibold flex gap-5 items-end'>
-            <span className='text-4xl font-medium'>{fmtBoost}x</span>
-            {'Yield Boosted'}
+          <div className='text-xs flex gap-2 items-end'>
+            {/* <span className='text-4xl font-medium'>{fmtBoost}x</span> */}
+            {/* {'Yield Boosted'} */}
+            <Tip
+              node={<span className='text-2xl font-medium underline underline-offset-2 relative top-0.5'>{fmtPercent(apy1 + apy2, 18, 2)}</span>}
+            >
+              <div>Restaking incomes: {fmtPercent(apy1, 18, 2)}</div>
+              <div>Additional airdrops: {fmtPercent(apy2, 18, 2)}</div>
+            </Tip>
+            {'Est.ROI in remaining days'}
           </div>
-          <span className='text-xs'>
+          <span className='text-xs relative top-[3.9375rem]'>
             1{yTokenSymbolShort} = Yield of {displayBalance(oneYTYieldOfAsset, 2)} {assetSymbolShort}
           </span>
         </div>
@@ -315,6 +325,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const priceImpact = afterYtAssetPrice > ytAssetPriceBn && ytAssetPriceBn > 0n ? ((afterYtAssetPrice - ytAssetPriceBn) * BigInt(1e10)) / ytAssetPriceBn : 0n
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(bvc)
+  const [apy1, apy2, apy1change, apy2change] = useBvaultROI(bvc.vault, outputYTokenForInput)
   return (
     <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
       <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} />
@@ -328,9 +339,9 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
         </div>
         <div className='flex gap-2 items-center'>{`Price Impact: ${fmtPercent(priceImpact, 10, 2)}`}</div>
       </div>
-      {/* <div className='text-xs font-medium text-black/80 dark:text-white/80'>
-        1 {yTokenSymbolShort} represents the yield {<span className='font-extrabold text-base'>at least</span>} 1 {assetSymbolShort} until the end of Epoch.
-      </div> */}
+      {outputYTokenForInput > 0n && <div className='text-xs font-medium text-center my-auto text-black/80 dark:text-white/80'>
+        Implied ROI Change: {fmtPercent(apy1 + apy2, 18, 2)} {'->'} <span className={cn({ 'text-red-400': (apy1 + apy2 - apy1change - apy2change) >= BigInt(1e17) })}>{fmtPercent(apy1change + apy2change, 18, 2)}</span>
+      </div>}
       <ApproveAndTx
         className='mx-auto mt-auto'
         tx='Buy'
@@ -602,7 +613,9 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
                 }}
               />
             </div>}
-
+            <div className='text-end text-xs whitespace-nowrap'>
+              <span className='font-semibold text-base'>1000 vIPs</span> will be airdropped based on YT points after Epoch ends
+            </div>
           </div>
         </div>
       </div>
@@ -656,7 +669,8 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
   const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
-
+  const { data: underlyingApy } = useBVaultUnderlyingAPY(vc.vault)
+  const [apy1, apy2] = useBvaultROI(vc.vault)
   return (
     <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden', {})}>
       <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
@@ -687,14 +701,17 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
           </div>
         ),
       )}
-      {renderStat('Reward', vc.rewardSymbol || 'vIP', vc.rewardSymbol || 'vIP', true)}
+      {renderStat('Reward', vc.rewardSymbol || 'vIP', <Fragment>
+        <span>{vc.rewardSymbol || 'vIP'}</span>
+        <div className='text-xs whitespace-nowrap absolute top-2/3 left-1/2 -translate-x-1/2'>Underlying APY: {fmtPercent(underlyingApy, 18, 2)}</div>
+      </Fragment>, true)}
       {renderChoseSide(
         'PToken',
         'Principal Token',
         <BVaultApy bvc={vc} />,
         'YToken',
         'Yield Token',
-        `${fmtBoost}x`,
+        `${fmtPercent(apy1 + apy2, 18, 2)}`, // `${fmtBoost}x`,
         (e) => {
           e.stopPropagation()
           toBVault(r, vc.vault, 'principal_token')
