@@ -75,7 +75,7 @@ export const renderChoseSide = (
           <div className='flex flex-row-reverse gap-2 items-center p-4 w-full h-[4.25rem] absolute left-0 top-0'>
             <CoinIcon symbol={rightSymbol} size={36} />
             <div className='flex flex-col items-end gap-2'>
-              <div className='text-white text-xs font-semibold leading-[12px] whitespace-nowrap'>{rightTitle}</div>
+              <div className='text-white/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>{rightTitle}</div>
               <span className=' text-[14px] leading-[14px] font-medium'>{rightSub}</span>
             </div>
           </div>

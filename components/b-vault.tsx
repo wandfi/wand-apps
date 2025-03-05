@@ -613,8 +613,11 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
                 }}
               />
             </div>}
-            <div className='text-end text-xs whitespace-nowrap'>
-              <span className='font-semibold text-base'>1000 vIPs</span> will be airdropped based on YT points after Epoch ends
+            <div className='text-end whitespace-nowrap mt-auto'>
+              <span className='font-semibold'>1000 vIPs</span>{' '}
+              <span className='text-xs whitespace-nowrap mt-auto text-black/80 dark:text-white/80'>
+                will be airdropped based on YT points after Epoch ends
+              </span>
             </div>
           </div>
         </div>
