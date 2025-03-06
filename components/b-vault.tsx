@@ -485,7 +485,7 @@ function BVaultPoolsOld({ bvc }: { bvc: BVaultConfig }) {
   )
 }
 function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
-  const [onlyMy, setOnlyMy] = useState(false)
+  const [onlyMy, setOnlyMy] = useState(true)
   const epochesData = useEpochesData(bvc.vault)
   const epoches = useMemo(() => {
     const myFilter = (item: (typeof epochesData)[number]) => item.sBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n || item.aBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n
@@ -613,11 +613,8 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
                 }}
               />
             </div>}
-            <div className='text-end whitespace-nowrap mt-auto'>
-              <span className='font-semibold'>1000 vIPs</span>{' '}
-              <span className='text-xs whitespace-nowrap mt-auto text-black/80 dark:text-white/80'>
-                will be airdropped based on YT points after Epoch ends
-              </span>
+            <div className='text-center text-sm font-medium flex items-center flex-nowrap justify-center whitespace-nowrap mt-auto gap-1'>
+              Additional Airdrops: 1000 <CoinIcon symbol='vIP' size={16} /> vIP <Tip>Will be distributed based on YT points after Epoch ends</Tip>
             </div>
           </div>
         </div>

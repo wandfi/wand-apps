@@ -11,7 +11,7 @@ export default function ConnectBtn() {
   if (showConnect)
     return (
       <BBtn className='mt-0 w-fit' onClick={() => cm.openConnectModal?.()}>
-        <span className='font-medium text-sm px-5'>Connect Wallet</span>
+        <span className='font-medium text-sm px-5 whitespace-nowrap'>Connect Wallet</span>
       </BBtn>
     )
   return <ConnectButton chainStatus={'none'} showBalance={false} />
