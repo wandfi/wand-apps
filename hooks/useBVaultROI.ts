@@ -121,6 +121,7 @@ export function calcAdditionalApy(ytPoints: bigint, ytAmount: bigint, remainTime
   const additionalRoi = ytPrice > 0n ? (I * DECIMAL) / ytPrice : 0n
   return additionalRoi
 }
+
 export function useBvaultROI(vault: Address, ytchange: bigint = 0n) {
   const bvd = useBVault(vault)
   // restaking incomes
@@ -138,5 +139,10 @@ export function useBvaultROI(vault: Address, ytchange: bigint = 0n) {
   const { data: ytPoints } = useYTPoints(vault)
   const additionalRoi = calcAdditionalApy(ytPoints, ytAmount, remainTime, ytAssetPriceBn)
   const additionalRoiChanged = ytchange > 0n ? calcAdditionalApy(ytPoints, ytAmount + ytchange, remainTime, ytPriceChanged) : 0n
-  return [restakingIncomesApy, additionalRoi, restakingChangedApy, additionalRoiChanged]
+  return {
+    roi: restakingIncomesApy > 0n && additionalRoi > 0n ? restakingIncomesApy + additionalRoi - DECIMAL : 0n,
+    roiChange: restakingChangedApy > 0n && additionalRoiChanged > 0n ? restakingChangedApy + additionalRoiChanged - DECIMAL : 0n,
+    restakingIncomesApy,
+    additionalRoi,
+  }
 }

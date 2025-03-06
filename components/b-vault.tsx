@@ -43,7 +43,7 @@ function TupleTxt(p: { tit: string; sub: ReactNode; subClassname?: string }) {
 }
 
 const maxClassname = 'max-w-4xl mx-auto w-full'
-
+const MinumAmount = BigInt(1e16)
 export function BVaultRedeem({ bvc }: { bvc: BVaultConfig }) {
   const [inputPToken, setInputPToken] = useState('')
   const inputPTokenBn = parseEthers(inputPToken)
@@ -167,13 +167,13 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
       tab: 'Buy',
       content: (
         <div className='flex flex-col gap-1'>
-          <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} />
+          <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
           <GetvIP address={bvc.asset} />
           <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div>
           <ApproveAndTx
             className='mx-auto mt-4'
             tx='Buy'
-            disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance}
+            disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance || inputAssetBn < MinumAmount}
             spender={bvc.vault}
             approves={{
               [bvc.asset]: inputAssetBn,
@@ -249,7 +249,7 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
     return parseInt(progress.toString())
   }
 
-  const [apy1, apy2] = useBvaultROI(bvc.vault)
+  const { roi, restakingIncomesApy, additionalRoi } = useBvaultROI(bvc.vault)
   return (
     <div className='card !p-0 overflow-hidden flex flex-col'>
       <div className='flex p-5 bg-[#6366F126] gap-5'>
@@ -265,10 +265,12 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
             {/* <span className='text-4xl font-medium'>{fmtBoost}x</span> */}
             {/* {'Yield Boosted'} */}
             <Tip
-              node={<span className='text-2xl font-medium underline underline-offset-2 relative top-0.5'>{fmtPercent(apy1 + apy2, 18, 2)}</span>}
+              node={<span className='text-2xl font-medium underline underline-offset-2 relative top-0.5'>{fmtPercent(roi, 18, 2)}</span>}
             >
-              <div>Restaking incomes: {fmtPercent(apy1, 18, 2)}</div>
-              <div>Additional airdrops: {fmtPercent(apy2, 18, 2)}</div>
+              <div>Restaking incomes: {fmtPercent(restakingIncomesApy, 18, 2)}</div>
+              <div>Additional airdrops: {fmtPercent(additionalRoi, 18, 2)}</div>
+              <br />
+              <div>YT Spent: -100%</div>
             </Tip>
             {'Est.ROI in remaining days'}
           </div>
@@ -325,10 +327,10 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const priceImpact = afterYtAssetPrice > ytAssetPriceBn && ytAssetPriceBn > 0n ? ((afterYtAssetPrice - ytAssetPriceBn) * BigInt(1e10)) / ytAssetPriceBn : 0n
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(bvc)
-  const [apy1, apy2, apy1change, apy2change] = useBvaultROI(bvc.vault, outputYTokenForInput)
+  const { roi, roiChange } = useBvaultROI(bvc.vault, outputYTokenForInput)
   return (
     <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
-      <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} />
+      <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''}/>
       <GetvIP address={bvc.asset} />
       <div className='text-base font-bold my-2'>Receive</div>
       <AssetInput asset={bvc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
@@ -340,13 +342,13 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
         <div className='flex gap-2 items-center'>{`Price Impact: ${fmtPercent(priceImpact, 10, 2)}`}</div>
       </div>
       {outputYTokenForInput > 0n && <div className='text-xs font-medium text-center my-auto text-black/80 dark:text-white/80'>
-        Implied ROI Change: {fmtPercent(apy1 + apy2, 18, 2)} {'->'} <span className={cn({ 'text-red-400': (apy1 + apy2 - apy1change - apy2change) >= BigInt(1e17) })}>{fmtPercent(apy1change + apy2change, 18, 2)}</span>
+        Implied ROI Change: {fmtPercent(roi, 18, 2)} {'->'} <span className={cn({ 'text-red-400': (roi - roiChange) >= BigInt(1e17) })}>{fmtPercent(roiChange, 18, 2)}</span>
       </div>}
       <ApproveAndTx
         className='mx-auto mt-auto'
         tx='Buy'
         skipSimulate
-        disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance}
+        disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance || inputAssetBn < MinumAmount}
         config={{
           abi: abiBVault,
           address: bvc.vault,
@@ -670,7 +672,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
   const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
   const { data: underlyingApy } = useBVaultUnderlyingAPY(vc.vault)
-  const [apy1, apy2] = useBvaultROI(vc.vault)
+  const { roi } = useBvaultROI(vc.vault)
   return (
     <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden', {})}>
       <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
@@ -711,7 +713,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
         <BVaultApy bvc={vc} />,
         'YToken',
         'Yield Token',
-        `${fmtPercent(apy1 + apy2, 18, 2)}`, // `${fmtBoost}x`,
+        `${fmtPercent(roi, 18, 2)}`, // `${fmtBoost}x`,
         (e) => {
           e.stopPropagation()
           toBVault(r, vc.vault, 'principal_token')

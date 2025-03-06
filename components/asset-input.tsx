@@ -30,11 +30,12 @@ export function AssetInput({
   disable,
   hasInput = false,
   options,
-  onChange = () => {},
+  onChange = () => { },
   defaultValue,
   balanceClassName = '',
   loading,
   disableNegative,
+  error = '',
 }: {
   asset: string
   assetIcon?: string
@@ -58,13 +59,14 @@ export function AssetInput({
   loading?: boolean
   balanceClassName?: string
   disableNegative?: boolean
+  error?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const balanceInsufficient =
     checkBalance && typeof balance !== 'undefined' && parseEthers(typeof amount == 'number' ? amount + '' : amount || '', decimals) > (typeof balance == 'bigint' ? balance : 0n)
   const isDark = useThemeState((t) => t.theme == 'dark')
-  const isError = balanceInsufficient
+  const isError = Boolean(error) || balanceInsufficient
   const [coinSymbolRef, { width: coinSymbolWidth }] = useMeasure<HTMLDivElement>()
   return (
     <div
@@ -148,29 +150,28 @@ export function AssetInput({
           title=''
           readOnly={readonly}
         />
-        {loading && <Spinner className='absolute right-24 top-[1.125rem]'/>}
+        {loading && <Spinner className='absolute right-24 top-[1.125rem]' />}
       </div>
 
-      {balance != undefined && (
-        <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
-          <div className={balanceClassName}>
-            <span>
-              {balanceTit}: {displayBalance(balance, 3, decimals)}
-            </span>
-            <button
-              className='text-primary ml-2'
-              onClick={() => {
-                const fmtAmount = formatUnits(balance, decimals)
-                setAmount(fmtAmount)
-                onClick && !disable && onClick()
-              }}
-            >
-              Max
-            </button>
-          </div>
-          <div className='text-sm text-red-400'>{balanceInsufficient ? 'Insufficient account balance' : ''}</div>
-        </div>
-      )}
+      <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
+        {balance != undefined && <div className={balanceClassName}>
+          <span>
+            {balanceTit}: {displayBalance(balance, 3, decimals)}
+          </span>
+          <button
+            className='text-primary ml-2'
+            onClick={() => {
+              const fmtAmount = formatUnits(balance, decimals)
+              setAmount(fmtAmount)
+              onClick && !disable && onClick()
+            }}
+          >
+            Max
+          </button>
+        </div>}
+        {isError && <div className='text-sm text-red-400'>{error || 'Insufficient account balance'}</div>}
+      </div>
+
     </div>
   )
 }
