@@ -4,6 +4,7 @@ import { getPC } from '@/providers/publicClient'
 import { useQuery } from '@tanstack/react-query'
 import { erc20Abi } from 'viem'
 import { useCurrentChainId } from './useCurrentChainId'
+import { abiVerioStakePool } from '@/config/abi'
 
 export function useVerioStakeApy() {
   const chainId = useCurrentChainId()
@@ -23,8 +24,8 @@ export function useVerioStakeApy() {
       // const apy = (singularityIncentivePerDayInIp * DECIMAL * DECIMAL_10 * 365n) / (stakePoolAmount + totalStake)
       // console.info('VerioStakeApy:', fmtPercent(apy, 10))
       // return apy
-      const vipTotalSupply = await pc.readContract({ abi: erc20Abi, functionName: 'totalSupply', address: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD' })
-      return (280320n * DECIMAL * DECIMAL_10) / vipTotalSupply
+      const ipTotalStake = await pc.readContract({ abi: abiVerioStakePool, address: verioStakePool, functionName: 'getTotalStake' })
+      return (280320n * DECIMAL * DECIMAL_10) / ipTotalStake
     },
   })
 }
