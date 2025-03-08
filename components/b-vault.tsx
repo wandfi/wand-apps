@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import _ from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Fragment, ReactNode, useMemo, useState } from 'react'
+import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useMeasure, useToggle } from 'react-use'
 import { List, ListRowProps } from 'react-virtualized'
@@ -330,7 +330,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const { roi, roiChange } = useBvaultROI(bvc.vault, outputYTokenForInput)
   return (
     <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
-      <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''}/>
+      <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
       <GetvIP address={bvc.asset} />
       <div className='text-base font-bold my-2'>Receive</div>
       <AssetInput asset={bvc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
@@ -498,7 +498,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   const itemSpaceY = 20
   const [mesRef, mes] = useMeasure<HTMLDivElement>()
   const valueClassname = 'text-black/60 dark:text-white/60 text-sm'
-  const [currentEpochId, setCurrentEpochId] = useState<bigint | undefined>(epoches[0]?.epochId)
+  const [currentEpochId, setCurrentEpochId] = useState<bigint | undefined>(epoches[0]?.epochId || epochesData[0]?.epochId)
   const current = useMemo(() => (!currentEpochId ? epoches[0] : epoches.find((e) => e.epochId == currentEpochId)), [epoches, currentEpochId])
   const userBalanceYToken = current?.userBalanceYToken || 0n
   const userBalanceYTokenSyntyetic = current?.userBalanceYTokenSyntyetic || 0n
@@ -506,6 +506,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   const onRowClick = (index: number) => {
     setCurrentEpochId(epoches[index]?.epochId)
   }
+  useEffect(() => { epochesData.length && setCurrentEpochId(epoches[0]?.epochId || epochesData[0]?.epochId) }, [epochesData.length])
   const sBribes = current?.sBribes || []
   const aBribes = current?.aBribes || []
 
@@ -544,7 +545,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
         <div className='flex flex-col gap-2 w-full'>
           <div className='flex gap-6 items-end font-semibold'>
             <span className='text-sm'>Rewards</span>
-            <span className='text-xs dark:text-white/60'>Epoch {(current?.epochId || 1n).toString()}</span>
+            <span className='text-xs dark:text-white/60'>Epoch {(current?.epochId || currentEpochId || 1n).toString()}</span>
           </div>
           <div className='flex-1 overflow-y-auto flex flex-col gap-4 font-semibold text-sm'>
             <div className='flex gap-8 items-end font-semibold'>

@@ -1,10 +1,9 @@
+import { abiVerioStakePool } from '@/config/abi'
 import { VerioStakePool } from '@/config/bvaults'
 import { DECIMAL, DECIMAL_10 } from '@/constants'
 import { getPC } from '@/providers/publicClient'
 import { useQuery } from '@tanstack/react-query'
-import { erc20Abi } from 'viem'
 import { useCurrentChainId } from './useCurrentChainId'
-import { abiVerioStakePool } from '@/config/abi'
 
 export function useVerioStakeApy() {
   const chainId = useCurrentChainId()
@@ -25,7 +24,7 @@ export function useVerioStakeApy() {
       // console.info('VerioStakeApy:', fmtPercent(apy, 10))
       // return apy
       const ipTotalStake = await pc.readContract({ abi: abiVerioStakePool, address: verioStakePool, functionName: 'getTotalStake' })
-      return (280320n * DECIMAL * DECIMAL_10) / ipTotalStake
+      return (294920n * DECIMAL * DECIMAL_10) / ipTotalStake
     },
   })
 }
