@@ -33,7 +33,7 @@ export const storyTestnet = defineChain({
 
 export const story = defineChain({
   id: 1514,
-  name: 'Story Mainnet',
+  name: 'Story',
   iconUrl: '/storynetwork.png',
   nativeCurrency: {
     decimals: 18,
