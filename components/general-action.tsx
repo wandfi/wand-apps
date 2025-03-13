@@ -49,7 +49,7 @@ export function Expandable({ children, tit, disable }: { tit: string; children?:
           </div>
         )}
       </div>
-      <Collapse isOpened={open} theme={{ content: 'bg-gray-200 dark:bg-transparent p-4 flex flex-col gap-2' }}>
+      <Collapse isOpened={open} theme={{ content: 'bg-gray-200 dark:bg-transparent p-4 flex flex-col gap-2 whitespace-break-spaces' }}>
         {children}
       </Collapse>
     </div>

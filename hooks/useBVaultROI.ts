@@ -1,13 +1,11 @@
-import { abiAdhocBribesPool, abiBVault, abiRedeemPool } from '@/config/abi'
+import { abiAdhocBribesPool, abiBVault } from '@/config/abi'
 import { getCurrentChainId } from '@/config/network'
 import { DECIMAL, YEAR_SECONDS } from '@/constants'
-import { getBigint } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import { useBoundStore } from '@/providers/useBoundStore'
 import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
 import _ from 'lodash'
-import { Address, formatEther, parseAbi } from 'viem'
+import { Address, parseAbi } from 'viem'
 
 export function useBVaultIPAssets(vault: Address) {
   return useQuery({
@@ -32,7 +30,7 @@ const abiIpAssetStaking = parseAbi([
 
 // const addressRestaking = '0xE884e394218Add9D5972B87291C2743401F88546'
 const addressIpAssetStaking = '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE'
-const ipAssetsTit: { [k: Address]: string } = {
+export const ipAssetsTit: { [k: Address]: string } = {
   '0xB1D831271A68Db5c18c8F0B69327446f7C8D0A42': 'IPPY',
   '0x0a0466c312687027E2BEa065d4Cca0DCEC19bb2C': 'Globkins',
   '0xCdF104e4F24d593E16B9F6c382cEB1FB5573EEDd': 'Mimboku',

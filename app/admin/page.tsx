@@ -5,6 +5,7 @@ import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/c
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiLntVault, abiMockERC20, abiMockERC721, abiMockPriceFeed, abiPlainVault, abiProtocolSettings, abiPtyPool, abiVault, abiWandProtocol, abiZooProtocol } from '@/config/abi'
 import { PROTOCOL_SETTINGS_ADDRESS, VaultConfig, WAND_PROTOCOL_ADDRESS } from '@/config/swap'
+import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVaultsConfigs } from '@/hooks/useVaultsConfigs'
 import { useWandContractRead, useWandContractReads } from '@/hooks/useWand'
@@ -298,7 +299,9 @@ function DeleteIpAssets(props: { vault: Address }) {
     address: props.vault,
     functionName: 'ipAssets'
   })
-  return <GeneralAction key={`b-vault-removeIpAsset`} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={JSON.stringify(data || '', undefined, 2)} />
+  const infos: any = {}
+  data?.forEach(ipID => { infos[ipID] = ipAssetsTit[ipID] })
+  return <GeneralAction key={`b-vault-removeIpAsset`} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={JSON.stringify(infos, undefined, 2)} />
 }
 
 export default function AdminPage() {
