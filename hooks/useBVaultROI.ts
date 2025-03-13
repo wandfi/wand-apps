@@ -32,11 +32,19 @@ const abiIpAssetStaking = parseAbi([
 
 // const addressRestaking = '0xE884e394218Add9D5972B87291C2743401F88546'
 const addressIpAssetStaking = '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE'
+const ipAssetsTit: { [k: Address]: string } = {
+  '0xB1D831271A68Db5c18c8F0B69327446f7C8D0A42': 'IPPY',
+  '0x0a0466c312687027E2BEa065d4Cca0DCEC19bb2C': 'Globkins',
+  '0xCdF104e4F24d593E16B9F6c382cEB1FB5573EEDd': 'Mimboku',
+  '0x8c40Ef7408D6036Dca0b69E67D960dd48014cB16': 'Sofamon',
+  '0x00e23f81e489E43484B0B8Bc109faD6C1F4c28E7': 'Benjamin',
+  '0x42A351E005De1330DeDe69Ca4Ae1B06715a2f4fA': 'WTF',
+}
 // 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
 export function useBVaultUnderlyingAPY(vault: Address) {
   const { data: ipAssets } = useBVaultIPAssets(vault)
   return useQuery({
-    initialData: 0n,
+    initialData: { avrageApy: 0n, items: [] },
 
     queryKey: ['bvualtunderlyingapy', vault, ipAssets],
     enabled: Boolean(vault) && ipAssets.length > 0,
@@ -86,7 +94,13 @@ export function useBVaultUnderlyingAPY(vault: Address) {
       const staked = stakeed.map((item) => item.find((s) => s.length)?.find((s) => !!s))
       console.info('staked:', staked)
       const avrageApy = apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
-      return avrageApy
+      const items = apys
+        .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
+        .sort((a, b) => {
+          const sub = b.apy - a.apy
+          return sub > 0n ? 1 : sub < 0n ? -1 : 0
+        })
+      return { avrageApy, items }
     },
   })
 }
@@ -125,15 +139,17 @@ export function calcAdditionalApy(ytPoints: bigint, ytAmount: bigint, remainTime
 export function useBvaultROI(vault: Address, ytchange: bigint = 0n) {
   const bvd = useBVault(vault)
   // restaking incomes
-  const { data: underlyingApy } = useBVaultUnderlyingAPY(vault)
+  const {
+    data: { avrageApy },
+  } = useBVaultUnderlyingAPY(vault)
   const ytAmount = bvd.current.yTokenAmountForSwapYT
   const vualtYTokenBalance = bvd.current.vaultYTokenBalance
   const remainTime = bvd.current.duration + bvd.current.startTime - BigInt(_.round(_.now() / 1000))
   const ptTotal = bvd.pTokenTotal
   const ytAssetPriceBn = vualtYTokenBalance > 0n ? (bvd.Y * DECIMAL) / vualtYTokenBalance : 0n
   const ytPriceChanged = vualtYTokenBalance > 0n ? (bvd.Y * DECIMAL) / (vualtYTokenBalance - ytchange) : 0n
-  const restakingIncomesApy = calcRestakingApy(underlyingApy, ptTotal, remainTime, ytAmount, ytAssetPriceBn)
-  const restakingChangedApy = ytchange > 0n ? calcRestakingApy(underlyingApy, ptTotal, remainTime, ytAmount + ytchange, ytPriceChanged) : 0n
+  const restakingIncomesApy = calcRestakingApy(avrageApy, ptTotal, remainTime, ytAmount, ytAssetPriceBn)
+  const restakingChangedApy = ytchange > 0n ? calcRestakingApy(avrageApy, ptTotal, remainTime, ytAmount + ytchange, ytPriceChanged) : 0n
 
   // aditional airdrops
   const { data: ytPoints } = useYTPoints(vault)

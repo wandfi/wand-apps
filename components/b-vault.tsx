@@ -672,7 +672,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
   const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
-  const { data: underlyingApy } = useBVaultUnderlyingAPY(vc.vault)
+  const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc.vault)
   const { roi } = useBvaultROI(vc.vault)
   return (
     <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden', {})}>
@@ -706,7 +706,20 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
       )}
       {renderStat('Reward', vc.rewardSymbol || 'vIP', <Fragment>
         <span>{vc.rewardSymbol || 'vIP'}</span>
-        <div className='text-xs whitespace-nowrap absolute top-2/3 left-1/2 -translate-x-1/2'>Underlying APY: {fmtPercent(underlyingApy, 18, 2)}</div>
+        <div className='text-xs whitespace-nowrap absolute top-2/3 left-1/2 -translate-x-1/2'>Underlying APY:
+          <Tip node={<span className='underline underline-offset-2'>{fmtPercent(underlyingApy, 18, 2)}</span>}>
+            <div className='grid grid-cols-3'>
+              <div className='p-2'>IP Asset</div>
+              <div className='p-2'>Restaked</div>
+              <div className='p-2'>APY</div>
+              {items.map(item => <Fragment key={item.tit}>
+                <div className='px-2'>{item.tit || '-'}</div>
+                <div className='px-2'>{displayBalance(item.staked)}</div>
+                <div className='px-2'>{fmtPercent(item.apy, 18, 2)}</div>
+              </Fragment>)}
+            </div>
+          </Tip>
+        </div>
       </Fragment>, true)}
       {renderChoseSide(
         'PToken',
