@@ -10,7 +10,7 @@ import { getPC } from '@/providers/publicClient'
 import { useStore } from '@/providers/useBoundStore'
 import { useBVault, useBVaultApy, useBVaultBoost, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import _ from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -32,6 +32,9 @@ import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
+import { toast } from 'sonner'
+import { WriteConfirmations } from '@/config/lntvaults'
+import { BBtn } from './ui/bbtn'
 
 function TupleTxt(p: { tit: string; sub: ReactNode; subClassname?: string }) {
   return (
@@ -77,6 +80,44 @@ export function BVaultRedeem({ bvc }: { bvc: BVaultConfig }) {
           upForUserAction()
         }}
       />
+    </div>
+  )
+}
+
+export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
+  const pTokenBalance = useStore((s) => s.sliceTokenStore.balances[bvc.pToken] || 0n, [`sliceTokenStore.balances.${bvc.pToken}`])
+  const upForUserAction = useUpBVaultForUserAction(bvc)
+  const { data: wc } = useWalletClient()
+  const { ids, claimable } = useCalcClaimable(bvc.vault)
+  const { mutate, isPending } = useMutation({
+    mutationKey: ['readeemAll', pTokenBalance, claimable, ids],
+    mutationFn: async () => {
+      if (!wc) throw 'Error';
+      const pc = getPC()
+      if (pTokenBalance > 10n) {
+        await wc.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'redeem', args: [pTokenBalance] }).then(tx => pc.waitForTransactionReceipt({ hash: tx, confirmations: WriteConfirmations }))
+      }
+      if (claimable > 10n) {
+        await wc.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'batchClaimRedeemAssets', args: [ids] }).then(tx => pc.waitForTransactionReceipt({ hash: tx, confirmations: WriteConfirmations }))
+      }
+      toast.success('Transaction success')
+    },
+    onSuccess: upForUserAction,
+    onError: handleError
+  })
+  const disableRedeemAll = !Boolean(wc) || (pTokenBalance + claimable) <= 100n
+  return (
+    <div className={cn('flex justify-between items-center gap-5 flex-wrap')}>
+      <div className='flex items-center gap-2 flex-nowrap'>
+        <CoinIcon symbol={bvc.assetSymbol} size={30} /> {bvc.assetSymbol}
+      </div>
+      <div className='whitespace-nowrap'>
+        Balance: {displayBalance(pTokenBalance)}
+      </div>
+      <div className='whitespace-nowrap'>
+        Claimable: {displayBalance(claimable)}
+      </div>
+      <BBtn className='mx-auto mt-6' busy={isPending} disabled={disableRedeemAll} onClick={mutate as any}>Redeem All</BBtn>
     </div>
   )
 }

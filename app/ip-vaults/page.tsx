@@ -1,6 +1,6 @@
 'use client'
 
-import { BVaultB, BVaultCard, BVaultCardComming, BVaultP, BVaultRedeem } from '@/components/b-vault'
+import { BVaultB, BVaultCard, BVaultCardComming, BVaultP, BVaultRedeem, BVaultRedeemAll } from '@/components/b-vault'
 import { BVaultAddReward } from '@/components/bvault-add-reward'
 import { Noti } from '@/components/noti'
 import { PageWrap } from '@/components/page-wrap'
@@ -62,16 +62,19 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
     },
   })
   const odata = [
-    {
-      tab: bvd.closed ? 'Redeem' : 'Principal Token',
-      content: bvd.closed ? (
-        <div className='max-w-4xl mx-auto pt-8'>
-          <BVaultRedeem bvc={bvc} />
+    ...(bvd.closed ? [
+      {
+        tab: 'Redeem',
+        content: <div className='max-w-xl mx-auto pt-8 w-full'>
+          <BVaultRedeemAll bvc={bvc} />
         </div>
-      ) : (
-        <BVaultP bvc={bvc} />
-      ),
-    },
+      }
+    ] : [
+      {
+        tab: 'Principal Token',
+        content: <BVaultP bvc={bvc} />,
+      }
+    ]),
     {
       tab: 'Yield Token',
       content: <BVaultB bvc={bvc} />,
