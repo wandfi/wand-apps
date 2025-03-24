@@ -91,14 +91,14 @@ export function useBVaultUnderlyingAPY(vault: Address) {
       )
 
       const staked = stakeed.map((item) => item.find((s) => s.length)?.find((s) => !!s))
-      console.info('staked:', staked)
       const avrageApy = apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
       const items = apys
-        .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
-        .sort((a, b) => {
-          const sub = b.apy - a.apy
-          return sub > 0n ? 1 : sub < 0n ? -1 : 0
-        })
+      .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
+      .sort((a, b) => {
+        const sub = b.apy - a.apy
+        return sub > 0n ? 1 : sub < 0n ? -1 : 0
+      })
+      console.info('staked:', staked, avrageApy)
       return { avrageApy, items }
     },
   })
