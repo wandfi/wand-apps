@@ -50,6 +50,19 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
   [storyTestnet.id]: [],
   [story.id]: [
     {
+      vault: '0xDBB8fEadD0FC5fa80E3B69ccAd82844A71BbE38a',
+      asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
+      pToken: '0xE2D3130985f9e188A8055C16B3F3C15ba1e49233',
+      pTokenV2: true,
+      assetSymbol: 'vIP',
+      pTokenSymbol: 'pvIP',
+      yTokenSymbol: 'yvIP',
+      protocolAddress: '0x55239Efb39Aa006f04b8e13151b940a0d319E96F',
+      protocolSettingsAddress: '0xE355e8961d15034793a80CD434F99CA02cb338B0',
+      bQueryAddres: BQueryAddress[story.id],
+      onEnv: ['test'],
+    },
+    {
       vault: '0xEe3A2C8fCAcea36ba1866a3a2282105ee2eD3943',
       asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
       pToken: '0xaAe257c3471e99980501041A597BbcC82945b1Cc',
