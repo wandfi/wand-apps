@@ -37,6 +37,7 @@ export type BVaultDTO = {
   Y: bigint
   current: BVaultEpochDTO
   ptRebaseRate: bigint
+  ytPointsMaxTotalSupply: bigint
 }
 export type BVaultsStore = {
   bvaults: {
@@ -123,6 +124,18 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
       }
     }
 
+    const ytPointsMaxTotalSupplys = await Promise.all(
+      bvcs.map((vc) =>
+        pc.readContract({
+          abi: [parseAbiItem('function maxTotalSupply() external view returns (uint256)')],
+          address: map[vc.vault]!.current.adhocBribesPool,
+          functionName: 'maxTotalSupply',
+        }),
+      ),
+    )
+    for (let i = 0; i < bvcs.length; i++) {
+      map[bvcs[i].vault]!.ytPointsMaxTotalSupply = ytPointsMaxTotalSupplys[i]
+    }
     set({ bvaults: { ...get().bvaults, ...map } })
     return map
   }

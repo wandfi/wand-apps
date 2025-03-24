@@ -1,4 +1,5 @@
 import { abiAdhocBribesPool, abiBVault } from '@/config/abi'
+import { BVaultConfig } from '@/config/bvaults'
 import { getCurrentChainId } from '@/config/network'
 import { DECIMAL, YEAR_SECONDS } from '@/constants'
 import { getPC } from '@/providers/publicClient'
@@ -133,8 +134,18 @@ export function calcAdditionalApy(ytPoints: bigint, ytAmount: bigint, remainTime
   const additionalRoi = ytPrice > 0n ? (I * DECIMAL) / ytPrice : 0n
   return additionalRoi
 }
+export function calcAdditionalApy2(ytPointsMaxTotalSupply: bigint, remainTime: bigint, ytPrice: bigint) {
+  const YTp = ytPointsMaxTotalSupply
+  const A = 1000n * DECIMAL
+  const B = YTp > 0n ? (A * DECIMAL) / YTp : 0n
+  const P = DECIMAL * remainTime
+  const I = (B * P) / DECIMAL
+  const additionalRoi = ytPrice > 0n ? (I * DECIMAL) / ytPrice : 0n
+  return additionalRoi
+}
 
-export function useBvaultROI(vault: Address, ytchange: bigint = 0n, afterYtPriceBn: bigint = 0n) {
+export function useBvaultROI(vc: BVaultConfig, ytchange: bigint = 0n, afterYtPriceBn: bigint = 0n) {
+  const vault = vc.vault
   const bvd = useBVault(vault)
   // restaking incomes
   const {
@@ -145,14 +156,19 @@ export function useBvaultROI(vault: Address, ytchange: bigint = 0n, afterYtPrice
   const remainTime = bvd.current.duration + bvd.current.startTime - BigInt(_.round(_.now() / 1000))
   const ptTotal = bvd.pTokenTotal
   const ytAssetPriceBn = vualtYTokenBalance > 0n ? (bvd.Y * DECIMAL) / vualtYTokenBalance : 0n
-  const ytPriceChanged = afterYtPriceBn;
+  const ytPriceChanged = afterYtPriceBn
   const restakingIncomesApy = calcRestakingApy(avrageApy, ptTotal, remainTime, ytAmount, ytAssetPriceBn)
   const restakingChangedApy = ytchange > 0n ? calcRestakingApy(avrageApy, ptTotal, remainTime, ytAmount + ytchange, ytPriceChanged) : 0n
 
   // aditional airdrops
   const { data: ytPoints } = useYTPoints(vault)
-  const additionalRoi = calcAdditionalApy(ytPoints, ytAmount, remainTime, ytAssetPriceBn)
-  const additionalRoiChanged = ytchange > 0n ? calcAdditionalApy(ytPoints, ytAmount + ytchange, remainTime, ytPriceChanged) : 0n
+  const additionalRoi = vc.pTokenV2 ? calcAdditionalApy2(bvd.ytPointsMaxTotalSupply, remainTime, ytAssetPriceBn) : calcAdditionalApy(ytPoints, ytAmount, remainTime, ytAssetPriceBn)
+  const additionalRoiChanged =
+    ytchange > 0n
+      ? vc.pTokenV2
+        ? calcAdditionalApy2(bvd.ytPointsMaxTotalSupply + ytchange * remainTime, remainTime, ytPriceChanged)
+        : calcAdditionalApy(ytPoints, ytAmount + ytchange, remainTime, ytPriceChanged)
+      : 0n
   return {
     roi: restakingIncomesApy > 0n && additionalRoi > 0n ? restakingIncomesApy + additionalRoi - DECIMAL : 0n,
     roiChange: restakingChangedApy > 0n && additionalRoiChanged > 0n ? restakingChangedApy + additionalRoiChanged - DECIMAL : 0n,

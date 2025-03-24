@@ -2,7 +2,7 @@
 import { CoinIcon } from '@/components/icons/coinicon'
 import { PageWrap } from '@/components/page-wrap'
 import STable from '@/components/simple-table'
-import { BVAULTS_CONFIG } from '@/config/bvaults'
+import { BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { USBSymbol, VAULTS_CONFIG } from '@/config/swap'
 import { DECIMAL, ENV } from '@/constants'
@@ -101,8 +101,8 @@ function LVaultsItem() {
   return <DashItem title='L-Vault' tHeader={['Vaults', 'Total Deposit', `${USBSymbol} Debt`, 'AAR', 'Status', 'Discount Offer']} tData={data} />
 }
 
-function BVaultROI({ vault }: { vault: Address }) {
-  const { roi } = useBvaultROI(vault)
+function BVaultROI({ vc }: { vc: BVaultConfig }) {
+  const { roi } = useBvaultROI(vc)
   return <>{fmtPercent(roi, 18, 2)}</>
 }
 function BVaultsItem() {
@@ -160,7 +160,7 @@ function BVaultsItem() {
         <span>Epoch {getBigint(bvaults, [bvc.vault, 'epochCount']).toString()}</span>
       </div>,
       <BVaultApy key={'apy'} bvc={bvc} />,
-      <BVaultROI key={'roi'} vault={bvc.vault}/>,
+      <BVaultROI key={'roi'} vc={bvc}/>,
     ])
   }, [bvcs, bvaults, prices])
   return <DashItem title='B-Vault' tHeader={['Vaults', 'Total Deposit', 'Status', 'PT APY', 'YT ROI']} tData={data} />

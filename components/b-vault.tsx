@@ -249,7 +249,7 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
     return parseInt(progress.toString())
   }
 
-  const { roi, restakingIncomesApy, additionalRoi } = useBvaultROI(bvc.vault)
+  const { roi, restakingIncomesApy, additionalRoi } = useBvaultROI(bvc)
   return (
     <div className='card !p-0 overflow-hidden flex flex-col'>
       <div className='flex p-5 bg-[#6366F126] gap-5'>
@@ -327,7 +327,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const priceImpact = afterYtAssetPrice > ytAssetPriceBn && ytAssetPriceBn > 0n ? ((afterYtAssetPrice - ytAssetPriceBn) * BigInt(1e10)) / ytAssetPriceBn : 0n
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(bvc)
-  const { roi, roiChange } = useBvaultROI(bvc.vault, outputYTokenForInput, afterYtAssetPrice)
+  const { roi, roiChange } = useBvaultROI(bvc, outputYTokenForInput, afterYtAssetPrice)
   return (
     <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
       <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
@@ -490,7 +490,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   const [onlyMy, setOnlyMy] = useState(true)
   const epochesData = useEpochesData(bvc.vault)
   const epoches = useMemo(() => {
-    const myFilter = (item: (typeof epochesData)[number]) => item.sBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n || item.aBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n
+    const myFilter = (item: (typeof epochesData)[number]) => item.userClaimableYTokenSyntyetic > 0n || item.sBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n || item.aBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n
     return onlyMy ? epochesData.filter(myFilter) : epochesData
   }, [epochesData, onlyMy])
   const viewMax = 6
@@ -673,7 +673,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
   const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
   const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc.vault)
-  const { roi } = useBvaultROI(vc.vault)
+  const { roi } = useBvaultROI(vc)
   return (
     <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden', {})}>
       <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
