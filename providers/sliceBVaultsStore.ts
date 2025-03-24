@@ -126,11 +126,13 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
 
     const ytPointsMaxTotalSupplys = await Promise.all(
       bvcs.map((vc) =>
-        pc.readContract({
-          abi: [parseAbiItem('function maxTotalSupply() external view returns (uint256)')],
-          address: map[vc.vault]!.current.adhocBribesPool,
-          functionName: 'maxTotalSupply',
-        }),
+        vc.pTokenV2
+          ? pc.readContract({
+              abi: [parseAbiItem('function maxTotalSupply() external view returns (uint256)')],
+              address: map[vc.vault]!.current.adhocBribesPool,
+              functionName: 'maxTotalSupply',
+            })
+          : Promise.resolve(0n),
       ),
     )
     for (let i = 0; i < bvcs.length; i++) {
