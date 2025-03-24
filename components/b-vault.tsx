@@ -627,7 +627,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
 }
 
 export function BVaultApy({ bvc, showTip = false }: { bvc: BVaultConfig, showTip?: boolean }) {
-  const [fmtApy, apy] = useBVaultApy(bvc.vault)
+  const [fmtApy, apy] = useBVaultApy(bvc)
   const { data: stakeApy } = useVerioStakeApy()
   const fmtTotal = fmtPercent(apy + stakeApy, 10)
   if (showTip)

@@ -7,6 +7,7 @@ export type BVaultConfig = {
   asset: Address
   assetSymbol: string
   pToken: Address
+  pTokenV2?: boolean
   pTokenSymbol: string
   yTokenSymbol: string
   protocolAddress: Address
@@ -48,6 +49,19 @@ export const VerioStakePool: { [k: number]: Address } = {
 export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
   [storyTestnet.id]: [],
   [story.id]: [
+    {
+      vault: '0xEe3A2C8fCAcea36ba1866a3a2282105ee2eD3943',
+      asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
+      pToken: '0xaAe257c3471e99980501041A597BbcC82945b1Cc',
+      pTokenV2: true,
+      assetSymbol: 'vIP',
+      pTokenSymbol: 'pvIP',
+      yTokenSymbol: 'yvIP',
+      protocolAddress: '0x1b6B83E9539dAd1F45012e21e4AA35dAE78473Bc',
+      protocolSettingsAddress: '0x7858e1C67Dfd3ba5B58Ae3Ea2C2c3B2F182e1Aab',
+      bQueryAddres: BQueryAddress[story.id],
+      onEnv: ['test'],
+    },
     {
       vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
       asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',

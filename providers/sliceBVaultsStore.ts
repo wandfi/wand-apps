@@ -2,7 +2,7 @@ import { abiBeraLP, abiBeraVault, abiBQuery, abiBQueryOld } from '@/config/abi'
 import { getBvaultsPtSynthetic } from '@/config/api'
 import { BVaultConfig } from '@/config/bvaults'
 import _ from 'lodash'
-import { Address, erc20Abi, PublicClient } from 'viem'
+import { Address, erc20Abi, parseAbiItem, PublicClient } from 'viem'
 import { getPC } from './publicClient'
 import { SliceFun } from './types'
 import { story, getCurrentChainId } from '@/config/network'
@@ -36,6 +36,7 @@ export type BVaultDTO = {
   lpQuote: bigint
   Y: bigint
   current: BVaultEpochDTO
+  ptRebaseRate: bigint
 }
 export type BVaultsStore = {
   bvaults: {
@@ -93,7 +94,7 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
     const start = _.now()
     console.info('timeStart:updateBvaults', start)
     const pc = getPC()
-    const [datas, lpdatas] = await Promise.all([
+    const [datas, lpdatas, ptRates] = await Promise.all([
       Promise.all(
         bvcs.map((bvc) =>
           pc
@@ -101,12 +102,15 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
             .then((item) => ({ vault: bvc.vault, item })),
         ),
       ),
-      story.id == getCurrentChainId()
-        ? Promise.all(bvcs.map((bvc) => (LP_TOKENS[bvc.asset]?.poolId ? getBvaultLpData(pc, bvc) : Promise.resolve(null))))
-        : Promise.resolve(null),
+      story.id == getCurrentChainId() ? Promise.all(bvcs.map((bvc) => (LP_TOKENS[bvc.asset]?.poolId ? getBvaultLpData(pc, bvc) : Promise.resolve(null)))) : Promise.resolve(null),
+      Promise.all(
+        bvcs.map((vc) =>
+          vc.pTokenV2 ? pc.readContract({ abi: [parseAbiItem('function rebaseRate() view returns (uint256)')], address: vc.pToken, functionName: 'rebaseRate' }) : 0n,
+        ),
+      ),
     ])
     console.info('timeEND:updateBvaults', _.now() - start)
-    const map = _.filter(datas, (item) => item != null).reduce<BVaultsStore['bvaults']>((map, item) => ({ ...map, [item.vault]: item.item }), {})
+    const map = _.filter(datas, (item) => item != null).reduce<BVaultsStore['bvaults']>((map, item, i) => ({ ...map, [item.vault]: item.item, ptRebaseRate: ptRates[i] }), {})
     if (lpdatas) {
       for (const lpdata of lpdatas) {
         if (lpdata) {

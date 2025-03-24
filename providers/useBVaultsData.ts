@@ -92,15 +92,21 @@ export function useBVaultBoost(vault: Address): [string, bigint] {
   return [displayBalance(boost, 0), boost]
 }
 
-export function calcBVaultPTApy(vault: Address) {
+export function calcBVaultPTApy(vc: BVaultConfig) {
   const s = useBoundStore.getState()
-  const bvd = s.sliceBVaultsStore.bvaults[vault]
-  const pTokenSynthetic = getBigint(s.sliceBVaultsStore.yTokenSythetic, [vault])
-  const apy = bvd && bvd.current.assetTotalSwapAmount && pTokenSynthetic ? (bvd.current.assetTotalSwapAmount * YEAR_SECONDS * BigInt(1e10)) / pTokenSynthetic : 0n
+  const bvd = s.sliceBVaultsStore.bvaults[vc.vault]
+  const pTokenSynthetic = getBigint(s.sliceBVaultsStore.yTokenSythetic, [vc.vault])
+  let apy = 0n
+  if (vc.pTokenV2) {
+    apy = bvd && bvd.ptRebaseRate && bvd.pTokenTotal ? ((bvd.ptRebaseRate / DECIMAL) * YEAR_SECONDS * BigInt(1e10)) / bvd.pTokenTotal / DECIMAL : 0n
+  } else {
+    apy = bvd && bvd.current.assetTotalSwapAmount && pTokenSynthetic ? (bvd.current.assetTotalSwapAmount * YEAR_SECONDS * BigInt(1e10)) / pTokenSynthetic : 0n
+  }
+  console.info('apy:', vc.vault, apy, vc.pTokenV2, bvd?.ptRebaseRate, bvd?.pTokenTotal)
   return apy
 }
-export function useBVaultApy(vault: Address): [string, bigint] {
-  const apy = useStore(() => calcBVaultPTApy(vault), [`sliceBVaultsStore.bvaults.${vault}`, `sliceBVaultsStore.yTokenSythetic.${vault}`])
+export function useBVaultApy(vc: BVaultConfig): [string, bigint] {
+  const apy = useStore(() => calcBVaultPTApy(vc), [`sliceBVaultsStore.bvaults.${vc.vault}`, `sliceBVaultsStore.yTokenSythetic.${vc.vault}`])
   // const { data: stakingApy} = useVerioStakeApy()
   return [fmtPercent(apy, 10), apy]
 }
