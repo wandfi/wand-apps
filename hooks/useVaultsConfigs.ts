@@ -42,7 +42,7 @@ export function useVaultsConfigs() {
       type: 'Lnt-Vault',
     }))
 
-    return [...vcsOpt, ...pvcsOpt, ...bvcsOpt, ...lntvcsOpt].map((item) => ({ ...item, label: `${item.label}(${item.type})` }))
+    return [...vcsOpt, ...pvcsOpt, ...bvcsOpt, ...lntvcsOpt].map((item) => ({ ...item, label: `${item.label}(${item.type}:${item.data.vault})` }))
   }, [vcs, pvcs, bvcs, lntvcs])
   const [{ current }, setState] = useSetState<{ current: OptionsItem }>({
     current: options[0],
