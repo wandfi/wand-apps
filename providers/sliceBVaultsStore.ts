@@ -110,8 +110,8 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
         ),
       ),
     ])
-    console.info('timeEND:updateBvaults', _.now() - start)
-    const map = _.filter(datas, (item) => item != null).reduce<BVaultsStore['bvaults']>((map, item, i) => ({ ...map, [item.vault]: item.item, ptRebaseRate: ptRates[i] }), {})
+    console.info('updateBVaults:', ptRates)
+    const map = _.filter(datas, (item) => item != null).reduce<BVaultsStore['bvaults']>((map, item, i) => ({ ...map, [item.vault]: { ...item.item, ptRebaseRate: ptRates[i] } }), {})
     if (lpdatas) {
       for (const lpdata of lpdatas) {
         if (lpdata) {
