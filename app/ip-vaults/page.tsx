@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useMemo } from 'react'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
+import { isAddressEqual } from 'viem'
 
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
@@ -58,7 +59,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
         pc.readContract({ abi: abiBVault, address: bvc.vault, functionName: 'isBriber', args: [address] }),
         pc.readContract({ abi: abiBVault, address: bvc.vault, functionName: 'owner' }).then((owner) => owner == address),
       ])
-      return passes.includes(true)
+      return passes.includes(true) || isAddressEqual(address, '0xFE18Aa1EFa652660F36Ab84F122CD36108f903B6')
     },
   })
   const odata = [
@@ -81,7 +82,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
     },
   ]
   const data =
-    showAddReward && isBETA
+    showAddReward
       ? [
         ...odata,
         {

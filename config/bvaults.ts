@@ -76,7 +76,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
     //   onEnv: ['test'],
     // },
     // {
-    //   vault: '0xEe3A2C8fCAcea36ba1866a3a2282105ee2eD3943',
+    //   vault: '0xEe3A2C8fCAcea36ba1866a3a2282105ee2ehaoD3943',
     //   asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
     //   pToken: '0xaAe257c3471e99980501041A597BbcC82945b1Cc',
     //   pTokenV2: true,

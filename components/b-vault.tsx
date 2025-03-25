@@ -117,7 +117,7 @@ export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
       <div className='whitespace-nowrap'>
         Claimable: {displayBalance(claimable)}
       </div>
-      <BBtn className='mx-auto mt-6' busy={isPending} disabled={disableRedeemAll} onClick={mutate as any}>Redeem All</BBtn>
+      <BBtn className='mx-auto mt-6 flex justify-center items-center gap-2' busy={isPending} disabled={disableRedeemAll} onClick={mutate as any}>Redeem All</BBtn>
     </div>
   )
 }

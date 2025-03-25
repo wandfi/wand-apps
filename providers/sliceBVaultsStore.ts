@@ -2,7 +2,7 @@ import { abiBeraLP, abiBeraVault, abiBQuery, abiBQueryOld } from '@/config/abi'
 import { getBvaultsPtSynthetic } from '@/config/api'
 import { BVaultConfig } from '@/config/bvaults'
 import _ from 'lodash'
-import { Address, erc20Abi, parseAbiItem, PublicClient } from 'viem'
+import { Address, erc20Abi, parseAbiItem, PublicClient, zeroAddress } from 'viem'
 import { getPC } from './publicClient'
 import { SliceFun } from './types'
 import { story, getCurrentChainId } from '@/config/network'
@@ -111,7 +111,10 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
       ),
     ])
     console.info('updateBVaults:', ptRates)
-    const map = _.filter(datas, (item) => item != null).reduce<BVaultsStore['bvaults']>((map, item, i) => ({ ...map, [item.vault]: { ...item.item, ptRebaseRate: ptRates[i] } }), {})
+    const map = _.filter(datas, (item) => item != null).reduce<BVaultsStore['bvaults']>(
+      (map, item, i) => ({ ...map, [item.vault]: { ...item.item, ptRebaseRate: ptRates[i] } }),
+      {},
+    )
     if (lpdatas) {
       for (const lpdata of lpdatas) {
         if (lpdata) {
@@ -126,7 +129,7 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
 
     const ytPointsMaxTotalSupplys = await Promise.all(
       bvcs.map((vc) =>
-        vc.pTokenV2 && map[vc.vault]!.current.adhocBribesPool !== '0x0000000000000000000000000000000000000000'
+        vc.pTokenV2 && map[vc.vault]!.current.adhocBribesPool !== zeroAddress
           ? pc.readContract({
               abi: [parseAbiItem('function maxTotalSupply() external view returns (uint256)')],
               address: map[vc.vault]!.current.adhocBribesPool,

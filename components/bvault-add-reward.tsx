@@ -23,14 +23,8 @@ import { SimpleDialog } from './simple-dialog'
 import { BBtn } from './ui/bbtn'
 
 const defTokens: TokenItem[] = [
-  { symbol: 'HONEY', name: 'HONEY Token', address: '0x0e4aaf1351de4c0264c5c7056ef3777b41bd8e03', decimals: 18, },
-  { symbol: 'USDC', name: 'USD Coin', address: '0xd6d83af58a19cd14ef3cf6fe848c9a4d21e5727c', decimals: 18, },
-  { symbol: 'WBERA', name: 'BERA Token', address: '0x7507c1dc16935b82698e4c63f2746a2fcf994df8', decimals: 18, },
-  { symbol: 'iBGT', name: 'Infrared BGT', address: '0x46eFC86F0D7455F135CC9df501673739d513E982', decimals: 18, },
-  { symbol: 'USDT', name: 'Tether USD', address: '0x05D0dD5135E3eF3aDE32a9eF9Cb06e8D37A6795D', decimals: 18, },
-  { symbol: 'DAI', name: 'Decentralized USD', address: '0x806Ef538b228844c73E8E692ADCFa8Eb2fCF729c', decimals: 18, },
-  { symbol: 'WBTC', name: 'Wrapped Bitcoin', address: '0x2577D24a26f8FA19c1058a8b0106E2c7303454a4', decimals: 18, },
-  { symbol: 'WETH', name: 'Wrapped Ether', address: '0xE28AfD8c634946833e89ee3F122C06d7C537E8A8', decimals: 18, },
+  { symbol: 'vIP', name: 'Verio IP', address: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD', decimals: 18, },
+  { symbol: 'WIP', name: 'Wrapped IP', address: '0x1514000000000000000000000000000000000000', decimals: 18, },
 ]
 
 function TokenSelect({ tokens, onSelect, hiddenNative }: { tokens?: TokenItem[]; hiddenNative?: boolean; onSelect?: (item: TokenItem) => void }) {

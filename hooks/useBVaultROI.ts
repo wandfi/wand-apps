@@ -6,7 +6,7 @@ import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
 import _ from 'lodash'
-import { Address, parseAbi } from 'viem'
+import { Address, parseAbi, zeroAddress } from 'viem'
 
 export function useBVaultIPAssets(vault: Address) {
   return useQuery({
@@ -93,11 +93,11 @@ export function useBVaultUnderlyingAPY(vault: Address) {
       const staked = stakeed.map((item) => item.find((s) => s.length)?.find((s) => !!s))
       const avrageApy = apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
       const items = apys
-      .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
-      .sort((a, b) => {
-        const sub = b.apy - a.apy
-        return sub > 0n ? 1 : sub < 0n ? -1 : 0
-      })
+        .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
+        .sort((a, b) => {
+          const sub = b.apy - a.apy
+          return sub > 0n ? 1 : sub < 0n ? -1 : 0
+        })
       console.info('staked:', staked, avrageApy)
       return { avrageApy, items }
     },
@@ -113,6 +113,7 @@ export function useYTPoints(vault: Address) {
     enabled: Boolean(vault) && Boolean(bvd.current.adhocBribesPool),
     queryFn: async () => {
       const pc = getPC()
+      if (bvd.current.adhocBribesPool === zeroAddress) return 0n
       return pc.readContract({ abi: abiAdhocBribesPool, address: bvd.current.adhocBribesPool, functionName: 'totalSupply' })
     },
   })
