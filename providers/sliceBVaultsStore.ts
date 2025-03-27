@@ -9,6 +9,7 @@ import { story, getCurrentChainId } from '@/config/network'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { DECIMAL } from '@/constants'
 import { toDecimal18 } from '@/lib/utils'
+import { abiBQuery2, codeBQuery2 } from '@/config/abi/BQuery2'
 
 export type BVaultEpochDTO = {
   epochId: bigint
@@ -99,7 +100,7 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
       Promise.all(
         bvcs.map((bvc) =>
           pc
-            .readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery, address: bvc.bQueryAddres, functionName: 'queryBVault', args: [bvc.vault] })
+            .readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery2, code: codeBQuery2, functionName: 'queryBVault', args: [bvc.vault] })
             .then((item) => ({ vault: bvc.vault, item })),
         ),
       ),
