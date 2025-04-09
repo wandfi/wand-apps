@@ -30,7 +30,7 @@ const abiIpAssetStaking = parseAbi([
 ])
 
 // const addressRestaking = '0xE884e394218Add9D5972B87291C2743401F88546'
-const addressIpAssetStaking = '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE'
+// const addressIpAssetStaking = '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE'
 export const ipAssetsTit: { [k: Address]: string } = {
   '0xB1D831271A68Db5c18c8F0B69327446f7C8D0A42': 'IPPY',
   '0x0a0466c312687027E2BEa065d4Cca0DCEC19bb2C': 'Globkins',
@@ -40,7 +40,8 @@ export const ipAssetsTit: { [k: Address]: string } = {
   '0x42A351E005De1330DeDe69Ca4Ae1B06715a2f4fA': 'WTF',
 }
 // 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
-export function useBVaultUnderlyingAPY(vault: Address) {
+export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
+  const vault = vc.vault
   const { data: ipAssets } = useBVaultIPAssets(vault)
   return useQuery({
     initialData: { avrageApy: 0n, items: [] },
@@ -58,13 +59,13 @@ export function useBVaultUnderlyingAPY(vault: Address) {
         const totalStake = await pc.readContract({
           abi: abiIpAssetStaking,
           functionName: 'getTotalStakeWeightedInIPForIP',
-          address: addressIpAssetStaking,
+          address: vc.ipAssetStaking,
           args: [ipAsset],
         })
         const rewardPools = await pc.readContract({
           abi: abiIpAssetStaking,
           functionName: 'getRewardPools',
-          address: addressIpAssetStaking,
+          address: vc.ipAssetStaking,
           args: [ipAsset],
         })
         let cumulativeRewardsPerEpoch = 0n
@@ -75,7 +76,9 @@ export function useBVaultUnderlyingAPY(vault: Address) {
             }
           })
         })
+
         const apy = (cumulativeRewardsPerEpoch * SECONDS_PER_YEAR * SCALE) / (totalStake * DIVISOR)
+        console.info('underlyingApy:', vault, ipAsset, apy)
         return apy * multiplier
       }
       const apys = await Promise.all(ipAssets.map(apyByIpAsset))
@@ -84,21 +87,22 @@ export function useBVaultUnderlyingAPY(vault: Address) {
           pc.readContract({
             abi: abiIpAssetStaking,
             functionName: 'getUserStakeAmountForIP',
-            address: addressIpAssetStaking,
+            address: vc.ipAssetStaking,
             args: [ipAsset, vault],
           }),
         ),
       )
 
       const staked = stakeed.map((item) => item.find((s) => s.length)?.find((s) => !!s))
-      const avrageApy = apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
+      const stakedAll = staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
+      const avrageApy = stakedAll > 0n ? apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / stakedAll : 0n
       const items = apys
         .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
         .sort((a, b) => {
           const sub = b.apy - a.apy
           return sub > 0n ? 1 : sub < 0n ? -1 : 0
         })
-      console.info('staked:', staked, avrageApy)
+      console.info('staked:', vault, staked, avrageApy)
       return { avrageApy, items }
     },
   })
@@ -151,7 +155,7 @@ export function useBvaultROI(vc: BVaultConfig, ytchange: bigint = 0n, afterYtPri
   // restaking incomes
   const {
     data: { avrageApy },
-  } = useBVaultUnderlyingAPY(vault)
+  } = useBVaultUnderlyingAPY(vc)
   const ytAmount = bvd.current.yTokenAmountForSwapYT
   const vualtYTokenBalance = bvd.current.vaultYTokenBalance
   const remainTime = bvd.current.duration + bvd.current.startTime - BigInt(_.round(_.now() / 1000))

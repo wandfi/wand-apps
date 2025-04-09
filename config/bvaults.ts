@@ -18,6 +18,7 @@ export type BVaultConfig = {
   lpPoolIdx?: number
   isOld?: boolean
   onEnv?: TypeENV[]
+  ipAssetStaking: Address
 }
 
 export const ZooProtocolAddress: { [k: number]: Address } = {
@@ -74,6 +75,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
       protocolSettingsAddress: '0x96510E8ED6b9dCC9fc6378a239483f0cE0eB1327',
       bQueryAddres: BQueryAddress[story.id],
       onEnv: ['test'],
+      ipAssetStaking: '0x1ADd58A4bf810Bd706FE01458B610466F6e7f8cD',
     },
     // {
     //   vault: '0xDBB8fEadD0FC5fa80E3B69ccAd82844A71BbE38a',
@@ -112,6 +114,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
       protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
       bQueryAddres: BQueryAddress[story.id],
       onEnv: ['test', 'prod'],
+      ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE'
     },
   ],
 }

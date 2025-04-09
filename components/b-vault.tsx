@@ -713,7 +713,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
   const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
-  const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc.vault)
+  const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc)
   const { roi } = useBvaultROI(vc)
   return (
     <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden', {})}>
