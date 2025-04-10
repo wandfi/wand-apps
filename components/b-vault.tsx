@@ -552,6 +552,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   const aBribes = current?.aBribes || []
 
   const upForUserAction = useUpBVaultForUserAction(bvc)
+  
   function rowRender({ key, style, index }: ListRowProps) {
     const itemEpoch = epoches[index]
     const fTime = `${fmtDate(itemEpoch.startTime * 1000n)}-${fmtDate((itemEpoch.startTime + itemEpoch.duration) * 1000n)}`

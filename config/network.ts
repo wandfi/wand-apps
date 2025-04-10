@@ -61,7 +61,7 @@ export const story = defineChain({
   },
 })
 
-export const apiBatchConfig = { batchSize: 30, wait: 300 }
+export const apiBatchConfig = { batchSize: 10, wait: 300 }
 export const multicallBatchConfig = { batchSize: 50, wait: 300 }
 
 export const storyChains = [storyTestnet, story]

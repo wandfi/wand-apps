@@ -36,6 +36,7 @@ export const sliceUserBVaults: SliceFun<UserBVaultsStore> = (set, get, init) => 
         pc.readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery, address: bvc.bQueryAddres, functionName: 'queryBVaultEpochUser', args: [bvc.vault, e.epochId, user] }),
       ),
     )
+    console.info("sliceUserBVaults", user, endEpoches)
     set({ epoches: { ...get().epoches, [bvc.vault]: endEpoches } })
     return endEpoches
   }

@@ -5,8 +5,8 @@ import { DECIMAL, YEAR_SECONDS } from '@/constants'
 import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
-import _ from 'lodash'
-import { Address, parseAbi, zeroAddress } from 'viem'
+import _, { flatten } from 'lodash'
+import { Address, formatEther, parseAbi, parseEther, zeroAddress } from 'viem'
 
 export function useBVaultIPAssets(vault: Address) {
   return useQuery({
@@ -21,12 +21,14 @@ export function useBVaultIPAssets(vault: Address) {
   })
 }
 
-const abiIpAssetStaking = parseAbi([
+const abiIPA = parseAbi([
   'struct UserStakeAmountDetail { address stakeTokenAddress; uint256 amount; uint8 lockup; uint256 lastStakeTimestamp;}',
   'function getUserStakeAmountForIP(address _ipAsset, address _user) external view returns (UserStakeAmountDetail[][] memory)',
   'function getTotalStakeWeightedInIPForIP(address _ipAsset) external view returns (uint256)',
+  'function getTotalStakeAmountForIP(address _ipAsset, address[] calldata _stakeTokens) external view returns (uint256[] memory)',
   'struct RewardPoolState {address rewardToken;uint8 rewardTokenType;uint8 distributionType;uint256 rewardsPerEpoch;uint256 rewardPerToken;uint256 totalRewards;uint256 totalDistributedRewards;uint256 lastEpochBlock;}',
   'function getRewardPools(address _ipAsset) external view returns (RewardPoolState[][] memory)',
+  'function calculateIPWithdrawal(uint256 _vIPToBurn) external view returns (uint256)',
 ])
 
 // const addressRestaking = '0xE884e394218Add9D5972B87291C2743401F88546'
@@ -52,40 +54,43 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
     queryFn: async () => {
       const pc = getPC(getCurrentChainId(), 1)
       const multiplier = 4n
-      const SECONDS_PER_YEAR = 60n * 60n * 24n * 365n
-      const SCALE = BigInt(1e18) * BigInt(1e18) // Increased precision scaling factor
-      const DIVISOR = BigInt(25e17) // Equivalent to 2.5 in 1e18 fixed point
+      const ratio = await pc.readContract({ abi: abiIPA, address: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27', functionName: 'calculateIPWithdrawal', args: [parseEther('1')] })
+      const blockTime = parseEther('2.5')
       const apyByIpAsset = async (ipAsset: Address) => {
-        const totalStake = await pc.readContract({
-          abi: abiIpAssetStaking,
-          functionName: 'getTotalStakeWeightedInIPForIP',
-          address: vc.ipAssetStaking,
-          args: [ipAsset],
-        })
-        const rewardPools = await pc.readContract({
-          abi: abiIpAssetStaking,
-          functionName: 'getRewardPools',
-          address: vc.ipAssetStaking,
-          args: [ipAsset],
-        })
-        let cumulativeRewardsPerEpoch = 0n
-        rewardPools.forEach((item) => {
-          item.forEach((rp) => {
-            if (rp.totalRewards > rp.totalDistributedRewards) {
-              cumulativeRewardsPerEpoch += rp.rewardsPerEpoch
-            }
-          })
-        })
-
-        const apy = (cumulativeRewardsPerEpoch * SECONDS_PER_YEAR * SCALE) / (totalStake * DIVISOR)
-        console.info('underlyingApy:', vault, ipAsset, apy)
-        return apy * multiplier
+        const [rewardPools, [totalStaked], totalStakedWeighted] = await Promise.all([
+          pc.readContract({
+            abi: abiIPA,
+            functionName: 'getRewardPools',
+            address: vc.ipAssetStaking,
+            args: [ipAsset],
+          }),
+          pc.readContract({
+            abi: abiIPA,
+            functionName: 'getTotalStakeAmountForIP',
+            address: vc.ipAssetStaking,
+            args: [ipAsset, [vc.asset]],
+          }),
+          pc.readContract({
+            abi: abiIPA,
+            functionName: 'getTotalStakeWeightedInIPForIP',
+            address: vc.ipAssetStaking,
+            args: [ipAsset],
+          }),
+        ])
+        const rewardsPerEpoch = flatten(rewardPools).find((item) => item.rewardsPerEpoch > 0n)?.rewardsPerEpoch || 0n
+        let baseApy = totalStakedWeighted > 0n ? (rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime * DECIMAL / totalStakedWeighted : 0n
+        if (totalStaked >= parseEther('100') && ratio > 0n && totalStakedWeighted > 0n) {
+          baseApy += ((parseEther('7.5') * DECIMAL) / ratio) * (totalStaked * DECIMAL / totalStakedWeighted) / DECIMAL/ 100n
+        }
+        const apy = baseApy * multiplier
+        console.info('underlyingApy:', vault, ipAsset, formatEther(apy))
+        return apy
       }
       const apys = await Promise.all(ipAssets.map(apyByIpAsset))
       const stakeed = await Promise.all(
         ipAssets.map((ipAsset) =>
           pc.readContract({
-            abi: abiIpAssetStaking,
+            abi: abiIPA,
             functionName: 'getUserStakeAmountForIP',
             address: vc.ipAssetStaking,
             args: [ipAsset, vault],
