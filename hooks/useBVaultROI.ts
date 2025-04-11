@@ -55,15 +55,17 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
       const pc = getPC(getCurrentChainId(), 1)
       const multiplier = 4n
       const ratio = await pc.readContract({ abi: abiIPA, address: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27', functionName: 'calculateIPWithdrawal', args: [parseEther('1')] })
-      const blockTime = parseEther('2.5')
+      const blockTime = parseEther('2.367')
       const apyByIpAsset = async (ipAsset: Address) => {
-        const [rewardPools, [totalStaked], totalStakedWeighted] = await Promise.all([
-          pc.readContract({
-            abi: abiIPA,
-            functionName: 'getRewardPools',
-            address: vc.ipAssetStaking,
-            args: [ipAsset],
-          }),
+        const [
+          // rewardPools, 
+          [totalStaked], totalStakedWeighted] = await Promise.all([
+          // pc.readContract({
+          //   abi: abiIPA,
+          //   functionName: 'getRewardPools',
+          //   address: vc.ipAssetStaking,
+          //   args: [ipAsset],
+          // }),
           pc.readContract({
             abi: abiIPA,
             functionName: 'getTotalStakeAmountForIP',
@@ -77,7 +79,8 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
             args: [ipAsset],
           }),
         ])
-        const rewardsPerEpoch = flatten(rewardPools).find((item) => item.rewardsPerEpoch > 0n)?.rewardsPerEpoch || 0n
+        // const rewardsPerEpoch = flatten(rewardPools).find((item) => item.rewardsPerEpoch > 0n)?.rewardsPerEpoch || 0n
+        const rewardsPerEpoch = parseEther("0.00009")
         let baseApy = totalStakedWeighted > 0n ? (rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime * DECIMAL / totalStakedWeighted : 0n
         if (totalStaked >= parseEther('100') && ratio > 0n && totalStakedWeighted > 0n) {
           baseApy += ((parseEther('7.5') * DECIMAL) / ratio) * (totalStaked * DECIMAL / totalStakedWeighted) / DECIMAL/ 100n
