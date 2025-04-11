@@ -24,7 +24,8 @@ export function useVerioStakeApy() {
       // console.info('VerioStakeApy:', fmtPercent(apy, 10))
       // return apy
       const ipTotalStake = await pc.readContract({ abi: abiVerioStakePool, address: verioStakePool, functionName: 'getTotalStake' })
-      return (294920n * DECIMAL * DECIMAL_10) / ipTotalStake
+      return (262750n * DECIMAL * DECIMAL_10) / ipTotalStake
+      // return (294920n * DECIMAL * DECIMAL_10) / ipTotalStake
     },
   })
 }
