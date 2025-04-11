@@ -552,7 +552,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   const aBribes = current?.aBribes || []
 
   const upForUserAction = useUpBVaultForUserAction(bvc)
-  
+
   function rowRender({ key, style, index }: ListRowProps) {
     const itemEpoch = epoches[index]
     const fTime = `${fmtDate(itemEpoch.startTime * 1000n)}-${fmtDate((itemEpoch.startTime + itemEpoch.duration) * 1000n)}`
@@ -659,7 +659,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
               />
             </div>}
             <div className='text-center text-sm font-medium flex items-center flex-nowrap justify-center whitespace-nowrap mt-auto gap-1'>
-              Additional Airdrops: 1000 <CoinIcon symbol='vIP' size={16} /> vIP <Tip>Will be distributed based on YT points after Epoch ends</Tip>
+              {/* Additional Airdrops: 1000 <CoinIcon symbol='vIP' size={16} /> vIP <Tip>Will be distributed based on YT points after Epoch ends</Tip> */}
             </div>
           </div>
         </div>

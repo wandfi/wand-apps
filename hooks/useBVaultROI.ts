@@ -140,7 +140,8 @@ export function calcRestakingApy(underlyingApy: bigint, ptTotal: bigint, remainT
 
 export function calcAdditionalApy(ytPoints: bigint, ytAmount: bigint, remainTime: bigint, ytPrice: bigint) {
   const YTp = ytPoints + ytAmount * remainTime
-  const A = 1000n * DECIMAL
+  // const A = 1000n * DECIMAL
+  const A = 0n * DECIMAL
   const B = YTp > 0n ? (A * DECIMAL) / YTp : 0n
   const P = DECIMAL * remainTime
   const I = (B * P) / DECIMAL
@@ -149,7 +150,8 @@ export function calcAdditionalApy(ytPoints: bigint, ytAmount: bigint, remainTime
 }
 export function calcAdditionalApy2(ytPointsMaxTotalSupply: bigint, remainTime: bigint, ytPrice: bigint) {
   const YTp = ytPointsMaxTotalSupply
-  const A = 1000n * DECIMAL
+  // const A = 1000n * DECIMAL
+  const A = 0n * DECIMAL
   const B = YTp > 0n ? (A * DECIMAL) / YTp : 0n
   const P = DECIMAL * remainTime
   const I = (B * P) / DECIMAL
