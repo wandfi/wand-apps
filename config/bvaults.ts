@@ -61,7 +61,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = {
       protocolAddress: '0xB5eD29BCf541aebcb3ee179cb590d92D3d9F9445',
       protocolSettingsAddress: '0x0b50513145a6cE1A8A93132881e6B29B3C04eEDe',
       bQueryAddres: BQueryAddress[story.id],
-      onEnv: ['test'],
+      onEnv: ['test', 'prod'],
       ipAssetStaking: '0x1ADd58A4bf810Bd706FE01458B610466F6e7f8cD',
     },
     // {

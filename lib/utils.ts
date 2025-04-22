@@ -6,6 +6,8 @@ import { toast } from 'sonner'
 import { NATIVE_TOKEN_ADDRESS } from '@/config/swap'
 import dayjs from 'dayjs'
 import { DECIMAL } from '@/constants'
+import { getCurrentChainId } from '@/config/network'
+import { TOKENS_MAP } from '@/config/tokens'
 
 export type UnwrapPromise<T> = T extends Promise<infer S> ? S : T
 export type UnPromise<T> = T extends () => Promise<infer U> ? U : UnwrapPromise<T>
@@ -208,3 +210,7 @@ export async function retry<T>(fn: () => Promise<T>, count: number = 3, wait: nu
 }
 
 export const tabToSearchParams = (tab: string) => tab.toLowerCase().replaceAll(' ', '_')
+
+export function getTokenBy(address: Address, chainId: number = getCurrentChainId()) {
+  return TOKENS_MAP[`${chainId}_${address.toLowerCase() as Address}`]
+}

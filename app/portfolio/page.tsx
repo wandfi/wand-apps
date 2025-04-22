@@ -150,7 +150,7 @@ function PrincipalItem() {
     }
     const yieldDay = (bvc: BVaultConfig) => {
       const balance = s.sliceTokenStore.balances[bvc.pToken] || 0n
-      return (calcBVaultPTApy(bvc.vault) * balance) / 10n ** 10n / 365n
+      return (calcBVaultPTApy(bvc) * balance) / 10n ** 10n / 365n
     }
     const datas = bvcs
       .map((bvc) => {

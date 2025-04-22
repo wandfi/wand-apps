@@ -1,10 +1,11 @@
+'use client'
 import { useEffect } from 'react'
 
 export const DomainRef = {
   value: 'wand.fi',
 }
 
-const supportDomain = ['wand.fi', 'wandfi.xyz']
+const supportDomain = ['wand.fi', 'wandfi.xyz', 'wandfi.io']
 
 export const getAvilableDomain = () => {
   if (location.hostname == 'localhost') return supportDomain[0]

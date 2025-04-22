@@ -30,3 +30,25 @@ export function Switch(p: { checked?: boolean; onChange?: (check?: boolean) => v
     </div>
   )
 }
+
+
+export function Switch2(p: { checked?: boolean; onChange?: (check?: boolean) => void }) {
+  const toggleSwitch = () => {
+    p.onChange?.(!p.checked)
+  };
+  return <div className={cn("relative inline-block w-12 h-6")}>
+    <input
+      type="checkbox"
+      className="absolute opacity-0 w-0 h-0"
+      checked={p.checked}
+      onChange={toggleSwitch}
+    />
+    <div
+      className={`absolute inset-0 bg-gray-300 rounded-full transition duration-200 ease-in-out cursor-pointer ${p.checked ? 'bg-blue-500' : ''}`}
+    >
+      <div
+        className={`absolute inset-y-0 left-0 w-6 bg-white rounded-full shadow-md transform transition duration-200 ease-in-out ${p.checked ? 'translate-x-full' : ''}`}
+      ></div>
+    </div>
+  </div>
+}

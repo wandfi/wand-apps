@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className='' suppressHydrationWarning>
-      <body className={`${inter.className} bg-stone-50 dark:bg-slate-950 dark:text-slate-50`}>
+      <body className={`${inter.className} tracking-wide bg-stone-50 dark:bg-slate-950 dark:text-slate-50`}>
         <PageLayout>{children}</PageLayout>
         <div id='tooltip-root' className='fixed left-0 top-0 z-[60]' />
       </body>

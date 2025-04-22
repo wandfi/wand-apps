@@ -56,6 +56,8 @@ const SupportICONS: { [k: string]: string } = {
   vIP: 'vIP.svg',
   pvIP: 'PToken.svg',
   yvIP: 'YToken.svg',
+  LPvIP: 'LPvIP.svg',
+  bvIP: 'bvIP.svg',
 }
 
 export function CoinIcon({ symbol, size = 48, url, ...p }: { symbol: string; className?: string; style?: CSSProperties; size?: number; url?: string }) {
