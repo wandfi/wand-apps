@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import _ from 'lodash'
 import React, { CSSProperties, ReactNode } from 'react'
 
 export interface TableProps {
@@ -41,6 +42,9 @@ export const STable = ({
   onClickRow,
   onRowMouseHover,
 }: TableProps) => {
+
+  const cols = header.reduce<number>((sum, _item, i) => sum + (span[i] ?? 1), 0);
+  const baseSize = cols > 0 ? 100 / cols : 0;
   return (
     <table className={cn('relative min-w-full bg-transparent ', className)}>
       <thead className=''>
@@ -53,8 +57,8 @@ export const STable = ({
           {header.map((head, i) => {
             return (
               <th
+                style={{ width: `${_.floor(baseSize * (span[i] ?? 1), 2)}%` }}
                 key={i}
-                colSpan={span[i]}
                 scope='col'
                 className={cn(span[i] == 0 ? 'p-0 w-0' : 'p-3 font-normal text-sm', headerItemClassName)}
               >
@@ -83,7 +87,6 @@ export const STable = ({
               return (
                 <td
                   key={i}
-                  colSpan={span[i]}
                   className={cn(
                     span[i] == 0 ? 'p-0 w-max' : 'px-3 py-2 text-sm w-max',
                     typeof cellClassName == 'function' ? cellClassName(index, i) : cellClassName,

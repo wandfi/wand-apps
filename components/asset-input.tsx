@@ -28,7 +28,6 @@ export function AssetInput({
   setAmount,
   price,
   disable,
-  hasInput = false,
   options,
   onChange = () => { },
   defaultValue,
@@ -52,7 +51,6 @@ export function AssetInput({
   setAmount?: any
   price?: number | string
   disable?: boolean
-  hasInput?: boolean
   options?: { value: any; label: string }[]
   onChange?: any
   defaultValue?: any
@@ -81,9 +79,9 @@ export function AssetInput({
           {exchange && <div className='text-slate-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>~${exchange}</div>}
         </div>
         <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2' ref={coinSymbolRef}>
-          <CoinIcon size={24} symbol={assetIcon || asset} url={assetURL} className='rounded-full' />
+          <CoinIcon size={24} symbol={assetIcon || asset} url={assetURL} />
           <div className={clsx('relative', price || exchange ? '-top-[6px]' : '')}>
-            {hasInput ? (
+            {Boolean(options) && options!!.length > 1 ? (
               <Select
                 options={options}
                 onChange={onChange}

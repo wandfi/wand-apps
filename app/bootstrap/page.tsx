@@ -1,5 +1,6 @@
 'use client'
 import { BVault2Info, BVault2Init, BVault2Swaps } from "@/components/bvaults2"
+import { MyPositions } from "@/components/bvaults2/positions"
 import { BVault2Chart } from "@/components/bvaut2-chart"
 import { Noti } from "@/components/noti"
 import { PageWrap } from "@/components/page-wrap"
@@ -18,13 +19,14 @@ export default function BootstrapPage() {
                     <Noti data='Deposit underlying assets to earn rewards. The Vault will launch once the target value is reached.' />
                     <BVault2Init vc={vc} />
                 </> : <>
-                    <div className="grid gap-5 lg:grid-cols-[8fr_5fr]">
+                    <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
                         <BVault2Info vc={vc} />
                         <div className="row-span-2">
                             <BVault2Swaps vc={vc} />
                         </div>
                         <BVault2Chart vc={vc} />
                     </div>
+                    <MyPositions vc={vc} />
                 </>}
             </div>
         </PageWrap>

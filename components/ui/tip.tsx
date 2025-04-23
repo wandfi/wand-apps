@@ -9,11 +9,13 @@ export function Tip({
   node,
   className,
   inFlex,
+  contentClassName
 }: {
   children?: ReactNode
   node?: ReactNode
   className?: string
   inFlex?: boolean
+  contentClassName?: string
 }) {
   const tooltipRoot = document.getElementById('tooltip-root')
   if (!children) return node
@@ -45,7 +47,7 @@ export function Tip({
         </Tooltip.Trigger>
 
         <Tooltip.Portal container={tooltipRoot}>
-          <Tooltip.Content className='max-w-xs text-sm text-white bg-slate-900 shadow-lg dark:bg-[#333333] rounded-md p-4'>
+          <Tooltip.Content className={cn('max-w-xs text-sm text-white bg-slate-900 shadow-lg dark:bg-[#333333] rounded-md p-4', contentClassName)}>
             {children}
             <Tooltip.Arrow />
           </Tooltip.Content>

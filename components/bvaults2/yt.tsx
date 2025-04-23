@@ -14,6 +14,8 @@ import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { Tip } from "../ui/tip"
+import { Fees } from "../fees"
+
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
@@ -48,7 +50,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 Est. ROI Change:   233% → 235%<br />
                 Implied APY Change: 233% → 235%
             </div>
-            <div>Fees: $54.48</div>
+            <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
         </div>
         <ApproveAndTx
             className='mx-auto mt-4'

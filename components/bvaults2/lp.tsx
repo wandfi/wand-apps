@@ -13,7 +13,8 @@ import { GetvIP } from "../get-lp"
 import { ApproveAndTx } from "../approve-and-tx"
 import { abiBVault2 } from "@/config/abi"
 import { shuffle } from "lodash"
-import { Switch } from "../ui/switch"
+import { Switch, Switch2 } from "../ui/switch"
+import { useToggle } from "react-use"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
@@ -22,6 +23,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const lp = getTokenBy(vc.lp, chainId)
     const yt = getTokenBy(vc.yt, chainId)
     const pt = getTokenBy(vc.pt, chainId)
+    const [keep, toggleKeep] = useToggle(false)
     const balances = useBalances()
     const assetBalance = balances[vc.asset]
     const [inputAsset, setInputAsset] = useState('')
@@ -31,6 +33,10 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={balances[input.address]} setAmount={setInputAsset} />
         <SwapDown />
+        <div className="flex justify-between items-center text-xs font-medium w-1/2">
+            <span>Keep PT/YT mode</span>
+            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2"/>
+        </div>
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={asset.address} />
@@ -65,6 +71,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     const lp = getTokenBy(vc.lp, chainId)
     const yt = getTokenBy(vc.yt, chainId)
     const pt = getTokenBy(vc.pt, chainId)
+    const [keep, toggleKeep] = useToggle(false)
     const balances = useBalances()
     const assetBalance = balances[vc.asset]
     const [inputAsset, setInputAsset] = useState('')
@@ -74,9 +81,9 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={balances[input.address]} setAmount={setInputAsset} />
         <SwapDown />
-        <div className="flex justify-between items-center text-xs font-medium">
+        <div className="flex justify-between items-center text-xs font-medium w-1/2">
             <span>Keep PT/YT mode</span>
-            <Switch />
+            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2"/>
         </div>
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>

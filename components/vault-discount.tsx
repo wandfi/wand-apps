@@ -200,11 +200,10 @@ export function LVaultsDiscount({ vc }: { vc: VaultConfig }) {
             <div className='w-full flex-1 text-right text-neutral-700 dark:text-slate-50/60 text-md whitespace-nowrap'>Discount Rate: {isTrigger ? '--' : rate}</div>
             <AssetInput
               asset={coin.label}
+              options={options}
               amount={displayBalance(xOut)}
               exchange={displayBalance((xPrice * xOut) / DECIMAL)}
               readonly
-              hasInput
-              options={options}
               defaultValue={options[0]}
               onChange={onSelectChange}
             />

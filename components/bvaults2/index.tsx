@@ -132,7 +132,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
 
 
 export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
-    return <div className="card bg-white h-full min-h-[48.6875rem]">
+    return <div className="card bg-white h-full min-h-[49.25rem]">
         <SimpleTabs
             listClassName="p-0 gap-8 mb-4"
             triggerClassName={`text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2`}

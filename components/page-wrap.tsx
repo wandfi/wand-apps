@@ -14,7 +14,7 @@ export function PageWrap({ children, className }: { children: React.ReactNode; c
         backgroundSize: 'contain',
         background:
           theme == 'light'
-            ? '#eeeeee'
+            ? 'transparent'
             : isHome
             ? 'url(bg_home.svg) center bottom no-repeat,linear-gradient(105.67deg, #02050E 14.41%, #1D2F23 98.84%)'
             : 'linear-gradient(105.67deg, #02050E 14.41%, #1D2F23 98.84%)',

@@ -12,6 +12,7 @@ import { GetvIP } from "../get-lp"
 import { ApproveAndTx } from "../approve-and-tx"
 import { abiBVault2 } from "@/config/abi"
 import { useToggle } from "react-use"
+import { Fees } from "../fees"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
@@ -43,7 +44,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         </div>
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
             <div>Implied APY Change: 233% → 235%</div>
-            <div>Fees: $54.48</div>
+            <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]}/>
         </div>
         <ApproveAndTx
             className='mx-auto mt-4'

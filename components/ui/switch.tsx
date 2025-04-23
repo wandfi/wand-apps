@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { useThemeState } from '../theme-mode';
+import { round } from 'lodash';
 
 export function Switch(p: { checked?: boolean; onChange?: (check?: boolean) => void }) {
   const ts = useThemeState()
@@ -32,23 +33,21 @@ export function Switch(p: { checked?: boolean; onChange?: (check?: boolean) => v
 }
 
 
-export function Switch2(p: { checked?: boolean; onChange?: (check?: boolean) => void }) {
+export function Switch2(p: { size?: number, border?: number, checked?: boolean; onChange?: (check?: boolean) => void, className?: string }) {
+  const border = p.border ?? 1
+  const msize = p.size ?? 16;
+  const bollWidth = round(msize * 1.2)
+  const bollHeight = round(msize)
+  const width = round(bollWidth * 2 + 2 * border)
+  const height = round(msize + 2 * border)
   const toggleSwitch = () => {
     p.onChange?.(!p.checked)
   };
-  return <div className={cn("relative inline-block w-12 h-6")}>
-    <input
-      type="checkbox"
-      className="absolute opacity-0 w-0 h-0"
-      checked={p.checked}
-      onChange={toggleSwitch}
-    />
+  return <div style={{ borderWidth: border, height, width }} className={cn("relative inline-block bg-gray-300 rounded-full border-primary transition duration-200 ease-in-out cursor-pointer", p.checked && 'bg-primary', p.className)} onClick={toggleSwitch}>
     <div
-      className={`absolute inset-0 bg-gray-300 rounded-full transition duration-200 ease-in-out cursor-pointer ${p.checked ? 'bg-blue-500' : ''}`}
-    >
-      <div
-        className={`absolute inset-y-0 left-0 w-6 bg-white rounded-full shadow-md transform transition duration-200 ease-in-out ${p.checked ? 'translate-x-full' : ''}`}
-      ></div>
-    </div>
+      style={{ width: bollWidth, height: bollHeight }}
+      className={cn(`left-0 w-6 bg-white dark:bg-black rounded-full shadow-md transform transition duration-200 ease-in-out`, p.checked && 'translate-x-full')}
+    />
+
   </div>
 }
