@@ -33,12 +33,12 @@ function PT({ vc }: { vc: BVault2Config }) {
             header={header}
             span={{ 2: statuColSize, 3: 2, [header.length - 1]: claimColSize }}
             data={[
-                [<TokenSymbol address={vc.pt} />, '12.33', 'Active', '', ''],
-                [<TokenSymbol address={vc.pt} />, '12.33', 'Mature', <div className="flex items-center gap-10">
+                [<TokenSymbol address={vc.pt} key="token"/>, '12.33', 'Active', '', ''],
+                [<TokenSymbol address={vc.pt} key="token2"/>, '12.33', 'Mature', <div key="fees" className="flex items-center gap-10">
                     <MCoinAmount token={getTokenBy(vc.bt)} />
                     <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
                 </div>,
-                <ApproveAndTx className="w-28 font-semibold h-7" tx="Redeem" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />
+                <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Redeem" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />
                 ]
             ]}
         />
@@ -56,19 +56,19 @@ function YT({ vc }: { vc: BVault2Config }) {
             span={{ 2: statuColSize, [header.length - 1]: claimColSize }}
             data={[
                 [
-                    <TokenSymbol address={vc.yt} />, '12.33', 'Active', <div>
+                    <TokenSymbol  key="token" address={vc.yt} />, '12.33', 'Active', <div  key="token2">
                         <MCoinAmount token={getTokenBy(vc.asset)} />
                         <MCoinAmount token={getTokenBy(vc.reward2)} />
                     </div>, '',
-                    <ApproveAndTx className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />],
+                    <ApproveAndTx  key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />],
 
                 [
-                    '', '', 'Rewards for mature YT', <div>
+                    '', '', 'Rewards for mature YT', <div  key="token2">
                         <MCoinAmount token={getTokenBy(vc.asset)} />
                         <MCoinAmount token={getTokenBy(vc.reward2)} />
                     </div>,
-                    <MCoinAmount token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
-                    <ApproveAndTx className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />
+                    <MCoinAmount  key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
+                    <ApproveAndTx  key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />
                 ]
             ]}
         />
@@ -86,20 +86,20 @@ function LPBT({ vc }: { vc: BVault2Config }) {
             span={{ 2: statuColSize, [header.length - 1]: claimColSize }}
             data={[
                 [
-                    <TokenSymbol address={vc.lp} />, '12.33', '', <div>
+                    <TokenSymbol  key="token" address={vc.lp} />, '12.33', '', <div  key="token2">
                         <MCoinAmount token={getTokenBy(vc.asset)} />
                         <MCoinAmount token={getTokenBy(vc.reward2)} />
                     </div>,
-                    <MCoinAmount token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
-                    <ApproveAndTx className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />],
+                    <MCoinAmount  key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
+                    <ApproveAndTx  key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />],
 
                 [
-                    <TokenSymbol address={vc.bt} />, '12.33', '', <div>
+                    <TokenSymbol  key="token" address={vc.bt} />, '12.33', '', <div  key="token2">
                         <MCoinAmount token={getTokenBy(vc.asset)} />
                         <MCoinAmount token={getTokenBy(vc.reward2)} />
                     </div>,
-                    <MCoinAmount token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
-                    <ApproveAndTx className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />
+                    <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
+                    <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />
                 ]
             ]}
         />
