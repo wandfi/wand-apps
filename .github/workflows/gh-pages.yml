@@ -1,15 +1,15 @@
 name: Github Pages
 on:
   workflow_dispatch:
+    inputs:
+      job:
+        required: true
+        type: choice
+        options: ['prod', 'prod2', 'test', 'test2', 'all']
   push:
-    branches:
-      - dev
-      - main
-      - beta
-      - test
-
+    branches: ['dev','main']
 jobs:
-  release:
+  prod:
     if: contains(github.event.head_commit.message, '[prod]') || contains(github.event.head_commit.message, '[all]')
     runs-on: ubuntu-latest
     permissions:
@@ -34,6 +34,32 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
           cname: story.wand.fi
+  prod2:
+    if: contains(github.event.head_commit.message, '[prod2]') || contains(github.event.head_commit.message, '[all]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Set pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies & build
+        run: |
+          pnpm install --frozen-lockfile    
+          pnpm build
+
+      - name: Deploy Gh-Pages 🚀
+        uses: XueMoMo/actions-gh-pages@v4.0.1
+        with:
+          deploy_key: ${{ secrets.DK_STORY2 }}
+          external_repository: wandfi/wand-ui-site-story-prod2
+          publish_dir: ./out
+          cname: story.wandfi.xyz
   test:
     if: contains(github.event.head_commit.message, '[test]') || contains(github.event.head_commit.message, '[all]')
     runs-on: ubuntu-latest
@@ -62,3 +88,31 @@ jobs:
           publish_dir: ./out
           external_repository: wandfi/wand-ui-site-story-test
           cname: test.story.wand.fi
+  test2:
+    if: contains(github.event.head_commit.message, '[test2]') || contains(github.event.head_commit.message, '[all]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Set pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies & build
+        env:
+          NEXT_PUBLIC_ENV: 'test'
+        run: |
+          pnpm install --frozen-lockfile    
+          pnpm build
+
+      - name: Deploy Gh-Pages 🚀
+        uses: XueMoMo/actions-gh-pages@v4.0.1
+        with:
+          deploy_key: ${{ secrets.DK_STORY_TEST2 }}
+          publish_dir: ./out
+          external_repository: wandfi/wand-ui-site-story-test2
+          cname: test.story.wandfi.xyz
