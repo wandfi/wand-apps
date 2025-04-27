@@ -1,8 +1,9 @@
 import { SUPPORT_CHAINS } from "@/config/network"
+import { DomainRef } from "@/hooks/useConfigDomain"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { FiX } from "react-icons/fi"
 import { useClickAway } from "react-use"
 import { Chain } from "viem"
@@ -10,20 +11,23 @@ import { useAccount, useChainId, useSwitchChain } from "wagmi"
 
 
 type ItemType = { name: string, icon: string, chain?: Chain, toUrl?: string }
-const types: ItemType[] = [
-    ...SUPPORT_CHAINS.map(item => ({
-        name: item.name,
-        icon: (item as any).iconUrl || '/ETH.svg',
-        chain: item,
-    })),
-    {
-        name: 'Blast',
-        icon: 'blast.png',
-        toUrl: 'https://wand.fi/vaults'
-    },
-
-]
+// const types: ItemType[] = 
 export function SwitchChain() {
+    const types: ItemType[] = useMemo(() => {
+        return [
+            ...SUPPORT_CHAINS.map(item => ({
+                name: item.name,
+                icon: (item as any).iconUrl || '/ETH.svg',
+                chain: item,
+            })),
+            {
+                name: 'Blast',
+                icon: 'blast.png',
+                toUrl: `https://${DomainRef.value}/vaults`
+            },
+
+        ]
+    }, [DomainRef.value])
     const chainId = useCurrentChainId()
     const ct = types.find(item => item.chain?.id == chainId)
     const [show, setShow] = useState(false)
