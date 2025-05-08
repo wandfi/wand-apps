@@ -1,15 +1,15 @@
+import { abiMaturityPool } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
-import STable from "../simple-table";
-import { Address } from "viem";
+import { Token } from "@/config/tokens";
+import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { cn, getTokenBy } from "@/lib/utils";
-import { CoinIcon } from "../icons/coinicon";
+import { Address } from "viem";
+import { ApproveAndTx } from "../approve-and-tx";
 import { CoinAmount } from "../coin-amount";
 import { Fees } from "../fees";
-import { ApproveAndTx } from "../approve-and-tx";
-import { abiBVault2, abiMaturityPool } from "@/config/abi/BVault2";
-import { useCurrentChainId } from "@/hooks/useCurrentChainId";
+import { CoinIcon } from "../icons/coinicon";
+import STable from "../simple-table";
 import { useBvualt2Data } from "./useFets";
-import { Token } from "@/config/tokens";
 
 const MCoinAmount = ({ ...p }: Parameters<typeof CoinAmount>[0]) => {
     return <CoinAmount className="font-bold text-sm" symbolClassName="opacity-100" {...p} />

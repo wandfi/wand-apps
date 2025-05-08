@@ -134,7 +134,7 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
   }
   useEffect(() => {
     const unSub = sub(fet, (fs) => {
-      console.info('onSub:', fet.key, fs)
+      // console.info('onSub:', fet.key, fs)
       update()
     })
     // check need fresh
@@ -144,6 +144,7 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
     }
     return unSub
   }, [fet.key])
+  // console.info('fetStat:', fet.key, fetStat.status)
   return fetStat
 }
 
@@ -178,18 +179,18 @@ export function useMerge<RES extends {}>(...status: AllFetStat<{}>[]) {
   const ref = useRef<MergeFetStat<RES>>({ key: [], status: 'idle', result: undefined, lastUpDate: 0 })
   ref.current.key = mStatus.flatMap((item) => item.key)
   let SuccessCount = 0
-  mStatus.forEach((item) => {
+  for (const item of mStatus) {
     if (item.status === 'fetching') {
-      ref.current.status === 'fetching'
+      ref.current.status = 'fetching'
     } else if (item.status == 'error' && ref.current.status !== 'fetching') {
-      ref.current.status == 'error'
+      ref.current.status = 'error'
     } else if (item.status == 'success') {
       SuccessCount++
     }
     if (item.result !== undefined) {
       ref.current.result = Object.assign(ref.current.result || {}, item.result) as any
     }
-  })
+  }
   if (SuccessCount > 0 && SuccessCount == mStatus.length) {
     ref.current.status = 'success'
   }

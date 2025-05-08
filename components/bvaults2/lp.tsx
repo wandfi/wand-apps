@@ -172,6 +172,9 @@ export function LP({ vc }: { vc: BVault2Config }) {
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: lp }).catch(handleError)
     }
+    const btc = useTotalSupply(bt)
+    const ptc = useTotalSupply(pt)
+    const ytc = useTotalSupply(yt)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#E8E8FD] gap-5'>
@@ -195,9 +198,9 @@ export function LP({ vc }: { vc: BVault2Config }) {
             <div className="pb-4 px-3 text-xs flex flex-col gap-2">
                 <span className="opacity-60">LP Positions</span>
                 <div className="flex justify-between items-center gap-5">
-                    <CoinAmount token={bt} />
-                    <CoinAmount token={pt} />
-                    <CoinAmount token={yt} />
+                    <CoinAmount token={bt} amount={btc.result} />
+                    <CoinAmount token={pt} amount={ptc.result} />
+                    <CoinAmount token={yt} amount={ytc.result} />
                 </div>
             </div>
         </div>

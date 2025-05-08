@@ -21,7 +21,7 @@ import { Address, isAddressEqual } from "viem"
 function Bvualt2Page({ vc }: { vc: BVault2Config }) {
     const vd = useBvualt2Data(vc)
     const showBootstrap = (vd.result?.epochIdCount ?? 0n) < 1n
-    console.info('vd:', vd)
+    console.info('vd:', vd.status)
     return <Fragment>
         {isError(vd) && 'Opps! Network Error!'}
         {isFetching(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
