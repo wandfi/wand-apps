@@ -1,5 +1,5 @@
 'use client'
-import { BVault2Info, BVault2Bootstrap, BVault2Swaps, BVault2Card } from "@/components/bvaults2"
+import { BVault2Bootstrap, BVault2Card, BVault2Info, BVault2Swaps } from "@/components/bvaults2"
 import { BT } from "@/components/bvaults2/bt"
 import { MyPositions } from "@/components/bvaults2/positions"
 import { useBvualt2Data } from "@/components/bvaults2/useFets"
@@ -8,7 +8,6 @@ import { Noti } from "@/components/noti"
 import { PageWrap } from "@/components/page-wrap"
 import { Spinner } from "@/components/spinner"
 import { BVault2Config, BVAULTS2CONIG } from "@/config/bvaults2"
-import { getCurrentChainId } from "@/config/network"
 import { ENV } from "@/constants"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { isError, isFetching, isSuccess } from "@/hooks/useFet"
@@ -21,7 +20,7 @@ import { Address, isAddressEqual } from "viem"
 function Bvualt2Page({ vc }: { vc: BVault2Config }) {
     const vd = useBvualt2Data(vc)
     const showBootstrap = (vd.result?.epochIdCount ?? 0n) < 1n
-    console.info('vd:', vd.status)
+    // console.info('vd:', vd.status)
     return <Fragment>
         {isError(vd) && 'Opps! Network Error!'}
         {isFetching(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}

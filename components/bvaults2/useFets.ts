@@ -58,7 +58,7 @@ export function useBvualt2Data(vc: BVault2Config) {
       return {}
     },
   })
-  console.info('vd2:', vd.status, vdc.status)
+  // console.info('vd2:', vd.status, vdc.status)
   return useMerge<Vault2Data>(vd, vdc)
 }
 
