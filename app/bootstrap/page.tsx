@@ -10,6 +10,7 @@ import { Spinner } from "@/components/spinner"
 import { BVault2Config, BVAULTS2CONIG } from "@/config/bvaults2"
 import { getCurrentChainId } from "@/config/network"
 import { ENV } from "@/constants"
+import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { isError, isFetching, isSuccess } from "@/hooks/useFet"
 import { Grid } from "@tremor/react"
 import { useSearchParams } from "next/navigation"
@@ -47,7 +48,8 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
 }
 
 export default function BootstrapPage() {
-    const vcs = BVAULTS2CONIG[getCurrentChainId()].filter(item => item.onEnv.includes(ENV))
+    const chainId = useCurrentChainId()
+    const vcs = BVAULTS2CONIG[chainId].filter(item => item.onEnv.includes(ENV))
     const params = useSearchParams()
     const paramsVault = params.get('vault')
     if (vcs.length == 0) return null
