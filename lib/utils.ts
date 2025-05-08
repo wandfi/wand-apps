@@ -229,3 +229,11 @@ export async function promiseAll<ObjTask extends { [k: string]: Promise<any> }>(
   })
   return data as { [k in keyof ObjTask]: UnwrapPromise<ObjTask[k]> }
 }
+
+export function bnRange(end: bigint, start = 1n, step = 1n) {
+  const bns: bigint[] = []
+  for (let index = start; index <= end; index += step) {
+    bns.push(index)
+  }
+  return bns
+}

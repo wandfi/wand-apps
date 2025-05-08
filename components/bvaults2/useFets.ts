@@ -1,11 +1,12 @@
-import { abiBVault2, abiMarket } from '@/config/abi/BVault2'
+import { abiBVault2, abiMarket, abiRewardManager } from '@/config/abi/BVault2'
 import { BVault2Config } from '@/config/bvaults2'
 import { DECIMAL_10 } from '@/constants'
 import { useFet, useMerge } from '@/hooks/useFet'
-import { aarToNumber, promiseAll, UnPromise } from '@/lib/utils'
+import { aarToNumber, bnRange, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
 import { Address, erc20Abi, PublicClient, zeroAddress } from 'viem'
+import { useAccount } from 'wagmi'
 
 export async function getBvaut2Data(vc: BVault2Config, pc: PublicClient = getPC()) {
   return await promiseAll({
@@ -85,4 +86,70 @@ export function getBvualt2Times(vd?: Vault2Data) {
   } else {
     return getBvualt2BootTimes(vd)
   }
+}
+
+export function useBvault2Epochs(vc: BVault2Config) {
+  const vd = useFet({
+    key: `vault2Data:${vc.vault}`,
+    fetfn: async () => getBvaut2Data(vc),
+  })
+  const epochs = useFet({
+    key: vd.result && vd.result.epochIdCount > 0n ? `vault2Data:epoches:${vc.vault}:${vd.result.epochIdCount}` : '',
+    initResult: [],
+    fetfn: async () => {
+      const count = vd.result!.epochIdCount
+      const pc = getPC()
+      const epochs = await Promise.all(bnRange(count).map((id) => getBvault2Epoch(vc, id, pc)))
+      return epochs.reverse()
+    },
+  })
+  if (vd.status == 'fetching') {
+    epochs.status = 'fetching'
+  }
+  return epochs
+}
+
+export function useBvault2YTRewards(vc: BVault2Config) {
+  const epochs = useBvault2Epochs(vc)
+  const { address } = useAccount()
+  const rewards = useFet({
+    key: address && epochs.result && epochs.result.length ? `vault2Data:epochesRewardsForYT:${vc.vault}:${epochs.result.length}` : '',
+    initResult: [],
+    fetfn: async () => {
+      const mEpochs = epochs.result!
+      const pc = getPC()
+      const getYtRewards = async (yt: Address) =>
+        Promise.all([
+          pc.readContract({ abi: abiRewardManager, address: yt, functionName: 'getRewardTokens' }),
+          pc.readContract({ abi: abiRewardManager, address: yt, functionName: 'getUserRewards', args: [address!] }),
+        ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
+      return Promise.all(mEpochs.map((item) => getYtRewards(item.YT))).then((datas) => datas.map((rewrads, i) => ({ ...mEpochs[i], rewrads })))
+    },
+  })
+  if (epochs.status === 'fetching') {
+    rewards.status = 'fetching'
+  }
+  return rewards
+}
+export function useBvault2PTRewards(vc: BVault2Config) {
+  const epochs = useBvault2Epochs(vc)
+  const { address } = useAccount()
+  const rewards = useFet({
+    key: address && epochs.result && epochs.result.length ? `vault2Data:epochesRewardsForPT:${vc.vault}:${epochs.result.length}` : '',
+    initResult: [],
+    fetfn: async () => {
+      const mEpochs = epochs.result!
+      const pc = getPC()
+      const getPtRewards = async (pt: Address) =>
+        Promise.all([
+          pc.readContract({ abi: abiRewardManager, address: pt, functionName: 'getRewardTokens' }),
+          pc.readContract({ abi: abiRewardManager, address: pt, functionName: 'getUserRewards', args: [address!] }),
+        ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
+      return Promise.all(mEpochs.map((item) => getPtRewards(item.PT))).then((datas) => datas.map((rewrads, i) => ({ ...mEpochs[i], rewrads })))
+    },
+  })
+  if (epochs.status === 'fetching') {
+    rewards.status = 'fetching'
+  }
+  return rewards
 }

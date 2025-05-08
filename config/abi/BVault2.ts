@@ -63,3 +63,8 @@ export const abiBvault2Query = parseAbi([
   'function calcAddLP(address protocol,address hook,address BT,uint256 amountBT) external view returns(uint256 amountPT, uint256 amountYT, uint256 amountShares)',
 ])
 
+export const abiRewardManager = parseAbi([
+  'function getUserRewards(address user) external view returns (uint256[] memory rewardAmounts)',
+  'function getRewardTokens() public view returns (address[] memory rewardTokens)',
+  'function claimRewards(address user) external',
+])
