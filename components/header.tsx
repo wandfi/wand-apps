@@ -1,7 +1,7 @@
 'use client'
 
 import { SUPPORT_CHAINS } from '@/config/network'
-import { DISCORD_LINK, DOC_LINK, ENV, isLNT, isLOCL, TWITTER_LINK } from '@/constants'
+import { DISCORD_LINK, DOC_LINK, ENV, isLNT, isLOCL, isTEST, TWITTER_LINK } from '@/constants'
 
 import { abiMockPriceFeed, abiVault } from '@/config/abi'
 import { BVAULTS_CONFIG } from '@/config/bvaults'
@@ -65,7 +65,7 @@ export function Header() {
       ...(ENV.includes("lnt") ? [
         { href: '/lnt-vaults', label: 'LNT-Vaults', icon: LuBox },
       ] : [
-        ...(isLOCL ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuBox, disable: false }] : []),
+        ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuBox, disable: false }] : []),
         { href: '/ip-vaults', label: 'IP-Vaults', icon: LuBox, disable: false },
         // { href: '/l-vaults', label: 'L-Vaults', icon: LuBox, disable: true },
         { href: '/portfolio', label: 'Portfolio', icon: LuUserCircle },

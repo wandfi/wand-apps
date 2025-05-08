@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { formatUnits, parseUnits, parseEther as _parseEther, etherUnits, Address } from 'viem'
-import _, { get } from 'lodash'
+import _, { get, now, round } from 'lodash'
 import { toast } from 'sonner'
 import { NATIVE_TOKEN_ADDRESS } from '@/config/swap'
 import dayjs from 'dayjs'
@@ -9,8 +9,8 @@ import { DECIMAL } from '@/constants'
 import { getCurrentChainId } from '@/config/network'
 import { TOKENS_MAP } from '@/config/tokens'
 
-export type UnwrapPromise<T> = T extends Promise<infer S> ? S : T
-export type UnPromise<T> = T extends () => Promise<infer U> ? U : UnwrapPromise<T>
+export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer S> ? S : T
+export type UnPromise<T extends (() => Promise<any>) | Promise<any>> = T extends () => Promise<infer U> ? U : T extends Promise<infer M> ? M : never
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -128,6 +128,7 @@ export const FMT = {
 
 export const fmtDate = (time: number | string | bigint | Date, fmt: string = FMT.DEF) => {
   const mtime = typeof time == 'bigint' ? parseInt(time.toString()) : time
+  if (mtime == 0) return '-'
   return dayjs(mtime).format(fmt)
 }
 
@@ -213,4 +214,18 @@ export const tabToSearchParams = (tab: string) => tab.toLowerCase().replaceAll('
 
 export function getTokenBy(address: Address, chainId: number = getCurrentChainId()) {
   return TOKENS_MAP[`${chainId}_${address.toLowerCase() as Address}`]
+}
+
+export function genDeadline(duration: bigint = 60n * 5n) {
+  return BigInt(round(now() / 1000)) + duration
+}
+
+export async function promiseAll<ObjTask extends { [k: string]: Promise<any> }>(objTask: ObjTask) {
+  const keys: (keyof ObjTask)[] = Object.keys(objTask)
+  const datas = await Promise.all(keys.map((item) => objTask[item]))
+  const data: any = {} as any
+  keys.forEach((key, i) => {
+    data[key] = datas[i] as any
+  })
+  return data as { [k in keyof ObjTask]: UnwrapPromise<ObjTask[k]> }
 }

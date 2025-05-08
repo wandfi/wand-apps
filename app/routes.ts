@@ -23,3 +23,9 @@ export function toLntVault(r: ReturnType<typeof useRouter>, vault?: Address, tab
   tab && (path += `&tab=${tabToSearchParams(tab)}`)
   r.push(path)
 }
+
+export function toBVault2(r: ReturnType<typeof useRouter>, vault?: Address) {
+  if (!vault) return r.push('/bootstrap')
+  let path = `/bootstrap?vault=${vault}`
+  r.push(path)
+}

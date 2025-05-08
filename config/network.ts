@@ -2,7 +2,36 @@ import { isLNT, isPROD } from '@/constants'
 import { providers } from 'ethers'
 import _ from 'lodash'
 import { Address, Chain, defineChain } from 'viem'
-import { LP_TOKENS } from './lpTokens'
+
+export const sepolia = defineChain({
+  id: 11_155_111,
+  name: 'Sepolia',
+  nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ['https://eth-sepolia.public.blastapi.io', 'https://eth-sepolia.api.onfinality.io/public'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Etherscan',
+      url: 'https://sepolia.etherscan.io',
+      apiUrl: 'https://api-sepolia.etherscan.io/api',
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: '0xca11bde05977b3631167028862be2a173976ca11',
+      blockCreated: 751532,
+    },
+    ensRegistry: { address: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e' },
+    ensUniversalResolver: {
+      address: '0xc8Af999e38273D658BE1b921b88A9Ddf005769cC',
+      blockCreated: 5_317_080,
+    },
+  },
+  testnet: true,
+})
 
 export const storyTestnet = defineChain({
   id: 1315,
@@ -61,12 +90,12 @@ export const story = defineChain({
   },
 })
 
-export const apiBatchConfig = { batchSize: 10, wait: 300 }
-export const multicallBatchConfig = { batchSize: 50, wait: 300 }
+export const apiBatchConfig = { batchSize: 5, wait: 300 }
+export const multicallBatchConfig = { batchSize: 5, wait: 300 }
 
 export const storyChains = [storyTestnet, story]
 export const lntChains = []
-export const SUPPORT_CHAINS: [Chain, ...Chain[]] = _.filter(isLNT ? [...lntChains] : [...storyChains], (item) => (isPROD ? !(item as any).testnet : true)) as any
+export const SUPPORT_CHAINS: [Chain, ...Chain[]] = _.filter(isLNT ? [...lntChains] : [...storyChains, sepolia], (item) => (isPROD ? !(item as any).testnet : true)) as any
 
 export const refChainId: { id: number } = { id: isPROD ? story.id : storyTestnet.id }
 export const getCurrentChainId = () => {

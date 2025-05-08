@@ -4,12 +4,14 @@ import { ApproveAndTx } from '@/components/approve-and-tx'
 import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/components/general-action'
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiLntVault, abiMockERC20, abiMockERC721, abiMockPriceFeed, abiPlainVault, abiProtocolSettings, abiPtyPool, abiVault, abiWandProtocol, abiZooProtocol } from '@/config/abi'
+import { abiBVault2 } from '@/config/abi/BVault2'
+import { getCurrentChain, SUPPORT_CHAINS } from '@/config/network'
 import { PROTOCOL_SETTINGS_ADDRESS, VaultConfig, WAND_PROTOCOL_ADDRESS } from '@/config/swap'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVaultsConfigs } from '@/hooks/useVaultsConfigs'
 import { useWandContractRead, useWandContractReads } from '@/hooks/useWand'
-import { cn, parseEthers } from '@/lib/utils'
+import { cn, getTokenBy, parseEthers } from '@/lib/utils'
 import { useMemo } from 'react'
 import Select from 'react-select'
 import { useMeasure, useSetState } from 'react-use'
@@ -55,6 +57,13 @@ const LntVaultParams: ParamItem[] = [
   { label: '利息佣金', value: 'f2' },
 ]
 
+const BVault2Params: ParamItem[] = [
+  { label: '产品周期', value: 'ED', units: 0 },
+  { label: 'initialAnchor', value: 'initialAnchor', units: 18 },
+  { label: 'scalarRoot', value: 'scalarRoot', units: 18 },
+  { label: '赎回手续费', value: 'f1', units: 18 },
+  { label: '利息佣金', value: 'f2', units: 18 },
+]
 function UpdateVaultParams({ paramList, vault, protocoSettingAddress }: { paramList: ParamItem[]; vault: Address; protocoSettingAddress: Address }) {
   const params = useMemo(() => paramList.map((p) => ({ ...p, label: `${p.label}(${p.value})` })), [paramList])
   const [{ value, param }, setState] = useSetState({
@@ -307,12 +316,18 @@ function DeleteIpAssets(props: { vault: Address }) {
 export default function AdminPage() {
   const chainId = useCurrentChainId()
   const { current, setState, options } = useVaultsConfigs()
-  const { chain } = useAccount()
+  const chain = getCurrentChain()
   return (
     <PageWrap>
       <div className='w-full flex'>
         <div className='flex flex-col gap-4 w-full max-w-[840px] mx-auto px-5'>
+          <div className="text-lg whitespace-pre-wrap p-2 bg-primary/20 rounded-xl">
+            {JSON.stringify({
+              'Decimal18': '000000000000000000'
+            }, undefined, 2)}
+          </div>
           <Select classNames={selectClassNames} defaultValue={options[0]} options={options} onChange={(e) => e && setState({ current: e as any })} />
+
           {current?.type == 'L-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={LVaultParams} protocoSettingAddress={PROTOCOL_SETTINGS_ADDRESS[chainId]} />
@@ -362,6 +377,18 @@ export default function AdminPage() {
               </>
             )
           }
+          {current?.type == 'B-Vault2' && (<>
+            <UpdateVaultParams vault={current.data.vault} paramList={BVault2Params} protocoSettingAddress={current.data.protocalSettings} />
+            {['initialize', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
+              <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
+            ))}
+            <GeneralAction tit='transferOwnership' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
+            <GeneralAction tit='upsertParamConfig' abi={abiProtocolSettings} functionName='upsertParamConfig' address={current.data.protocalSettings} />
+            {chain?.testnet && <>
+              <GeneralAction tit={`mint (${getTokenBy(current.data.asset).symbol})`} abi={abiMockERC20} functionName='mint' address={current.data.asset} />
+              <GeneralAction tit={`setTester (${getTokenBy(current.data.asset).symbol})`} abi={abiMockERC20} functionName='setTester' address={current.data.asset} />
+            </>}
+          </>)}
           <Erc20Approve />
         </div>
       </div>

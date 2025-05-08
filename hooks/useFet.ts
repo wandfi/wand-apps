@@ -1,6 +1,6 @@
 import { sleep } from '@/lib/utils'
 import EventEmitter from 'events'
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 /******************************************************** types *********************************************************************** */
 export type Conifg = {
   cacheTime?: number // default 1000
@@ -10,7 +10,7 @@ export type Conifg = {
 
 export type FetBase<RES> = {
   key: string
-  fetch: () => Promise<RES>
+  fetfn: () => Promise<RES>
   onError?: (err: Error) => void
 } & Conifg
 
@@ -27,6 +27,9 @@ export type FetStat<FET = Fet<any>> = {
   error?: Error
 }
 
+export type MergeFetStat<RES extends {}> = Omit<FetStat<Fet<RES>>, 'key'> & { key: string[] }
+export type AllFetStat<RES extends {}> = FetStat<Fet<RES>> | MergeFetStat<RES>
+
 /******************************************************** impl *********************************************************************** */
 
 // Manager all fets
@@ -37,6 +40,7 @@ const fets: {
     promise: Promise<any>
   }
 } = {}
+let mocks: { [key: string]: (() => any) | any } = {}
 
 function initFS<FET extends Fet<any>>(fet: FET): FetStat<FET> {
   return {
@@ -67,12 +71,14 @@ function sub<T>(fet: Fet<T>, onChange: (fs: FetStat<Fet<T>>) => void) {
     return () => {}
   }
 }
+
 async function runFetImpl<T>(fet: Fet<T>) {
+  const isMock = Object.hasOwn(mocks, fet.key)
   let retryCount = fet.retry ?? 3
   while (retryCount > 0) {
     retryCount--
     try {
-      const res = await fet.fetch()
+      const res = await (isMock ? (typeof mocks[fet.key] == 'function' ? mocks[fet.key]() : mocks[fet.key]) : fet.fetfn())
       fets[fet.key].fs.result = res as any
       fets[fet.key].fs.lastUpDate = now()
       fets[fet.key].fs.status = 'success'
@@ -86,11 +92,14 @@ async function runFetImpl<T>(fet: Fet<T>) {
       }
       console.error(`RunFetError: fetKey:${fet.key} retryCount:${retryCount}`, err)
       await sleep(fet.retryInterval ?? 500)
+      if (retryCount == 0) {
+        throw err
+      }
     }
   }
 }
 
-export function runFet<T>(fet: Fet<T>): FetStat<Fet<T>> {
+export function runFet<T>(fet: Fet<T>, emit: boolean = false): FetStat<Fet<T>> {
   if (fets[fet.key]) {
     fets[fet.key].promise = runFetImpl(fet)
   } else {
@@ -102,6 +111,7 @@ export function runFet<T>(fet: Fet<T>): FetStat<Fet<T>> {
   }
   fets[fet.key].fs.status = 'fetching'
   fets[fet.key].fs.error = undefined
+  emit && emiter.emit(fet.key, fets[fet.key].fs)
   return fets[fet.key].fs
 }
 
@@ -117,14 +127,14 @@ export function useUpdate() {
 
 export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
   const update = useUpdate()
-  let fetStat = fets[fet.key]?.fs
+  let fetStat = fets[fet.key]?.fs || initFS(fet)
   const needRunFet = Boolean(fet.key) && (!fetStat || fetStat.status == 'idle')
   if (needRunFet) {
     fetStat = runFet(fet)
   }
   useEffect(() => {
     const unSub = sub(fet, (fs) => {
-      fetStat = fs
+      console.info('onSub:', fet.key, fs)
       update()
     })
     // check need fresh
@@ -137,13 +147,67 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
   return fetStat
 }
 
-export function isFetching(status: FetStatus) {
-  return status === 'fetching'
+export function isFetching(...status: AllFetStat<any>[]) {
+  if (status.length == 0) return false
+  if (status.find((item) => item.status === 'fetching')) return true
+  return false
+}
+export function isSuccess(...status: AllFetStat<any>[]) {
+  if (status.length == 0) return false
+  if (status.find((item) => item.status !== 'success')) return false
+  return true
+}
+
+export function isError(...status: AllFetStat<any>[]) {
+  if (status.length == 0) return false
+  if (status.find((item) => item.status === 'error')) return true
+  return false
+}
+
+export function reFet(...keyOrFets: (string | Fet<any>)[]) {
+  for (const keyOrFet of keyOrFets) {
+    const fet = typeof keyOrFet == 'string' ? fets[keyOrFet]?.fet : keyOrFet
+    if (fet) runFet(fet, true)
+  }
+}
+
+// export type MergeFS<T extends FetStat<Fet<{}>>[]> =
+
+export function useMerge<RES extends {}>(...status: AllFetStat<{}>[]) {
+  const mStatus = status.filter((item) => Boolean(item))
+  const ref = useRef<MergeFetStat<RES>>({ key: [], status: 'idle', result: undefined, lastUpDate: 0 })
+  ref.current.key = mStatus.flatMap((item) => item.key)
+  let SuccessCount = 0
+  mStatus.forEach((item) => {
+    if (item.status === 'fetching') {
+      ref.current.status === 'fetching'
+    } else if (item.status == 'error' && ref.current.status !== 'fetching') {
+      ref.current.status == 'error'
+    } else if (item.status == 'success') {
+      SuccessCount++
+    }
+    if (item.result !== undefined) {
+      ref.current.result = Object.assign(ref.current.result || {}, item.result) as any
+    }
+  })
+  if (SuccessCount > 0 && SuccessCount == mStatus.length) {
+    ref.current.status = 'success'
+  }
+  ref.current.error = mStatus.find((item) => item.error)?.error
+  ref.current.lastUpDate = Math.max(...mStatus.map((item) => item.lastUpDate))
+  return ref.current
+}
+export function setMocks(_mocks: { [key: string]: (() => any) | any }) {
+  Object.keys(_mocks).forEach((key) => {
+    mocks[key] = _mocks[key]
+  })
 }
 
 /******************************************************** examples *********************************************************************** */
 
 function useGETDATA() {
-  const { result: res1 } = useFet({ key: '123', fetch: async () => 123 })
-  const { result: res2 } = useFet({ key: '123', initResult: 1, fetch: async () => 123 })
+  const s1 = useFet({ key: '123', fetfn: async () => ({ a: 10 }) })
+  const s2 = useFet({ key: '123', fetfn: async () => ({ b: '123' }), initResult: { b: '123' } })
+
+  const m1 = useMerge<{ a: number; b: string }>(s1, s2)
 }

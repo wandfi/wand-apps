@@ -16,8 +16,8 @@ export const selectClassNames: Parameters<Select>[0]['classNames'] = {
 export const inputClassname = 'bg-white dark:bg-transparent border-primary/70 w-full h-14 text-right pr-4 font-bold text-sm border focus:border-2  rounded-md outline-none '
 
 export const defConvertArg = (arg: string, _i: number, param: AbiParameter) => {
-  if (param.type == 'uint8') return parseInt(arg)
-  if (param.type.startsWith('uint')) return BigInt(arg)
+  if (param.type == 'uint8') return parseInt((arg || '').replaceAll(' ', ''))
+  if (param.type.startsWith('uint')) return BigInt((arg || '').replaceAll(' ', ''))
   if (param.type == 'bytes32') return stringToHex(arg, { size: 32 })
   if (param.type == 'bool') {
     if (arg == 'true') return true
@@ -26,12 +26,17 @@ export const defConvertArg = (arg: string, _i: number, param: AbiParameter) => {
   return arg
 }
 const convertArgs = (args: string[], inputs: readonly AbiParameter[], ca?: (arg: string, i: number, param: AbiParameter) => any) => {
-  return args.map((arg, i) => {
-    const input = inputs[i]
-    if (ca) return ca(arg, i, input)
-    return defConvertArg(arg, i, input)
-  })
+  try {
+    return args.map((arg, i) => {
+      const input = inputs[i]
+      if (ca) return ca(arg, i, input)
+      return defConvertArg(arg, i, input)
+    })
+  } catch (error) {
+    return undefined;
+  }
 }
+
 
 export function Expandable({ children, tit, disable }: { tit: string; children?: ReactNode; disable?: boolean }) {
   const [open, setOpen] = useState(false)

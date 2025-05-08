@@ -1,125 +1,173 @@
+import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
+import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { getTokenBy, handleError, parseEthers } from "@/lib/utils"
-import { useWalletClient } from "wagmi"
-import { CoinIcon } from "../icons/coinicon"
-import { CoinAmount } from "../coin-amount"
-import { SimpleTabs } from "../simple-tabs"
-import { useBalances } from "@/providers/useTokenStore"
+import { reFet } from "@/hooks/useFet"
+import { fmtBn, genDeadline, getTokenBy, handleError, multipBn, parseEthers } from "@/lib/utils"
+import { displayBalance } from "@/utils/display"
 import { useState } from "react"
-import { AssetInput } from "../asset-input"
-import { SwapDown } from "../ui/bbtn"
-import { GetvIP } from "../get-lp"
+import { useDebounce, useToggle } from "react-use"
+import { useAccount, useWalletClient } from "wagmi"
 import { ApproveAndTx } from "../approve-and-tx"
-import { abiBVault2 } from "@/config/abi"
-import { shuffle } from "lodash"
-import { Switch, Switch2 } from "../ui/switch"
-import { useToggle } from "react-use"
+import { AssetInput } from "../asset-input"
+import { CoinAmount } from "../coin-amount"
+import { GetvIP } from "../get-lp"
+import { CoinIcon } from "../icons/coinicon"
+import { SimpleTabs } from "../simple-tabs"
+import { SwapDown } from "../ui/bbtn"
+import { useBvualt2Data } from "./useFets"
+import { useBalance, useTotalSupply } from "./useToken"
+import { isAddressEqual, zeroAddress } from "viem"
+import { getPC } from "@/providers/publicClient"
+import { codeBvualt2Query } from "@/config/abi/codes"
+import { useQuery } from "@tanstack/react-query"
+import { logUserAction } from "@/lib/logs"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
+    const { address } = useAccount()
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const lp = getTokenBy(vc.lp, chainId)
-    const yt = getTokenBy(vc.yt, chainId)
-    const pt = getTokenBy(vc.pt, chainId)
+    const vdFS = useBvualt2Data(vc)
+    const vd = vdFS.result!
+    const lp = { address: vd.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lpc = useTotalSupply(lp)
+    const epoch = vd!.current!
+    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
+    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const ptc = useTotalSupply(pt)
+    const ytc = useTotalSupply(yt)
+    const out = ptc.result >= ytc.result ? pt : yt
     const [keep, toggleKeep] = useToggle(false)
-    const balances = useBalances()
-    const assetBalance = balances[vc.asset]
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
-    const input = asset
-    const andout = shuffle([yt, pt])[0]
+    const input = getTokenBy(vc.bt, chainId)
+    const inputBalance = useBalance(input)
+    const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
+    useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
+    const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
+        queryKey: calcOutsKey,
+        enabled: inputAssetBn > 0n && calcOutsKey.length > 1 && !isAddressEqual(vd.hook, zeroAddress),
+        initialData: [0n, 0n, 0n],
+        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.protocal, vd.hook, vc.bt, inputAssetBn] })
+    })
+    const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
+
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={balances[input.address]} setAmount={setInputAsset} />
+        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <SwapDown />
-        <div className="flex justify-between items-center text-xs font-medium w-1/2">
+        {/* <div className="flex justify-between items-center text-xs font-medium w-1/2">
             <span>Keep PT/YT mode</span>
-            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2"/>
-        </div>
+            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2" />
+        </div> */}
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={asset.address} />
         </div>
-        <AssetInput asset={lp.symbol} disable amount={inputAsset} />
+        <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
-        <AssetInput asset={andout.symbol} disable amount={inputAsset} />
+        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut} />
         <div className="font-medium text-xs opacity-60">Pool Share Change: 233% → 235%</div>
         <ApproveAndTx
             className='mx-auto mt-4'
             tx='Add'
-            disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance}
+            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
             spender={vc.vault}
             approves={{
-                [vc.asset]: inputAssetBn,
+                [input.address]: inputAssetBn,
             }}
             config={{
                 abi: abiBVault2,
                 address: vc.vault,
-                functionName: 'swap',
-                args: [inputAssetBn],
+                functionName: 'addLiquidity',
+                args: [inputAssetBn, 0n, genDeadline()],
             }}
             onTxSuccess={() => {
+                logUserAction(vc, address!, `LPAdd:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
+                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, ...vdFS.key)
             }}
         />
     </div>
 }
 function LPRemove({ vc }: { vc: BVault2Config }) {
+    const { address } = useAccount()
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const lp = getTokenBy(vc.lp, chainId)
-    const yt = getTokenBy(vc.yt, chainId)
-    const pt = getTokenBy(vc.pt, chainId)
+    const bt = getTokenBy(vc.bt, chainId)
+    const vdFS = useBvualt2Data(vc)
+    const vd = vdFS.result!
+    const lp = { address: vd.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lpc = useTotalSupply(lp)
+    const epoch = vd!.current!
+    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
+    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const ptc = useTotalSupply(pt)
+    const ytc = useTotalSupply(yt)
     const [keep, toggleKeep] = useToggle(false)
-    const balances = useBalances()
-    const assetBalance = balances[vc.asset]
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const input = lp
-    const andout = shuffle([yt, pt])[0]
+    const inputBalance = useBalance(input)
+    const out = ptc.result >= ytc.result ? pt : yt
+    const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPRemoveOut'])
+    useDebounce(() => setCalcOutsKey(['calcLPRemoveOut', inputAssetBn]), 300, [inputAssetBn])
+    const { data: [btAmount, ptAmount, ytAmount], isFetching: isFetchingOut } = useQuery({
+        queryKey: calcOutsKey,
+        enabled: inputAssetBn > 0n && calcOutsKey.length > 1 && !isAddressEqual(vd.hook, zeroAddress),
+        initialData: [0n, 0n, 0n],
+        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vd.hook, vc.bt, inputAssetBn] })
+    })
+    const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={balances[input.address]} setAmount={setInputAsset} />
+        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <SwapDown />
-        <div className="flex justify-between items-center text-xs font-medium w-1/2">
+        {/* <div className="flex justify-between items-center text-xs font-medium w-1/2">
             <span>Keep PT/YT mode</span>
-            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2"/>
-        </div>
+            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2" />
+        </div> */}
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={asset.address} />
         </div>
-        <AssetInput asset={asset.symbol} disable amount={inputAsset} />
+        <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
-        <AssetInput asset={andout.symbol} disable amount={inputAsset} />
+        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut} />
         <div className="font-medium text-xs opacity-60">Pool Share Change: 233% → 235%</div>
         <ApproveAndTx
             className='mx-auto mt-4'
             tx='Remove'
-            disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance}
+            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
             spender={vc.vault}
             approves={{
-                [vc.asset]: inputAssetBn,
+                [input.address]: inputAssetBn,
             }}
             config={{
                 abi: abiBVault2,
                 address: vc.vault,
-                functionName: 'swap',
-                args: [inputAssetBn],
+                functionName: 'removeLiquidity',
+                args: [inputAssetBn, 0n, genDeadline()],
             }}
             onTxSuccess={() => {
+                logUserAction(vc, address!, `LPRemove:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
+                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, ...vdFS.key)
             }}
         />
     </div>
 }
 export function LP({ vc }: { vc: BVault2Config }) {
+
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const lp = getTokenBy(vc.lp, chainId)
     const bt = getTokenBy(vc.bt, chainId)
-    const pt = getTokenBy(vc.pt, chainId)
-    const yt = getTokenBy(vc.yt, chainId)
+    const vdFS = useBvualt2Data(vc)
+    const vd = vdFS.result!
+    const lp = { address: vd.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lpc = useTotalSupply(lp)
+    const epoch = vd!.current!
+    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
+    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
     const { data: walletClient } = useWalletClient()
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: lp }).catch(handleError)
@@ -137,7 +185,7 @@ export function LP({ vc }: { vc: BVault2Config }) {
                 <div className="text-lg font-medium">150%</div>
                 <div className="text-xs font-semibold opacity-60">APY</div>
                 <div className="text-xs font-semibold opacity-60 ml-auto">LP amount</div>
-                <div className="text-lg font-medium">23,132.32</div>
+                <div className="text-lg font-medium">{displayBalance(lpc.result)}</div>
             </div>
             <div className='flex px-2.5'>
                 <button className='btn-link ml-auto text-primary text-xs underline-offset-2' onClick={onAddPToken}>

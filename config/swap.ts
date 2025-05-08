@@ -1,5 +1,6 @@
 import { Address } from 'viem'
 import { storyTestnet } from './network'
+import { proxyGetDef } from '@/lib/utils'
 
 export const WAND_PROTOCOL_ADDRESS: { [k: number]: Address } = {
   [storyTestnet.id]: '0xC816c35f07a40021e15295229dDb5895c90179ef',
@@ -38,8 +39,7 @@ export type VaultConfig = {
 }
 
 export const VAULTS_CONFIG: { [k: number]: VaultConfig[] } = {
-  [storyTestnet.id]: [
-  ],
+  [storyTestnet.id]: [],
 }
 
 export const OLD_VAULTS_CONFIG: { [k: number]: VaultConfig[] } = {}
@@ -83,4 +83,4 @@ export type PlainVaultConfig = {
   assetTokenSymbol: string
 }
 
-export const PLAIN_VAULTS_CONFIG: { [k: number]: PlainVaultConfig[] } = {}
+export const PLAIN_VAULTS_CONFIG: { [k: number]: PlainVaultConfig[] } = proxyGetDef({}, [])

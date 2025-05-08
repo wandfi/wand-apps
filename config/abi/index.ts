@@ -29,7 +29,6 @@ import abiLntNftStakingPool from './LntNftStakingPool'
 import abiBeraVault from './BeraVault'
 import abiBeraLP from './BeraLP'
 import abiVerioStakePool from './VerioStakePool'
-import abiBVault2 from './BVault2'
 export {
   abiPriceFeed,
   abiPtyPool,
@@ -60,5 +59,4 @@ export {
   abiBeraVault,
   abiBeraLP,
   abiVerioStakePool,
-  abiBVault2
 }
