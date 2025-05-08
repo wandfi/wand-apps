@@ -10,7 +10,7 @@ import { ApproveAndTx } from "../approve-and-tx";
 import { CoinAmount } from "../coin-amount";
 import { CoinIcon } from "../icons/coinicon";
 import STable from "../simple-table";
-import { useBvault2PTRewards, useBvault2YTRewards, useBvualt2Data } from "./useFets";
+import { useBvault2LPBTRewards, useBvault2YTRewards, useBvualt2Data } from "./useFets";
 import { useBalance } from "./useToken";
 
 const MCoinAmount = ({ ...p }: Parameters<typeof CoinAmount>[0]) => {
@@ -29,28 +29,8 @@ const statuColSize = 1.6
 function PT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const rewards = useBvault2PTRewards(vc)
     const { address } = useAccount()
-    const data = useMemo(() => {
-        if (!rewards.result.length) {
-            return []
-        }
-        return rewards.result.map(item => {
-            const pt = { address: item.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
-            return [
-                <TokenSymbol key="token" t={pt} />,
-                <TokenBalance t={pt} key='ytBalance' />,
-                'Active',
-                <div key="token2">
-                    {
-                        item.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)
-                    }
-                </div>,
-                '',
-                <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" disabled config={{ abi: abiRewardManager, functionName: 'claimRewards', address: pt.address, args: [address!] }} />,
-            ]
-        })
-    }, [rewards.result])
+    // const data = []
     const header = ['PT', 'Value', 'Status', 'Redeemable', '']
     return <div className="card !p-4 bg-white">
         <STable
@@ -60,7 +40,7 @@ function PT({ vc }: { vc: BVault2Config }) {
             cellClassName='py-2 px-0'
             header={header}
             span={{ 2: statuColSize, 3: 2, [header.length - 1]: claimColSize }}
-            data={data}
+            data={[]}
         />
     </div>
 }
@@ -86,12 +66,10 @@ function YT({ vc }: { vc: BVault2Config }) {
                 <TokenBalance t={yt} key='ytBalance' />,
                 'Active',
                 <div key="token2">
-                    {
-                        item.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)
-                    }
+                    {item.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
                 </div>,
                 '',
-                <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" disabled config={{ abi: abiRewardManager, functionName: 'claimRewards', address: yt.address, args: [address!] }} />,
+                <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: yt.address, args: [address!] }} />,
             ]
         })
     }, [rewards.result])
@@ -109,14 +87,19 @@ function YT({ vc }: { vc: BVault2Config }) {
     </div>
 }
 function LPBT({ vc }: { vc: BVault2Config }) {
-    const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
-    const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current
-    if (!epoch) return null
-    const lp = { address: vd.result!.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    useCurrentChainId()
+    const rewards = useBvault2LPBTRewards(vc)
+    const { address } = useAccount()
+    const data = useMemo(() => {
+        if (!rewards.result.length) return []
+        return rewards.result.map(item => [
+            <TokenSymbol key="token" t={item.token} />, <TokenBalance t={item.token} key={'tokenBalance'} />, '', <div key="token2">
+                {item.rewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
+            </div>,
+            <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
+            <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: item.token.address, args: [address!] }} />,
+        ])
+    }, [rewards.result])
     const header = ['YT', 'Value', '', 'Yield', 'Airdrops', '']
     return <div className="card !p-4 bg-white">
         <STable
@@ -126,27 +109,7 @@ function LPBT({ vc }: { vc: BVault2Config }) {
             cellClassName='py-2 px-0'
             header={header}
             span={{ 2: statuColSize, [header.length - 1]: claimColSize }}
-            data={[
-                [
-                    <TokenSymbol key="token" t={lp} />, '12.33', '', <div key="token2">
-                        <MCoinAmount token={getTokenBy(vc.asset)} />
-                        <MCoinAmount token={getTokenBy(vc.reward2)} />
-                    </div>,
-                    <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
-                    '',
-                    // <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" disabled config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />,
-                ],
-
-                [
-                    <TokenSymbol key="token" t={getTokenBy(vc.bt)} />, '12.33', '', <div key="token2">
-                        <MCoinAmount token={getTokenBy(vc.asset)} />
-                        <MCoinAmount token={getTokenBy(vc.reward2)} />
-                    </div>,
-                    <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
-                    '',
-                    // <ApproveAndTx key="claim" className="w-28 font-semibold h-7" tx="Claim" disabled config={{ abi: abiBVault2, functionName: 'redeem', address: vc.vault, args: [0n] }} />,
-                ]
-            ]}
+            data={data}
         />
     </div>
 }

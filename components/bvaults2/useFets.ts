@@ -1,11 +1,13 @@
 import { abiBVault2, abiMarket, abiRewardManager } from '@/config/abi/BVault2'
 import { BVault2Config } from '@/config/bvaults2'
+import { getCurrentChainId } from '@/config/network'
+import { Token } from '@/config/tokens'
 import { DECIMAL_10 } from '@/constants'
 import { useFet, useMerge } from '@/hooks/useFet'
-import { aarToNumber, bnRange, promiseAll, UnPromise } from '@/lib/utils'
+import { aarToNumber, bnRange, getTokenBy, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
-import { Address, erc20Abi, PublicClient, zeroAddress } from 'viem'
+import { Address, erc20Abi, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
 export async function getBvaut2Data(vc: BVault2Config, pc: PublicClient = getPC()) {
@@ -109,6 +111,12 @@ export function useBvault2Epochs(vc: BVault2Config) {
   return epochs
 }
 
+export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient = getPC()) {
+  return Promise.all([
+    pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getRewardTokens' }),
+    pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getUserRewards', args: [user] }),
+  ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
+}
 export function useBvault2YTRewards(vc: BVault2Config) {
   const epochs = useBvault2Epochs(vc)
   const { address } = useAccount()
@@ -118,12 +126,7 @@ export function useBvault2YTRewards(vc: BVault2Config) {
     fetfn: async () => {
       const mEpochs = epochs.result!
       const pc = getPC()
-      const getYtRewards = async (yt: Address) =>
-        Promise.all([
-          pc.readContract({ abi: abiRewardManager, address: yt, functionName: 'getRewardTokens' }),
-          pc.readContract({ abi: abiRewardManager, address: yt, functionName: 'getUserRewards', args: [address!] }),
-        ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
-      return Promise.all(mEpochs.map((item) => getYtRewards(item.YT))).then((datas) => datas.map((rewrads, i) => ({ ...mEpochs[i], rewrads })))
+      return Promise.all(mEpochs.map((item) => getRewardsBy(item.YT, address!, pc))).then((datas) => datas.map((rewrads, i) => ({ ...mEpochs[i], rewrads })))
     },
   })
   if (epochs.status === 'fetching') {
@@ -131,24 +134,25 @@ export function useBvault2YTRewards(vc: BVault2Config) {
   }
   return rewards
 }
-export function useBvault2PTRewards(vc: BVault2Config) {
-  const epochs = useBvault2Epochs(vc)
+export function useBvault2LPBTRewards(vc: BVault2Config) {
+  const vd = useBvualt2Data(vc)
+  const asset = getTokenBy(vc.vault)
   const { address } = useAccount()
   const rewards = useFet({
-    key: address && epochs.result && epochs.result.length ? `vault2Data:epochesRewardsForPT:${vc.vault}:${epochs.result.length}` : '',
+    key: address && vd.result && !isAddressEqual(vd.result.hook, zeroAddress) ? `vault2Data:RewardsForLPBT:${vc.vault}:` : '',
     initResult: [],
     fetfn: async () => {
-      const mEpochs = epochs.result!
+      const lp = { address: vd.result!.hook, decimals: asset.decimals, symbol: `LP${asset.symbol}`, chain: [getCurrentChainId()] } as Token
+      const bt = getTokenBy(vc.bt)
       const pc = getPC()
-      const getPtRewards = async (pt: Address) =>
-        Promise.all([
-          pc.readContract({ abi: abiRewardManager, address: pt, functionName: 'getRewardTokens' }),
-          pc.readContract({ abi: abiRewardManager, address: pt, functionName: 'getUserRewards', args: [address!] }),
-        ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
-      return Promise.all(mEpochs.map((item) => getPtRewards(item.PT))).then((datas) => datas.map((rewrads, i) => ({ ...mEpochs[i], rewrads })))
+      const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, address!, pc), getRewardsBy(bt.address, address!, pc)])
+      return [
+        { token: lp, rewards: lpRewards },
+        { token: bt, rewards: btRewards },
+      ]
     },
   })
-  if (epochs.status === 'fetching') {
+  if (vd.status === 'fetching') {
     rewards.status = 'fetching'
   }
   return rewards
