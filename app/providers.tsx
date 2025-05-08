@@ -6,10 +6,10 @@ import * as React from 'react'
 
 import { apiBatchConfig, multicallBatchConfig, SUPPORT_CHAINS } from '@/config/network'
 import { RainbowKitProvider, connectorsForWallets, darkTheme, lightTheme } from '@rainbow-me/rainbowkit'
-import { bitgetWallet, coinbaseWallet, gateWallet, injectedWallet, metaMaskWallet, okxWallet, tokenPocketWallet, walletConnectWallet } from '@rainbow-me/rainbowkit/wallets'
+import { bitgetWallet, coinbaseWallet, gateWallet, injectedWallet, metaMaskWallet, okxWallet, tokenPocketWallet, walletConnectWallet, binanceWallet } from '@rainbow-me/rainbowkit/wallets'
 import { WagmiProvider, createConfig, createStorage } from 'wagmi'
 
-const walletConnectProjectId = 'abf1f323cd9ff9f6a27167188d993168'
+const walletConnectProjectId = 'b3ff10277f66a6ba31bbb88fb6ea4365'
 // const ankrKey = 'e1a06837672f1dd89a4c70522941d3beebad120eafad005d79d77c42856d9310'
 const ankrKey = '5da55021cad3ac57391c3292c373dec3a32bf9eaae63b74d4138d5d4a17dd554'
 
@@ -41,12 +41,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       },
     })
-    const appName = 'ZooFi'
+    const appName = 'Wand'
     const connectors = connectorsForWallets(
       [
         {
           groupName: 'Recommended',
-          wallets: [injectedWallet, metaMaskWallet, coinbaseWallet, okxWallet, bitgetWallet, tokenPocketWallet, gateWallet, walletConnectWallet],
+          wallets: [injectedWallet, metaMaskWallet, coinbaseWallet, binanceWallet, okxWallet, bitgetWallet, tokenPocketWallet, gateWallet, walletConnectWallet],
         },
       ],
       {
