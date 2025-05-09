@@ -166,16 +166,16 @@ export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
 
 export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const r = useRouter()
-    const baseAsset = getTokenBy(vc.asset)
+    const asset = getTokenBy(vc.asset)
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { endTime, duration } = getBvualt2Times(vd)
     return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} onClick={() => toBVault2(r, vc.vault)}>
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
-            <CoinIcon symbol={baseAsset.symbol} size={44} />
+            <CoinIcon symbol={asset.symbol} size={44} />
             <div>
-                <div className=' text-lg font-semibold whitespace-nowrap'>{baseAsset.symbol}</div>
-                <div className=' text-sm font-medium'>{baseAsset.symbol.includes('-') ? 'LP Token' : ''}</div>
+                <div className=' text-lg font-semibold whitespace-nowrap'>{asset.symbol}</div>
+                <div className=' text-sm font-medium'>{asset.symbol.includes('-') ? 'LP Token' : ''}</div>
             </div>
             <div className='ml-auto'>
                 <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{'Total Value Locked'}</div>
@@ -196,7 +196,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
             </div>
             ,
         )}
-        {renderStat('Reward', 'vIP', 'vIP', true)}
+        {renderStat('Reward', asset.symbol, asset.symbol, true)}
         {renderChoseSide(
             'PToken',
             'Principal Token',

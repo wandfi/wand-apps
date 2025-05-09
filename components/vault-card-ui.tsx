@@ -36,14 +36,10 @@ export const renderStat = (tit: string, icon: string, sub: ReactNode, borderL: b
 
 const BtnWrap = (p: ButtonHTMLAttributes<HTMLButtonElement>) => {
   const { children, onClick, ...props } = p
-  return p.onClick ? (
-    <BBtn hiddenBorder {...props} onClick={onClick}>
+  return (
+    <BBtn hiddenBorder {...props} disabled={!Boolean(p.onClick)} onClick={onClick}>
       {children}
     </BBtn>
-  ) : (
-    <div {...(props as any)} onClick={onClick}>
-      {children}
-    </div>
   )
 }
 export const renderChoseSide = (
@@ -56,13 +52,13 @@ export const renderChoseSide = (
   onClickLeft?: MouseEventHandler<HTMLDivElement>,
   onClickRight?: MouseEventHandler<HTMLDivElement>,
 ) => {
-  
+
 
   return (
     <div className={cn(itemClassname, 'col-span-2 gap-4')}>
       <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>Choose your side</div>
       <div className='grid grid-cols-2 gap-4 w-full px-4'>
-        <BtnWrap  className={cn('h-[4.25rem] w-full relative')} onClick={onClickLeft as any}>
+        <BtnWrap className={cn('h-[4.25rem] w-full relative disabled:opacity-100 disabled:cursor-default')} onClick={onClickLeft as any}>
           <div className='flex gap-2 items-center p-4 w-full h-[4.25rem] absolute left-0 top-0'>
             <CoinIcon symbol={leftSymbol} size={36} />
             <div className='flex flex-col items-start gap-2'>
@@ -71,7 +67,7 @@ export const renderChoseSide = (
             </div>
           </div>
         </BtnWrap>
-        <BtnWrap className={cn('h-[4.25rem] w-full relative')} onClick={onClickRight as any}>
+        <BtnWrap className={cn('h-[4.25rem] w-full relative disabled:opacity-100 disabled:cursor-default')} onClick={onClickRight as any}>
           <div className='flex flex-row-reverse gap-2 items-center p-4 w-full h-[4.25rem] absolute left-0 top-0'>
             <CoinIcon symbol={rightSymbol} size={36} />
             <div className='flex flex-col items-end gap-2'>
