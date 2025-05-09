@@ -44,7 +44,7 @@ function PT({ vc }: { vc: BVault2Config }) {
                 <div key='redeemable'>
                     {!epochActive && <MCoinAmount token={getTokenBy(vc.bt)} amount={item.redeemable} />}
                 </div>,
-                <div>
+                <div key='calim'>
                     {!epochActive && <ApproveAndTx
                         key="claim"
                         tx="Claim"
