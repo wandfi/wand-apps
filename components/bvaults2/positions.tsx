@@ -42,9 +42,17 @@ function PT({ vc }: { vc: BVault2Config }) {
                 <MCoinAmount key='ptBalance' token={getTokenBy(vc.bt)} />,
                 epochActive ? 'Active' : 'Mature',
                 <div key='redeemable'>
-                    <MCoinAmount token={getTokenBy(vc.bt)} amount={item.redeemable} />
+                    {!epochActive && <MCoinAmount token={getTokenBy(vc.bt)} amount={item.redeemable} />}
                 </div>,
-                <ApproveAndTx onTxSuccess={() => reFet(redeems.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" disabled={item.redeemable <= 0n} config={{ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [pt.address, item.redeemable] }} />,
+                <div>
+                    {!epochActive && <ApproveAndTx
+                        key="claim"
+                        tx="Claim"
+                        className="w-28 font-semibold h-7"
+                        onTxSuccess={() => reFet(redeems.key)}
+                        disabled={item.redeemable <= 0n}
+                        config={{ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [pt.address, item.redeemable] }} />}
+                </div>
             ]
         })
     }, [redeems.result])
