@@ -111,6 +111,26 @@ export function useBvault2Epochs(vc: BVault2Config) {
   return epochs
 }
 
+export function useBvualt2PTRedeems(vc: BVault2Config) {
+  const epochs = useBvault2Epochs(vc)
+  const { address } = useAccount()
+  const redeems = useFet({
+    key: address && epochs.result && epochs.result.length ? `vault2Data:epochesPTRedeems:${vc.vault}:${epochs.result.length}` : '',
+    initResult: [],
+    fetfn: async () => {
+      const mEpochs = epochs.result!
+      const pc = getPC()
+      return Promise.all(mEpochs.map((item) => pc.readContract({ abi: erc20Abi, address: item.PT, functionName: 'balanceOf', args: [address!] }))).then((datas) =>
+        datas.map((redeemable, i) => ({ ...mEpochs[i], redeemable })),
+      )
+    },
+  })
+  if (epochs.status === 'fetching') {
+    redeems.status = 'fetching'
+  }
+  return redeems
+}
+
 export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient = getPC()) {
   return Promise.all([
     pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getRewardTokens' }),
