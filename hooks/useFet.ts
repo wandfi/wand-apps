@@ -37,7 +37,7 @@ const fets: {
   [k: string]: {
     fet: Fet<any>
     fs: FetStat<Fet<any>>
-    promise: Promise<any>
+    runId: number
   }
 } = {}
 let mocks: { [key: string]: (() => any) | any } = {}
@@ -73,12 +73,15 @@ function sub<T>(fet: Fet<T>, onChange: (fs: FetStat<Fet<T>>) => void) {
 }
 
 async function runFetImpl<T>(fet: Fet<T>) {
+  const runId = fets[fet.key].runId
   const isMock = Object.hasOwn(mocks, fet.key)
   let retryCount = fet.retry ?? 3
   while (retryCount > 0) {
     retryCount--
     try {
+      if (runId !== fets[fet.key].runId) break
       const res = await (isMock ? (typeof mocks[fet.key] == 'function' ? mocks[fet.key]() : mocks[fet.key]) : fet.fetfn())
+      if (runId !== fets[fet.key].runId) break
       fets[fet.key].fs.result = res as any
       fets[fet.key].fs.lastUpDate = now()
       fets[fet.key].fs.status = 'success'
@@ -86,6 +89,7 @@ async function runFetImpl<T>(fet: Fet<T>) {
       return res
     } catch (err: any) {
       if (retryCount == 0) {
+        if (runId !== fets[fet.key].runId) break
         fets[fet.key].fs.status = 'error'
         fets[fet.key].fs.error = err
         emiter.emit(fet.key, fets[fet.key].fs)
@@ -99,15 +103,26 @@ async function runFetImpl<T>(fet: Fet<T>) {
   }
 }
 
+function nextRunId(key: string) {
+  if (key) {
+    if (fets[key].runId > 999999) {
+      fets[key].runId = 0
+    } else {
+      fets[key].runId++
+    }
+  }
+}
 export function runFet<T>(fet: Fet<T>, emit: boolean = false): FetStat<Fet<T>> {
   if (fets[fet.key]) {
-    fets[fet.key].promise = runFetImpl(fet)
+    nextRunId(fet.key)
+    runFetImpl(fet)
   } else {
     fets[fet.key] = {
       fet,
+      runId: 0,
       fs: initFS(fet),
-      promise: runFetImpl(fet),
     }
+    runFetImpl(fet)
   }
   fets[fet.key].fs.status = 'fetching'
   fets[fet.key].fs.error = undefined

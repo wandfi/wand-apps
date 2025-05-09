@@ -42,7 +42,7 @@ dependencies:
     specifier: ^1.0.6
     version: 1.0.6(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
   '@rainbow-me/rainbowkit':
-    specifier: 2.x
+    specifier: 2.2.x
     version: 2.2.4(@tanstack/react-query@5.35.1)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)(viem@2.19.3)(wagmi@2.8.3)
   '@redstone-finance/evm-connector':
     specifier: ^0.3.6
