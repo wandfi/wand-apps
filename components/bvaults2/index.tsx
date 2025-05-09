@@ -103,7 +103,6 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                     className='mx-auto'
                     tx='Claim'
                     disabled={true}
-                    spender={vc.vault}
                     config={{
                         abi: abiBVault2,
                         address: vc.vault,

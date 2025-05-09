@@ -117,7 +117,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
             className='mx-auto mt-4'
             tx='Mint'
             disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
-            spender={vc.vault}
+            spender={vc.mintpool}
             approves={{
                 [vc.asset]: inputAssetBn,
             }}

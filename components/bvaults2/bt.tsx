@@ -79,7 +79,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
                 className='mx-auto mt-4'
                 tx={isToggled ? 'Unwrap' : 'Wrap'}
                 disabled={inputAssetBn <= 0n}
-                spender={vc.vault}
+                spender={bt.address}
                 approves={{
                     [input.address]: inputAssetBn,
                 }}
