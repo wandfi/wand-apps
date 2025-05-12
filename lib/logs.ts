@@ -12,7 +12,8 @@ export function saveLogs(item: any, key: string = 'logs') {
   const data: [string, any][] = JSON.parse(str || '[]')
   const date = new Date()
   const time = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
-  localStorage.setItem(key, JSON.stringify(data.push([time, item])))
+  data.push([time, item])
+  localStorage.setItem(key, JSON.stringify(data))
 }
 
 export function getLogsBy(user: Address) {
@@ -26,21 +27,18 @@ export async function logUserAction(vc: BVault2Config, user: Address, action: st
   retry(
     async () => {
       const pc = getPC()
-      const hook = await pc.readContract({ abi: abiMarket, address: vc.market, functionName: 'getYieldSwapHook', args: [vc.bt] })
-      if (hook !== zeroAddress) {
-        const [log, Share] = await Promise.all([
-          pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.protocal, vc.bt] }),
-          pc.readContract({ abi: erc20Abi, address: hook, functionName: 'balanceOf', args: [user] }),
-        ])
-        const data = mapValues(log, (item) => fmtBn(item, 18))
-        saveLogs(
-          {
-            action,
-            status: { ...data, Share: fmtBn(Share, 18) },
-          },
-          `${user.toLocaleLowerCase()}_logs`,
-        )
-      }
+      const [log, Share] = await Promise.all([
+        pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.protocal, vc.bt] }),
+        pc.readContract({ abi: erc20Abi, address: vc.hook, functionName: 'balanceOf', args: [user] }),
+      ])
+      const data = mapValues(log, (item) => fmtBn(item, 18))
+      saveLogs(
+        {
+          action,
+          status: { ...data, Share: fmtBn(Share, 18) },
+        },
+        `${user.toLocaleLowerCase()}_logs`,
+      )
     },
     3,
     1000,

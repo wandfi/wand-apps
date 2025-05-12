@@ -71,7 +71,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             <div className="font-bold">Receive</div>
             <GetvIP address={vc.asset} />
         </div>
-        <AssetInput asset={output.symbol} disable amount={fmtBn(outAmount, output.decimals)} />
+        <AssetInput asset={output.symbol} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
             <div>Price Impact: {priceImpact}</div>

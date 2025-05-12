@@ -10,7 +10,7 @@ import { Spinner } from "@/components/spinner"
 import { BVault2Config, BVAULTS2CONIG } from "@/config/bvaults2"
 import { ENV } from "@/constants"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { isError, isFetching, isSuccess } from "@/hooks/useFet"
+import { isError, isLoading, isSuccess } from "@/hooks/useFet"
 import { Grid } from "@tremor/react"
 import { useSearchParams } from "next/navigation"
 import { Fragment } from "react"
@@ -23,7 +23,7 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
     // console.info('vd:', vd.status)
     return <Fragment>
         {isError(vd) && 'Opps! Network Error!'}
-        {isFetching(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
+        {isLoading(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
         {isSuccess(vd) && <Fragment>
             <div className="card bg-white mb-5"><BT vc={vc} /></div>
             {

@@ -168,9 +168,14 @@ export function isFetching(...status: AllFetStat<any>[]) {
   if (status.find((item) => item.status === 'fetching')) return true
   return false
 }
+export function isLoading(...status: AllFetStat<any>[]) {
+  if (status.length == 0) return false
+  if (status.find((item) => item.status === 'fetching' && item.lastUpDate == 0)) return true
+  return false
+}
 export function isSuccess(...status: AllFetStat<any>[]) {
   if (status.length == 0) return false
-  if (status.find((item) => item.status !== 'success')) return false
+  if (status.find((item) => item.lastUpDate == 0)) return false
   return true
 }
 
@@ -210,7 +215,7 @@ export function useMerge<RES extends {}>(...status: AllFetStat<{}>[]) {
     ref.current.status = 'success'
   }
   ref.current.error = mStatus.find((item) => item.error)?.error
-  ref.current.lastUpDate = Math.max(...mStatus.map((item) => item.lastUpDate))
+  ref.current.lastUpDate = Math.min(...mStatus.map((item) => item.lastUpDate))
   return ref.current
 }
 export function setMocks(_mocks: { [key: string]: (() => any) | any }) {
