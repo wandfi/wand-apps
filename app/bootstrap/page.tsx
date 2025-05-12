@@ -25,9 +25,9 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
         {isError(vd) && 'Opps! Network Error!'}
         {isLoading(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
         {isSuccess(vd) && <Fragment>
-            <div className="card bg-white mb-5"><BT vc={vc} /></div>
             {
                 showBootstrap ? <>
+                    <div className="card bg-white mb-5"><BT vc={vc} /></div>
                     <div className='page-title'>Bootstrap</div>
                     <Noti data='Deposit underlying assets to earn rewards. The Vault will launch once the target value is reached.' />
                     <BVault2Bootstrap vc={vc} />
