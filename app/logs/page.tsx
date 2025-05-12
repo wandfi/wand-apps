@@ -13,7 +13,7 @@ export default function Logs() {
             setInfos(JSON.stringify(getLogsBy(address), undefined, 2))
         }
         return () => { }
-    })
+    },[address])
     return <PageWrap>
         <div className="w-full h-full overflow-auto p-5 card bg-white rounded-xl text-base">
             {infos}
