@@ -65,13 +65,13 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                     approves={{
                         [input.address]: inputAssetBn,
                     }}
-                    skipSimulate
+                    // skipSimulate
                     config={{
                         abi: abiBVault2,
                         address: vc.vault,
                         functionName: 'addLiquidity',
                         args: [inputAssetBn, genDeadline()],
-                        gas: 61917552n,
+                        // gas: 61917552n,
                     }}
                     onTxSuccess={() => {
                         setInputAsset('')
