@@ -44,9 +44,9 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
         queryKey: calcPtSwapKey,
-        enabled: inputAssetBn > 0n && calcPtSwapKey.length > 1 && vd.result && !isAddressEqual(vd.result.hook, zeroAddress),
+        enabled: inputAssetBn > 0n && calcPtSwapKey.length > 1,
         initialData: 0n,
-        queryFn: async () => getPC().readContract({ abi: abiHook, address: vd.result!.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
+        queryFn: async () => getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
     })
     const onSwitch = () => {
         toggle()

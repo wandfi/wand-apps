@@ -20,7 +20,7 @@ export const defConvertArg = (arg: string, _i: number, param: AbiParameter) => {
   if (param.type.startsWith('uint')) return BigInt((arg || '').replaceAll(' ', ''))
   if (param.type == 'bytes32') return stringToHex(arg, { size: 32 })
   if (param.type == 'bool') {
-    if (arg == 'true') return true
+    if (arg.toLowerCase() == 'true') return true
     return false
   }
   return arg

@@ -30,7 +30,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const asset = getTokenBy(vc.asset, chainId)
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result!
-    const lp = { address: vd.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
     const lpc = useTotalSupply(lp)
     const epoch = vd!.current!
     const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
@@ -47,9 +47,9 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
     const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcOutsKey,
-        enabled: inputAssetBn > 0n && calcOutsKey.length > 1 && !isAddressEqual(vd.hook, zeroAddress),
+        enabled: inputAssetBn > 0n && calcOutsKey.length > 1,
         initialData: [0n, 0n, 0n],
-        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.protocal, vd.hook, vc.bt, inputAssetBn] })
+        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
 
@@ -97,7 +97,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     const bt = getTokenBy(vc.bt, chainId)
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result!
-    const lp = { address: vd.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
     const lpc = useTotalSupply(lp)
     const epoch = vd!.current!
     const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
@@ -114,9 +114,9 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     useDebounce(() => setCalcOutsKey(['calcLPRemoveOut', inputAssetBn]), 300, [inputAssetBn])
     const { data: [btAmount, ptAmount, ytAmount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcOutsKey,
-        enabled: inputAssetBn > 0n && calcOutsKey.length > 1 && !isAddressEqual(vd.hook, zeroAddress),
+        enabled: inputAssetBn > 0n && calcOutsKey.length > 1,
         initialData: [0n, 0n, 0n],
-        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vd.hook, vc.bt, inputAssetBn] })
+        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
     return <div className='flex flex-col gap-1'>
@@ -163,7 +163,7 @@ export function LP({ vc }: { vc: BVault2Config }) {
     const bt = getTokenBy(vc.bt, chainId)
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result!
-    const lp = { address: vd.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
     const lpc = useTotalSupply(lp)
     const epoch = vd!.current!
     const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token

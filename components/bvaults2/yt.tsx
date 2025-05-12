@@ -1,8 +1,13 @@
 import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
+import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
+import { reFet } from "@/hooks/useFet"
+import { logUserAction } from "@/lib/logs"
 import { fmtBn, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { getPC } from "@/providers/publicClient"
+import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
@@ -18,12 +23,6 @@ import { Tip } from "../ui/tip"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { displayBalance } from "@/utils/display"
-import { getPC } from "@/providers/publicClient"
-import { isAddressEqual, zeroAddress } from "viem"
-import { codeBvualt2Query } from "@/config/abi/codes"
-import { logUserAction } from "@/lib/logs"
-import { reFet } from "@/hooks/useFet"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -51,15 +50,15 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     useDebounce(() => setCalcYtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
     const { data: [outAmount, bt1Amount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcYtSwapKey,
-        enabled: inputAssetBn > 0n && calcYtSwapKey.length > 1 && vd.result && !isAddressEqual(vd.result.hook, zeroAddress),
+        enabled: inputAssetBn > 0n,
         initialData: [0n, 0n],
         queryFn: async () => {
             if (isToggled) {
-                const outAmount = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vd.result!.hook, inputAssetBn] })
+                const outAmount = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vc.hook, inputAssetBn] })
                 return [outAmount, 0n]
             } else {
-                const bestBT1 = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vd.result!.hook, inputAssetBn] })
-                const [outAmount] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactBTforYT', args: [vd.result!.hook, inputAssetBn, bestBT1] })
+                const bestBT1 = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn] })
+                const [outAmount] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactBTforYT', args: [vc.hook, inputAssetBn, bestBT1] })
                 return [outAmount, bestBT1]
             }
         }

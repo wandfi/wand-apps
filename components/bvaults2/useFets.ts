@@ -25,7 +25,7 @@ export async function getBvaut2Data(vc: BVault2Config, pc: PublicClient = getPC(
     bootstrapThreshold: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapThreshold' }),
     epochIdCount: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochIdCount' }),
     totalDeposits: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'totalDeposits' }),
-    hook: pc.readContract({ abi: abiMarket, functionName: 'getYieldSwapHook', address: vc.market, args: [vc.bt] }),
+    // hook: pc.readContract({ abi: abiMarket, functionName: 'getYieldSwapHook', address: vc.market, args: [vc.bt] }),
   })
 }
 
@@ -159,10 +159,10 @@ export function useBvault2LPBTRewards(vc: BVault2Config) {
   const asset = getTokenBy(vc.vault)
   const { address } = useAccount()
   const rewards = useFet({
-    key: address && vd.result && !isAddressEqual(vd.result.hook, zeroAddress) ? `vault2Data:RewardsForLPBT:${vc.vault}:` : '',
+    key: address ? `vault2Data:RewardsForLPBT:${vc.vault}:` : '',
     initResult: [],
     fetfn: async () => {
-      const lp = { address: vd.result!.hook, decimals: asset.decimals, symbol: `LP${asset.symbol}`, chain: [getCurrentChainId()] } as Token
+      const lp = { address: vc.hook, decimals: asset.decimals, symbol: `LP${asset.symbol}`, chain: [getCurrentChainId()] } as Token
       const bt = getTokenBy(vc.bt)
       const pc = getPC()
       const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, address!, pc), getRewardsBy(bt.address, address!, pc)])
