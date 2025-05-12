@@ -14,6 +14,7 @@ export type BVault2Config = {
   maturitypool: Address
   protocal: Address
   protocalSettings: Address
+  hook: Address
   onEnv: TypeENV[]
 }
 
@@ -22,15 +23,16 @@ export const BVAULTS2CONIG: { [k: number]: BVault2Config[] } = proxyGetDef(
     [sepolia.id]: [
       {
         tit: 'vIP-Verio Vault',
-        vault: '0x6Aa567D7EC7aaA39609394731C3C6fe0486Be958',
-        asset: '0x38B40a5c2Dd2d62a7B578257A18A8F675353d481',
-        bt: '0xe01C85599300f9ED5DE2d7D4FE3Dc2Dc4c5c3877',
+        vault: '0x9e98e6150d2ccd908fbd7d463219b9962c3942b9',
+        asset: '0x6f01d0fe5329b8f5c8553ac7e75422fdd304c7c5',
+        bt: '0xedef3c6573db3a48b8f7ddb9fa32f000dc6e89fe',
         reward2: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aE',
-        market: '0x2280c560B1d36eb40814F1E7489663C35B1BaDF0',
-        mintpool: '0x4A2d5F3BaBF2ad41a723A8415a59a8a600CC1519',
-        maturitypool: '0x0D7e86D8218de7c3A0109F3d5DCb8C6BBa055bf0',
-        protocal: '0xB58DAfe606162a744F5007a49D928055Bcfb67Ed',
-        protocalSettings: '0x776f5061F89Aa8df62f8E52688516Ab33E55b494',
+        market: '0x2bec00701287c4f721c607f72697df782f0c76c5',
+        mintpool: '0x39c8080b6f228c5f41af89909361e8cc77e838ea',
+        maturitypool: '0x8147cc09224747a0d22b0ec9cfd8720705d560f2',
+        protocal: '0x6689f2b38658a221ea2792f023a1d034beec2a86',
+        protocalSettings: '0xcba5e0d1528a22078b9a56f8a2047b948bae19dd',
+        hook: '0x989947f1dc4bae3e0fa16429dcf04a343f653a88',
         onEnv: ['test'],
       },
     ],

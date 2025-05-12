@@ -19,7 +19,7 @@ export const abiBVault2 = parseAbi([
   'function epochInfoById(uint256 epochId) public view returns (Epoch memory)',
   'struct Epoch {uint256 epochId;uint256 startTime;uint256 duration;address PT;address YT;}',
 
-  'function addLiquidity(uint256 amountBT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountShares, uint256 amountPT, uint256 amountYT)',
+  'function addLiquidity(uint256 amountBT, uint256 deadline) external returns (uint256 amountShares, uint256 amountPT, uint256 amountYT)',
   'function removeLiquidity(uint256 shares, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT, uint256 amountPT, uint256 amountYT)',
   'function swapExactBTForPT(uint256 amountBT, uint256 minAmountPT, uint256 deadline) external returns (uint256 amountPT)',
   'function swapExactPTForBT(uint256 amountPT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT)',

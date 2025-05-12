@@ -80,7 +80,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
                 abi: abiBVault2,
                 address: vc.vault,
                 functionName: 'addLiquidity',
-                args: [inputAssetBn, 0n, genDeadline()],
+                args: [inputAssetBn, genDeadline()],
             }}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPAdd:(${fmtBn(inputAssetBn)})`);

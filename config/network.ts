@@ -30,6 +30,9 @@ export const sepolia = defineChain({
       blockCreated: 5_317_080,
     },
   },
+  fees: {
+    baseFeeMultiplier: 1.2,
+  },
   testnet: true,
 })
 
@@ -56,7 +59,7 @@ export const storyTestnet = defineChain({
   },
   testnet: true,
   fees: {
-    baseFeeMultiplier: 1.4,
+    baseFeeMultiplier: 1.2,
   },
 })
 
