@@ -46,8 +46,8 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const onSwitch = () => {
         toggle()
     }
-    const [calcYtSwapKey, setCalcYtSwapKey] = useState<any[]>(['calcPTSwapOut'])
-    useDebounce(() => setCalcYtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
+    const [calcYtSwapKey, setCalcYtSwapKey] = useState<any[]>(['calcYTSwapOut'])
+    useDebounce(() => setCalcYtSwapKey(['calcYTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
     const { data: [outAmount, bt1Amount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcYtSwapKey,
         enabled: inputAssetBn > 0n,

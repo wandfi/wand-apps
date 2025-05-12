@@ -10,8 +10,12 @@ import { now } from 'lodash'
 import { Address, erc20Abi, isAddressEqual, PublicClient, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
+export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient = getPC()) {
+  return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
+}
+
 export async function getBvaut2Data(vc: BVault2Config, pc: PublicClient = getPC()) {
-  return await promiseAll({
+  const res = await promiseAll({
     initialized: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'initialized' }),
     BT: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'BT' }),
     Points: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'Points' }),
@@ -27,10 +31,8 @@ export async function getBvaut2Data(vc: BVault2Config, pc: PublicClient = getPC(
     totalDeposits: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'totalDeposits' }),
     // hook: pc.readContract({ abi: abiMarket, functionName: 'getYieldSwapHook', address: vc.market, args: [vc.bt] }),
   })
-}
 
-export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient = getPC()) {
-  return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
+  return { ...res, current: res.epochIdCount > 0n ? await getBvault2Epoch(vc, res.epochIdCount, pc) : undefined }
 }
 
 export async function getHookData(vc: BVault2Config, user: Address, pc: PublicClient = getPC()) {
@@ -44,25 +46,13 @@ export async function getHookData(vc: BVault2Config, user: Address, pc: PublicCl
   })
 }
 
-export type Vault2Data = UnPromise<ReturnType<typeof getBvaut2Data>> & { current?: UnPromise<ReturnType<typeof getBvault2Epoch>> }
+export type Vault2Data = UnPromise<ReturnType<typeof getBvaut2Data>>
 export function useBvualt2Data(vc: BVault2Config) {
-  const vd = useFet({
+  // console.info('vd2:', vd.status, vdc.status)
+  return useFet({
     key: `vault2Data:${vc.vault}`,
     fetfn: async () => getBvaut2Data(vc),
   })
-  const vdc = useFet({
-    key: `vault2DataCurrent:${vc.vault}:${vd.result?.epochIdCount ?? 0n}`,
-    fetfn: async () => {
-      const epochCount = vd.result?.epochIdCount ?? 0n
-      if (epochCount > 0n) {
-        const current = await getBvault2Epoch(vc, vd.result!.epochIdCount)
-        return { current }
-      }
-      return {}
-    },
-  })
-  // console.info('vd2:', vd.status, vdc.status)
-  return useMerge<Vault2Data>(vd, vdc)
 }
 
 export function getBvault2EpochTimes(vd?: Vault2Data) {
@@ -156,7 +146,7 @@ export function useBvault2YTRewards(vc: BVault2Config) {
 }
 export function useBvault2LPBTRewards(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
-  const asset = getTokenBy(vc.vault)
+  const asset = getTokenBy(vc.asset)
   const { address } = useAccount()
   const rewards = useFet({
     key: address ? `vault2Data:RewardsForLPBT:${vc.vault}:` : '',

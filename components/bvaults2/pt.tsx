@@ -25,16 +25,16 @@ import { logUserAction } from "@/lib/logs"
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const baseAsset = getTokenBy(vc.asset, chainId)
-    const asset = getTokenBy(vc.bt, chainId)
+    const asset = getTokenBy(vc.asset, chainId)
+    const bt = getTokenBy(vc.bt, chainId)
     const vd = useBvualt2Data(vc)
     const epoch = vd.result!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${baseAsset.symbol}`, decimals: baseAsset.decimals } as Token
+    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const [isToggled, toggle] = useToggle(false)
-    const input = isToggled ? pt : asset
-    const output = isToggled ? asset : pt
+    const input = isToggled ? pt : bt
+    const output = isToggled ? bt : pt
     const inputBalance = useBalance(input)
     const outputBalance = useBalance(output)
     const swapPrice = `1 ${input.symbol} = ${'23.3'} ${output.symbol}`
@@ -56,7 +56,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={asset.address} />
+            <GetvIP address={bt.address} />
         </div>
         <AssetInput asset={output.symbol} loading={isFetchingOut && inputAssetBn > 0n} disable amount={fmtBn(outAmount, output.decimals)} />
         <div className="flex justify-between items-center text-xs font-medium">
@@ -78,11 +78,11 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             config={{
                 abi: abiBVault2,
                 address: vc.vault,
-                functionName: isToggled ? 'swapExactBTForPT' : 'swapExactPTForBT',
+                functionName: isToggled ? 'swapExactPTForBT' : 'swapExactBTForPT',
                 args: [inputAssetBn, 0n, genDeadline()],
             }}
             onTxSuccess={() => {
-                logUserAction(vc, address!, `PTSwap:${isToggled ? 'BT->PT' : 'PT->BT'}:(${fmtBn(inputAssetBn)})`)
+                logUserAction(vc, address!, `PTSwap:${isToggled ? 'PT->BT' : 'BT->PT'}:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
                 reFet(...vd.key, inputBalance.key, outputBalance.key)
             }}
@@ -119,7 +119,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
             disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
             spender={vc.mintpool}
             approves={{
-                [vc.asset]: inputAssetBn,
+                [input.address]: inputAssetBn,
             }}
             config={{
                 abi: abiMintPool,
