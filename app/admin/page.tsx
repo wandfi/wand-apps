@@ -382,6 +382,7 @@ export default function AdminPage() {
             {['initialize', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
               <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
             ))}
+            <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
             <GeneralAction tit='transferOwnership' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
             <GeneralAction tit='upsertParamConfig' abi={abiProtocolSettings} functionName='upsertParamConfig' address={current.data.protocalSettings} />
             {chain?.testnet && <>

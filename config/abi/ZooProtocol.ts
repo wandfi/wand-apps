@@ -171,4 +171,17 @@ export default [
     stateMutability: 'nonpayable',
     type: 'function',
   },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'yieldsSwapHookHelper',
+        type: 'address',
+      },
+    ],
+    name: 'updateYieldSwapHookHelper',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
 ] as const
