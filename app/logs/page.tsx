@@ -27,10 +27,10 @@ const testDef: any = [
 ]
 export default function Logs() {
     const { address } = useAccount()
-    const [infos, setInfos] = useState<[string, any][]>(testDef)
+    const [infos, setInfos] = useState<[string, any][]>([])
     useEffect(() => {
         if (address) {
-            // setInfos(getLogsBy(address))
+            setInfos(getLogsBy(address))
         }
         return () => { }
     }, [address])
