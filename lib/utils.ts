@@ -58,10 +58,14 @@ export function fmtAAR(aar: bigint, decimals: bigint | number) {
 }
 
 export function parseEthers(num: string, unit?: Parameters<typeof _parseEther>[1] | number) {
-  if (!num) num = '0'
-  num = num.replaceAll(',', '')
-  const decimal = typeof unit == 'number' ? unit : etherUnits[unit || 'wei']
-  return parseUnits(num, decimal)
+  try {
+    if (!num) num = '0'
+    num = num.replaceAll(',', '')
+    const decimal = typeof unit == 'number' ? unit : etherUnits[unit || 'wei']
+    return parseUnits(num, decimal)
+  } catch (error) {
+    return 0n
+  }
 }
 
 export function fmtPercent(percent: bigint, decimals: number | bigint, showDecimals: number = 2) {

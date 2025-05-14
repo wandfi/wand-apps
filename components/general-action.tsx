@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn, parseEthers } from '@/lib/utils'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Collapse } from 'react-collapse'
 import { FiArrowDown, FiArrowUp } from 'react-icons/fi'
@@ -84,7 +84,11 @@ export function GeneralAction({
 }) {
   const abiItem = abi.find((item) => item.type == 'function' && item.name == functionName) as AbiFunction
   const inputsLength = abiItem?.inputs?.length || 0
-  const [{ args }, setState] = useSetState({ args: typeof argsDef !== 'function' && argsDef?.length == inputsLength && inputsLength > 0 ? argsDef : new Array(inputsLength).fill('') })
+  const [{ args, value }, setState] = useSetState({
+    value: '',
+    args: typeof argsDef !== 'function' && argsDef?.length == inputsLength && inputsLength > 0 ? argsDef : new Array(inputsLength).fill('')
+  })
+  const valueBn = parseEthers(value)
   useEffect(() => {
     onArgs && onArgs(args)
   }, [args])
@@ -115,6 +119,15 @@ export function GeneralAction({
 
         </div>
       ))}
+      {abiItem.stateMutability == 'payable' && <div className='relative'>
+        <div className='opacity-60 absolute top-1/2 left-2 -translate-y-1/2 text-xs'>value</div>
+        <input
+          type='text'
+          value={value}
+          onChange={(e) => setState({ value: e.target.value })}
+          className={cn(inputClassname)}
+        />
+      </div>}
       {infos}
       <ApproveAndTx
         {...(txProps || {})}
@@ -125,6 +138,7 @@ export function GeneralAction({
             address,
             functionName,
             ...(args.length ? { args: convertArgs(args, abiItem.inputs, convertArg) } : {}),
+            value: valueBn
           } as any
         }
         className={cn('!mt-0 flex items-center justify-center gap-4', disableExpand ? 'max-w-[100px]' : 'w-full')}

@@ -4,7 +4,7 @@ import { ApproveAndTx } from '@/components/approve-and-tx'
 import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/components/general-action'
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiLntVault, abiMockERC20, abiMockERC721, abiMockPriceFeed, abiPlainVault, abiProtocolSettings, abiPtyPool, abiVault, abiWandProtocol, abiZooProtocol } from '@/config/abi'
-import { abiBVault2 } from '@/config/abi/BVault2'
+import { abiBVault2, abiMockInfraredVault, abiRewardManager } from '@/config/abi/BVault2'
 import { getCurrentChain, SUPPORT_CHAINS } from '@/config/network'
 import { PROTOCOL_SETTINGS_ADDRESS, VaultConfig, WAND_PROTOCOL_ADDRESS } from '@/config/swap'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
@@ -388,7 +388,10 @@ export default function AdminPage() {
             {chain?.testnet && <>
               <GeneralAction tit={`mint (${getTokenBy(current.data.asset).symbol})`} abi={abiMockERC20} functionName='mint' address={current.data.asset} />
               <GeneralAction tit={`setTester (${getTokenBy(current.data.asset).symbol})`} abi={abiMockERC20} functionName='setTester' address={current.data.asset} />
+
             </>}
+
+            {current.data.mockInfraredVault && <GeneralAction tit={`MockInfraredVault addReward ${current.data.mockInfraredVault}`} abi={abiMockInfraredVault} functionName='addReward' address={current.data.mockInfraredVault} />}
           </>)}
           <Erc20Approve />
         </div>

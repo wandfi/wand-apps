@@ -15,6 +15,7 @@ export type BVault2Config = {
   protocal: Address
   protocalSettings: Address
   hook: Address
+  mockInfraredVault?: Address
   onEnv: TypeENV[]
 }
 
@@ -33,6 +34,7 @@ export const BVAULTS2CONIG: { [k: number]: BVault2Config[] } = proxyGetDef(
         protocal: '0x6689f2b38658a221ea2792f023a1d034beec2a86',
         protocalSettings: '0xcba5e0d1528a22078b9a56f8a2047b948bae19dd',
         hook: '0x989947f1dc4bae3e0fa16429dcf04a343f653a88',
+        mockInfraredVault: '0x2d02c76e74bb97c87833f4a47679c3ffd84e5da8',
         onEnv: ['test'],
       },
     ],
