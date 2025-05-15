@@ -8,7 +8,6 @@ export type BVault2Config = {
   vault: Address
   asset: Address
   bt: Address
-  reward2: Address
   market: Address
   mintpool: Address
   maturitypool: Address
@@ -25,16 +24,15 @@ export const BVAULTS2CONIG: { [k: number]: BVault2Config[] } = proxyGetDef(
       {
         tit: 'vIP-Verio Vault',
         vault: '0x9e98e6150d2ccd908fbd7d463219b9962c3942b9',
-        asset: '0x6f01d0fe5329b8f5c8553ac7e75422fdd304c7c5',
-        bt: '0xedef3c6573db3a48b8f7ddb9fa32f000dc6e89fe',
-        reward2: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aE',
-        market: '0x2bec00701287c4f721c607f72697df782f0c76c5',
-        mintpool: '0x39c8080b6f228c5f41af89909361e8cc77e838ea',
-        maturitypool: '0x8147cc09224747a0d22b0ec9cfd8720705d560f2',
-        protocal: '0x6689f2b38658a221ea2792f023a1d034beec2a86',
-        protocalSettings: '0xcba5e0d1528a22078b9a56f8a2047b948bae19dd',
-        hook: '0x989947f1dc4bae3e0fa16429dcf04a343f653a88',
-        mockInfraredVault: '0x2d02c76e74bb97c87833f4a47679c3ffd84e5da8',
+        asset: '0x8bcf0d8468a733484b945173b73e2126167288b0',
+        bt: '0xe1b53e90408ece0c76bd698ef98cdaccc7de8de0',
+        market: '0xe362fd208ca99ba5bd86285d27ac899ccd66532d',
+        mintpool: '0xfddb3aec297b75a21d21c9dcf3d78d093c0fd762',
+        maturitypool: '0xadcc66c101818aacc9b99ea3e338959fadd56fd8',
+        protocal: '0x19d1785d8fddc659bd1218c2b9bf74b568c82c8f',
+        protocalSettings: '0xfe85817aeda1a3e3f3b896319e6d9cd2c2f3e981',
+        hook: '0xb358647922faae86cf49b8ebe2b72687deea7a88',
+        mockInfraredVault: '0xb6829e86f3a8c9bb94c7b346483e4786b3eb7cf2',
         onEnv: ['test'],
       },
     ],
