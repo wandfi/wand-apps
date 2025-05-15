@@ -23,7 +23,7 @@ export const BVAULTS2CONIG: { [k: number]: BVault2Config[] } = proxyGetDef(
     [sepolia.id]: [
       {
         tit: 'vIP-Verio Vault',
-        vault: '0x9e98e6150d2ccd908fbd7d463219b9962c3942b9',
+        vault: '0x4f8d9705ffd40c249c1c3309c9094dfc79e4b4c7',
         asset: '0x8bcf0d8468a733484b945173b73e2126167288b0',
         bt: '0xe1b53e90408ece0c76bd698ef98cdaccc7de8de0',
         market: '0xe362fd208ca99ba5bd86285d27ac899ccd66532d',
