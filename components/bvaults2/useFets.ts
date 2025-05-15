@@ -23,7 +23,6 @@ export async function getBvaut2Data(vc: BVault2Config, pc: PublicClient = getPC(
     bootstrapDuration: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapDuration' }),
     bootstrapStarted: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapStarted' }),
     bootstrapEnded: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapEnded' }),
-    bootstrapFailed: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapFailed' }),
     bootstrapSucceeded: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapSucceeded' }),
     bootstrapping: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapping' }),
     bootstrapThreshold: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapThreshold' }),
