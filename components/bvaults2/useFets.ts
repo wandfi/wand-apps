@@ -3,11 +3,11 @@ import { BVault2Config } from '@/config/bvaults2'
 import { getCurrentChainId } from '@/config/network'
 import { Token } from '@/config/tokens'
 import { DECIMAL_10 } from '@/constants'
-import { useFet, useMerge } from '@/hooks/useFet'
+import { useFet } from '@/hooks/useFet'
 import { aarToNumber, bnRange, getTokenBy, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
-import { Address, erc20Abi, isAddressEqual, PublicClient, zeroAddress } from 'viem'
+import { Address, erc20Abi, PublicClient, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
 export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient = getPC()) {
