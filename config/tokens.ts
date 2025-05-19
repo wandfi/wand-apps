@@ -21,8 +21,8 @@ export const TOKENS: Token[] = [
   { address: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d6', symbol: 'bvIP', decimals: 18, chain: [story.id] },
   { address: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aE', symbol: 'WIP', decimals: 18, chain: [story.id] },
 
-  { address: '0xa247358b5e3350354bacd8a15becb218d11a9a59', symbol: 'YTK', decimals: 18, chain: [sepolia.id] },
-  { address: '0xd4b290cbf95aa997f75f12a0aab4084869a10c4e', symbol: 'BT-INFRA', decimals: 18, chain: [sepolia.id] },
+  { address: '0xb09a8ba59615a552231cefcee80c3b88706597ed', symbol: 'YTK', decimals: 18, chain: [sepolia.id] },
+  { address: '0xf37b6ec18cee80634de01aef83701d6e726e7fc9', symbol: 'BT-INFRA', decimals: 18, chain: [sepolia.id] },
 ]
 
 export const TOKENS_MAP: { [k: `${number}_${Address}`]: Token } = TOKENS.reduce((map, item) => {
