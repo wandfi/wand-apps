@@ -23,6 +23,7 @@ import { Tip } from "../ui/tip"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
+import { parseUnits } from "viem"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -57,7 +58,8 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 const outAmount = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vc.hook, inputAssetBn] })
                 return [outAmount, 0n]
             } else {
-                const bestBT1 = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn] })
+                const bestBT1 = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.08', 18)] })
+                // const bestBT1 = inputAssetBn * 99n / 100n;
                 const [outAmount] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactBTforYT', args: [vc.hook, inputAssetBn, bestBT1] })
                 return [outAmount, bestBT1]
             }
@@ -98,7 +100,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 args: isToggled ? [inputAssetBn, 0n, genDeadline()] : [inputAssetBn, bt1Amount, 0n, genDeadline()],
             }}
             onTxSuccess={() => {
-                logUserAction(vc, address!, isToggled? `YTSwap:YT->BT:(${fmtBn(inputAssetBn)})`: `YTSwap:BT->YT:(${fmtBn(inputAssetBn)}, bt1:${fmtBn(bt1Amount)})`)
+                logUserAction(vc, address!, isToggled ? `YTSwap:YT->BT:(${fmtBn(inputAssetBn)})` : `YTSwap:BT->YT:(${fmtBn(inputAssetBn)}, bt1:${fmtBn(bt1Amount)})`)
                 setInputAsset('')
                 reFet(...vd.key, btBalance.key, ytBalance.key)
             }}

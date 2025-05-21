@@ -39,10 +39,10 @@ function PT({ vc }: { vc: BVault2Config }) {
             const pt = { address: item.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
             return [
                 <TokenSymbol key="token" t={pt} />,
-                <MCoinAmount key='ptBalance' token={getTokenBy(vc.bt)} />,
+                displayBalance(item.redeemable, undefined, pt.decimals),
                 epochActive ? 'Active' : 'Mature',
                 <div key='redeemable'>
-                    {!epochActive && <MCoinAmount token={getTokenBy(vc.bt)} amount={item.redeemable} />}
+                    {!epochActive && <MCoinAmount token={pt} amount={item.redeemable} />}
                 </div>,
                 <div key='calim'>
                     {!epochActive && <ApproveAndTx
