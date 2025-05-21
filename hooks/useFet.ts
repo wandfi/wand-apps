@@ -8,11 +8,13 @@ export type Conifg = {
   retryInterval?: number // default 500
 }
 
-export type FetBase<RES> = {
+export type FetFN<RES> = () => Promise<RES>
+
+export type FetBase<RES> = Conifg & {
   key: string
-  fetfn: () => Promise<RES>
+  fetfn: FetFN<RES>
   onError?: (err: Error) => void
-} & Conifg
+}
 
 export type FetWithInit<RES> = FetBase<RES> & { initResult: RES }
 export type Fet<RES> = FetBase<RES> | FetWithInit<RES>
@@ -140,7 +142,7 @@ export function useUpdate() {
   return update
 }
 
-export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
+export function useFet<T, FET extends Fet<T>>(fet: FET): FetStat<FET> {
   const update = useUpdate()
   let fetStat = fets[fet.key]?.fs || initFS(fet)
   const needRunFet = Boolean(fet.key) && (!fetStat || fetStat.status == 'idle')

@@ -74,6 +74,10 @@ export function fmtPercent(percent: bigint, decimals: number | bigint, showDecim
   return parseFloat(_percent.replaceAll(',', '')).toFixed(showDecimals) + '%'
 }
 
+export function formatPercent(percet: number, decimals: number = 2) {
+  return _.round(percet * 100, decimals) + '%'
+}
+
 export function getBigint(result: any, path: string | (string | number)[], def: bigint = 0n) {
   const data = get(result, path, def)
   if (typeof data == 'bigint') return data

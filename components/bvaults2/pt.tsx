@@ -4,7 +4,7 @@ import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
@@ -20,6 +20,7 @@ import { SimpleTabs } from "../simple-tabs"
 import { Swap, SwapDown } from "../ui/bbtn"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
+import { useBT2PTPrice, usePTApy } from "./useDatas"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
@@ -36,8 +37,9 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const output = isToggled ? bt : pt
     const inputBalance = useBalance(input)
     const outputBalance = useBalance(output)
-    const swapPrice = `1 ${input.symbol} = ${'23.3'} ${output.symbol}`
-    const priceImpact = `20%`
+
+    const { result: btPrice } = useBT2PTPrice(vc)
+    const swapPrice = `1 ${bt.symbol} = ${displayBalance(btPrice, undefined, bt.decimals)} ${pt.symbol}`
 
     const [calcPtSwapKey, setCalcPtSwapKey] = useState<any[]>(['calcPTSwapOut'])
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
@@ -47,6 +49,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async () => getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
     })
+    const [apy, apyto, priceimpcat] = usePTApy(vc, inputAssetBn, outAmount, isToggled ? 'pt' : 'bt')
     const onSwitch = () => {
         toggle()
     }
@@ -60,10 +63,10 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         <AssetInput asset={output.symbol} loading={isFetchingOut && inputAssetBn > 0n} disable amount={fmtBn(outAmount, output.decimals)} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
-            <div>Price Impact: {priceImpact}</div>
+            <div>Price Impact: {formatPercent(priceimpcat)}</div>
         </div>
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
-            <div>Implied APY Change: 233% → 235%</div>
+            <div>Implied APY Change: {formatPercent(apy)} → {formatPercent(apyto)}</div>
             <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
         </div>
         <ApproveAndTx
@@ -190,6 +193,7 @@ export function PT({ vc }: { vc: BVault2Config }) {
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: pt }).catch(handleError)
     }
+    const [apy] = usePTApy(vc)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#10B98126] gap-5'>
@@ -200,7 +204,7 @@ export function PT({ vc }: { vc: BVault2Config }) {
                 </div>
             </div>
             <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>
-                <div className="text-lg font-medium">150%</div>
+                <div className="text-lg font-medium">{formatPercent(apy)}</div>
                 <div className="text-xs font-semibold opacity-60">Fixed APY</div>
                 <div className="text-xs font-semibold opacity-60 ml-auto">Circulation amount</div>
                 <div className="text-lg font-medium">{displayBalance(ptc.result, undefined, pt.decimals)}</div>
