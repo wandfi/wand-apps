@@ -32,6 +32,7 @@ module.exports = {
       animation: {
         'spin-slow': 'spin 2s cubic-bezier(1, 0, 0, 1) infinite'
       },
+      
       colors: {
         // light mode
         primary: { 

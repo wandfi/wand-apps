@@ -152,13 +152,13 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
 export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
     return <div className="card bg-white h-full min-h-[49.25rem]">
         <SimpleTabs
-            listClassName="p-0 gap-8 mb-4"
-            triggerClassName={`text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2`}
+            listClassName="p-0 gap-8 mb-4 w-full"
+            triggerClassName={(i) => `text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2 ${i == 3? 'ml-auto': ''}`}
             data={[
                 { tab: 'PT', content: <PT vc={vc} /> },
                 { tab: 'YT', content: <YT vc={vc} /> },
-                { tab: 'LP', content: <LP vc={vc} /> },
                 { tab: 'BT', content: <BT vc={vc} /> },
+                { tab: 'Add Liquidity', content: <LP vc={vc} /> },
             ]}
         />
     </div>

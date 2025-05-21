@@ -14,7 +14,7 @@ export function SimpleTabs({
 }: {
   className?: string
   listClassName?: string
-  triggerClassName?: string
+  triggerClassName?: string | ((i: number) => string)
   contentClassName?: string
   hiddenConetent?: boolean
   currentTab?: string
@@ -37,12 +37,12 @@ export function SimpleTabs({
       }}
     >
       <Tabs.List className={cn('p-1 w-fit rounded-md gap-5 flex bg-transparent', listClassName)}>
-        {data.map((item) => (
+        {data.map((item, i) => (
           <Tabs.Trigger
             key={item.tab}
             className={cn(
               'rounded-[3px] text-sm py-1.5 px-0 text-black/50 font-medium data-[state="active"]:bg-black data-[state="active"]:text-slate-900 !bg-transparent dark:text-white/50 dark:data-[state="active"]:text-white',
-              triggerClassName,
+              typeof triggerClassName == 'function' ? triggerClassName(i) : triggerClassName,
             )}
             value={item.tab}
           >
