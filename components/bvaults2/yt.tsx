@@ -23,7 +23,7 @@ import { Tip } from "../ui/tip"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { parseUnits } from "viem"
+import { formatEther, parseUnits } from "viem"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -52,13 +52,17 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const { data: [outAmount, bt1Amount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcYtSwapKey,
         enabled: inputAssetBn > 0n,
+        retry: 0,
         initialData: [0n, 0n],
         queryFn: async () => {
             if (isToggled) {
                 const outAmount = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vc.hook, inputAssetBn] })
                 return [outAmount, 0n]
             } else {
-                const bestBT1 = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.08', 18)] })
+                const [bestBT1, count] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.05', 18)] })
+                    .catch(() => [0n, 0n] as [bigint, bigint])
+                console.info('calcBT1:', formatEther(bestBT1), count)
+                if (bestBT1 == 0n) return [0n, 0n]
                 // const bestBT1 = inputAssetBn * 99n / 100n;
                 const [outAmount] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactBTforYT', args: [vc.hook, inputAssetBn, bestBT1] })
                 return [outAmount, bestBT1]
@@ -88,7 +92,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         <ApproveAndTx
             className='mx-auto mt-4'
             tx='Swap'
-            disabled={isFetchingOut || inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
+            disabled={isFetchingOut || inputAssetBn <= 0n || inputAssetBn > inputBalance.result || (!isToggled && bt1Amount == 0n)}
             spender={vc.vault}
             approves={{
                 [input.address]: inputAssetBn,
