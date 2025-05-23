@@ -52,7 +52,8 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             return getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
         }
     })
-    const [apy, apyto, priceimpcat] = usePTApy(vc, inputAssetBn, outAmount, isToggled ? 'pt' : 'bt')
+    // isInputBT ? -outputBn : inputBn, isInputBT ? inputBn : -outputBn
+    const [apy, apyto, priceimpcat] = usePTApy(vc, isToggled ? inputAssetBn : -outAmount, isToggled ? -outAmount : inputAssetBn)
     const onSwitch = () => {
         toggle()
     }

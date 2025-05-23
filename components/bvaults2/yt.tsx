@@ -78,11 +78,10 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             }
         }
     })
-    const [roi, roito, priceimpact] = useYTRoi(vc, {
-        yt2bt: isToggled ? { inputYt: inputAssetBn, outBt: outAmount } : undefined,
-        bt2yt: !isToggled ? { inputBt: inputAssetBn, inputBt1: bt1Amount, refoundBt } : undefined,
-    })
-    const [apy] = usePTApy(vc)
+    // by2yt: inputBt1, -refoundBt
+    // yt2bt: -inputYt, inputYt - outBt
+    const [roi, roito, priceimpact] = useYTRoi(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
+    const [apy, apyTo] = usePTApy(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <Swap onClick={onSwitch} />
@@ -98,7 +97,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
             <div>
                 Est. ROI Change:   {formatPercent(roi)} → {formatPercent(roito)}<br />
-                Implied APY Change: {formatPercent(apy)} → 235%
+                Implied APY Change: {formatPercent(apy)} → {formatPercent(apyTo)}
             </div>
             <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
         </div>

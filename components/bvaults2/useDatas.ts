@@ -50,7 +50,7 @@ export function useEpochRemain(vc: BVault2Config) {
 }
 
 const YearSeconds = 365 * 24 * 60 * 60
-export function usePTApy(vc: BVault2Config, inputBn: bigint = 0n, outputBn: bigint = 0n, input: 'bt' | 'pt' = 'bt') {
+export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: bigint = 0n) {
   const { result: bt2ptPrice } = useBT2PTPrice(vc)
   const { result: logs } = useLogs(vc)
   const { result: remain } = useEpochRemain(vc)
@@ -61,9 +61,8 @@ export function usePTApy(vc: BVault2Config, inputBn: bigint = 0n, outputBn: bigi
   let apyto = apy
   let priceimpact = 0
   // calc change
-  if (inputBn > 0n && outputBn > 0n && logs) {
-    const isInputBT = input == 'bt'
-    const nPrice = calcBt2PtPrice(logs, isInputBT ? -outputBn : inputBn, isInputBT ? inputBn : -outputBn)
+  if ((ptChange != 0n && btChange != 0n) && logs) {
+    const nPrice = calcBt2PtPrice(logs, ptChange, btChange)
     priceimpact = Math.abs(nPrice - bt2ptPrice) / bt2ptPrice
     apyto = t > 0 ? _.round(Math.pow(nPrice, 1 / t) - 1, 5) : 0
   }
@@ -116,10 +115,8 @@ export function useUnderlingApy(vc: BVault2Config) {
 }
 export function useYTRoi(
   vc: BVault2Config,
-  inputs?: {
-    bt2yt?: { inputBt: bigint; inputBt1: bigint; refoundBt: bigint }
-    yt2bt?: { inputYt: bigint; outBt: bigint }
-  },
+  ptChange: bigint = 0n,
+  btChange: bigint = 0n,
 ) {
   const { result: logs } = useLogs(vc)
   const { result: btPrice } = useBTPriceUsd(vc)
@@ -131,15 +128,15 @@ export function useYTRoi(
   const roi = Pyt != 0 ? _.round(Y / Pyt - 1, 5) : 0
   let roito = roi
   let priceimpact = 0
-  if (inputs && (inputs.bt2yt || inputs.yt2bt)) {
-    let nBt2Pt = 0
-    if (inputs.bt2yt && inputs.bt2yt.inputBt > 0n && inputs.bt2yt.inputBt1 > 0n && inputs.bt2yt.refoundBt >= 0n) {
-      const { inputBt, inputBt1, refoundBt } = inputs.bt2yt
-      nBt2Pt = calcBt2PtPrice(logs, inputBt1, -refoundBt)
-    } else if (inputs.yt2bt && inputs.yt2bt.inputYt > 0n && inputs.yt2bt.outBt > 0n) {
-      const { inputYt, outBt } = inputs.yt2bt
-      nBt2Pt = calcBt2PtPrice(logs, -inputYt, inputYt - outBt)
-    }
+  if ((ptChange != 0n && btChange != 0n) && logs) {
+    const nBt2Pt = calcBt2PtPrice(logs, ptChange, btChange)
+    // if (inputs.bt2yt && inputs.bt2yt.inputBt > 0n && inputs.bt2yt.inputBt1 > 0n && inputs.bt2yt.refoundBt >= 0n) {
+    //   const { inputBt, inputBt1, refoundBt } = inputs.bt2yt
+    //   nBt2Pt = calcBt2PtPrice(logs, inputBt1, -refoundBt)
+    // } else if (inputs.yt2bt && inputs.yt2bt.inputYt > 0n && inputs.yt2bt.outBt > 0n) {
+    //   const { inputYt, outBt } = inputs.yt2bt
+    //   nBt2Pt = calcBt2PtPrice(logs, -inputYt, inputYt - outBt)
+    // }
     if (nBt2Pt != 0) {
       const nYtPriceBT = calcYt2BtPrice(nBt2Pt)
       const nPyt = btPrice * nYtPriceBT
