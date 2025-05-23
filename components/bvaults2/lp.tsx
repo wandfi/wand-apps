@@ -21,7 +21,7 @@ import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { useLogs, useLPApy } from "./useDatas"
+import { useLogs, useLPApy, useLpShare } from "./useDatas"
 import _ from "lodash"
 
 
@@ -49,14 +49,15 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
     const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcOutsKey,
-        enabled: inputAssetBn > 0n && calcOutsKey.length > 1,
         initialData: [0n, 0n, 0n],
-        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
+        queryFn: async () => {
+            if (inputAssetBn <= 0n || calcOutsKey.length <= 1) return [0n, 0n, 0n]
+            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
+        }
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
 
-    const poolShare = lpc.result > 0 ? _.round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0
-    const poolShareTo = lpAmount > 0n ? _.round(aarToNumber(lpBalance.result + lpAmount, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : poolShare
+    const [poolShare, poolShareTo] = useLpShare(vc, lpAmount)
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <SwapDown />
@@ -120,9 +121,13 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         queryKey: calcOutsKey,
         enabled: inputAssetBn > 0n && calcOutsKey.length > 1,
         initialData: [0n, 0n, 0n],
-        queryFn: async () => getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
+        queryFn: async () => {
+            if (inputAssetBn <= 0n || calcOutsKey.length <= 1) return [0n, 0n, 0n]
+            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
+        }
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
+    const [poolShare, poolShareTo] = useLpShare(vc, -inputAssetBn)
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <SwapDown />
@@ -137,7 +142,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
         <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut} />
-        <div className="font-medium text-xs opacity-60">Pool Share Change: 233% → 235%</div>
+        <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
         <ApproveAndTx
             className='mx-auto mt-4'
             tx='Remove'

@@ -6,7 +6,7 @@ import { Token } from "@/config/tokens";
 import { DECIMAL } from "@/constants";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
-import { aarToNumber, cn, FMT, fmtDate, fmtDuration, genDeadline, getTokenBy, parseEthers } from "@/lib/utils";
+import { aarToNumber, cn, FMT, fmtDate, fmtDuration, formatPercent, genDeadline, getTokenBy, parseEthers } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@tremor/react";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,7 @@ import { PT } from "./pt";
 import { getBvault2EpochTimes, getBvualt2BootTimes, getBvualt2Times, useBvualt2Data } from "./useFets";
 import { useBalance } from "./useToken";
 import { YT } from "./yt";
+import { usePTApy, useYTRoi } from "./useDatas";
 
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
@@ -170,6 +171,8 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { endTime, duration } = getBvualt2Times(vd)
+    const [apy] = usePTApy(vc)
+    const [roi] = useYTRoi(vc)
     return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} onClick={() => toBVault2(r, vc.vault)}>
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
             <CoinIcon symbol={asset.symbol} size={44} />
@@ -200,10 +203,10 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
         {renderChoseSide(
             'PToken',
             'Principal Token',
-            '123$%',
+            formatPercent(apy),
             'YToken',
             'Yield Token',
-            `123x`, // `${fmtBoost}x`,
+            formatPercent(roi), // `${fmtBoost}x`,
             // (e) => {
             //     e.stopPropagation()
             //     //   toBVault(r, vc.vault, 'principal_token')

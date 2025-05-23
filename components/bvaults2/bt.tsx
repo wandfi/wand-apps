@@ -40,8 +40,10 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const { data: outAmount, isFetching: isFetchingCalc } = useQuery({
         queryKey: calcOutAmountKey,
         initialData: 0n,
-        enabled: calcOutAmountKey.length > 1,
-        queryFn: async () => getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: isToggled ? [vc.asset, inputAssetBn] : [vc.asset, inputAssetBn] })
+        queryFn: async () => {
+            if (calcOutAmountKey.length <= 1) return 0n
+            return getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: isToggled ? [vc.asset, inputAssetBn] : [vc.asset, inputAssetBn] })
+        }
     })
     const onSwitch = () => {
         toggle()

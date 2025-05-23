@@ -8,7 +8,7 @@ import { getPC } from '@/providers/publicClient'
 import _ from 'lodash'
 import { formatEther, parseUnits } from 'viem'
 import { useBvualt2Data } from './useFets'
-import { useTotalSupply } from './useToken'
+import { useBalance, useTotalSupply } from './useToken'
 import { Token } from '@/config/tokens'
 
 export const FetKEYS = {
@@ -173,4 +173,20 @@ export function useLPApy(vc: BVault2Config) {
   const apyBy = BTnet + PT * pt2btPrice + YT * yt2btPrice
   const apy = apyBy != 0 ? (underlyinApy * BTtp) / apyBy : 0
   return apy
+}
+
+export function useLpShare(vc: BVault2Config, lpUserChange: bigint) {
+  const chainId = useCurrentChainId()
+  const asset = getTokenBy(vc.asset)
+  const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals } as Token
+  const lpc = useTotalSupply(lp)
+  const lpBalance = useBalance(lp)
+  const poolShare = lpc.result > 0 ? _.round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0
+  const poolShareTo =
+    lpUserChange != 0n
+      ? lpc.result + lpUserChange > 0n
+        ? _.round(aarToNumber(lpBalance.result + lpUserChange, lp.decimals) / aarToNumber(lpc.result + lpUserChange, lp.decimals), 5)
+        : 0
+      : poolShare
+  return [poolShare, poolShareTo]
 }

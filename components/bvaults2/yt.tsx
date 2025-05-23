@@ -24,7 +24,7 @@ import { PTYTMint, PTYTRedeem } from "./pt"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
 import { formatEther, parseUnits } from "viem"
-import { FetKEYS, useYTPriceBt, useYTRoi } from "./useDatas"
+import { FetKEYS, usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
 import _ from "lodash"
 
 
@@ -64,7 +64,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 const outAmount = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vc.hook, inputAssetBn] })
                 return [outAmount, 0n, 0n]
             } else {
-                const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.05', 18)] })
+                const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.02', 18)] })
                     .catch(() => [0n, 0n] as [bigint, bigint])
                 console.info('calcBT1:', formatEther(bestBT1), count)
                 if (bestBT1 == 0n) return [0n, 0n, 0n]
@@ -82,6 +82,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         yt2bt: isToggled ? { inputYt: inputAssetBn, outBt: outAmount } : undefined,
         bt2yt: !isToggled ? { inputBt: inputAssetBn, inputBt1: bt1Amount, refoundBt } : undefined,
     })
+    const [apy] = usePTApy(vc)
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <Swap onClick={onSwitch} />
@@ -97,7 +98,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
             <div>
                 Est. ROI Change:   {formatPercent(roi)} → {formatPercent(roito)}<br />
-                Implied APY Change: 233% → 235%
+                Implied APY Change: {formatPercent(apy)} → 235%
             </div>
             <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
         </div>
