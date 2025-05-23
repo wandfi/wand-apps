@@ -75,7 +75,11 @@ export function fmtPercent(percent: bigint, decimals: number | bigint, showDecim
 }
 
 export function formatPercent(percet: number, decimals: number = 2) {
-  return `${percet < 0 ? '-' : ''}${_.round(percet * 100, decimals)} %`
+  const minValue = 1 / Math.pow(10, decimals + 2)
+  if (percet < minValue) {
+    return `<${minValue * 100}%`
+  }
+  return `${_.round(percet * 100, decimals)} %`
 }
 
 export function getBigint(result: any, path: string | (string | number)[], def: bigint = 0n) {

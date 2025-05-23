@@ -1,10 +1,14 @@
 import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
+import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { reFet } from "@/hooks/useFet"
-import { fmtBn, genDeadline, getTokenBy, handleError, multipBn, parseEthers } from "@/lib/utils"
+import { logUserAction } from "@/lib/logs"
+import { aarToNumber, fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
+import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
 import { useAccount, useWalletClient } from "wagmi"
@@ -17,11 +21,8 @@ import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { isAddressEqual, zeroAddress } from "viem"
-import { getPC } from "@/providers/publicClient"
-import { codeBvualt2Query } from "@/config/abi/codes"
-import { useQuery } from "@tanstack/react-query"
-import { logUserAction } from "@/lib/logs"
+import { useLogs, useLPApy } from "./useDatas"
+import _ from "lodash"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
@@ -43,6 +44,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const inputAssetBn = parseEthers(inputAsset)
     const input = getTokenBy(vc.bt, chainId)
     const inputBalance = useBalance(input)
+    const lpBalance = useBalance(lp)
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
     const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
@@ -53,6 +55,8 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
 
+    const poolShare = lpc.result > 0 ? _.round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0
+    const poolShareTo = lpAmount > 0n ? _.round(aarToNumber(lpBalance.result + lpAmount, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : poolShare
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <SwapDown />
@@ -67,7 +71,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
         <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
         <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut} />
-        <div className="font-medium text-xs opacity-60">Pool Share Change: 233% → 235%</div>
+        <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
         <ApproveAndTx
             className='mx-auto mt-4'
             tx='Add'
@@ -172,9 +176,11 @@ export function LP({ vc }: { vc: BVault2Config }) {
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: lp }).catch(handleError)
     }
-    const btc = useTotalSupply(bt)
+    const { result: logs } = useLogs(vc)
     const ptc = useTotalSupply(pt)
     const ytc = useTotalSupply(yt)
+    const apy = useLPApy(vc)
+
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#E8E8FD] gap-5'>
@@ -185,7 +191,7 @@ export function LP({ vc }: { vc: BVault2Config }) {
                 </div>
             </div>
             <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>
-                <div className="text-lg font-medium">150%</div>
+                <div className="text-lg font-medium">{formatPercent(apy)}</div>
                 <div className="text-xs font-semibold opacity-60">APY</div>
                 <div className="text-xs font-semibold opacity-60 ml-auto">LP amount</div>
                 <div className="text-lg font-medium">{displayBalance(lpc.result)}</div>
@@ -198,9 +204,9 @@ export function LP({ vc }: { vc: BVault2Config }) {
             <div className="pb-4 px-3 text-xs flex flex-col gap-2">
                 <span className="opacity-60">LP Positions</span>
                 <div className="flex justify-between items-center gap-5">
-                    <CoinAmount token={bt} amount={btc.result} />
-                    <CoinAmount token={pt} amount={ptc.result} />
-                    <CoinAmount token={yt} amount={ytc.result} />
+                    <CoinAmount token={bt} amount={logs?.BTnet ?? 0n} />
+                    <CoinAmount token={pt} amount={ytc.result > ptc.result ? ytc.result - ptc.result : 0n} />
+                    <CoinAmount token={yt} amount={ptc.result > ytc.result ? ptc.result - ytc.result : 0n} />
                 </div>
             </div>
         </div>

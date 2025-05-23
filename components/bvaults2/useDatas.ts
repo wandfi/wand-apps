@@ -8,6 +8,8 @@ import { getPC } from '@/providers/publicClient'
 import _ from 'lodash'
 import { formatEther, parseUnits } from 'viem'
 import { useBvualt2Data } from './useFets'
+import { useTotalSupply } from './useToken'
+import { Token } from '@/config/tokens'
 
 export const FetKEYS = {
   Logs: (chainId: number, vc: BVault2Config) => `Logs:${chainId}:${vc.vault}`,
@@ -147,4 +149,28 @@ export function useYTRoi(
   }
   console.info('ytRoi:', ytPriceBT, Pyt, Y, roi, roito)
   return [roi, roito, priceimpact]
+}
+
+export function useLPApy(vc: BVault2Config) {
+  // underlying APY * BTtp/(BTnet+PT*pt2btPrice+YT*yt2btPrice)
+  const chainId = useCurrentChainId()
+  const { result: underlyinApy } = useUnderlingApy(vc)
+  const { result: logs } = useLogs(vc)
+  const asset = getTokenBy(vc.asset)
+  const BTnet = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
+  const BTtp = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
+  const vd = useBvualt2Data(vc)
+  const epoch = vd.result?.current
+  const pt = epoch ? ({ address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token) : undefined
+  const yt = epoch ? ({ address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token) : undefined
+  const ptc = useTotalSupply(pt)
+  const ytc = useTotalSupply(yt)
+  const PT = ytc.result > ptc.result ? aarToNumber(ytc.result - ptc.result, asset.decimals) : 0
+  const YT = ptc.result > ytc.result ? aarToNumber(ptc.result - ytc.result, asset.decimals) : 0
+  const { result: bt2ptPrice } = useBT2PTPrice(vc)
+  const pt2btPrice = bt2ptPrice > 0 ? 1 / bt2ptPrice : 0
+  const yt2btPrice = calcYt2BtPrice(bt2ptPrice)
+  const apyBy = BTnet + PT * pt2btPrice + YT * yt2btPrice
+  const apy = apyBy != 0 ? (underlyinApy * BTtp) / apyBy : 0
+  return apy
 }

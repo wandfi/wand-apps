@@ -1,7 +1,7 @@
 import { abiBT } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
-import { fmtBn, getTokenBy, handleError, parseEthers } from "@/lib/utils";
+import { fmtBn, formatPercent, getTokenBy, handleError, parseEthers } from "@/lib/utils";
 import { useState } from "react";
 import { useDebounce, useToggle } from "react-use";
 import { useAccount, useWalletClient } from "wagmi";
@@ -15,6 +15,7 @@ import { displayBalance } from "@/utils/display";
 import { reFet } from "@/hooks/useFet";
 import { useQuery } from "@tanstack/react-query";
 import { getPC } from "@/providers/publicClient";
+import { useUnderlingApy } from "./useDatas";
 
 export function BT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
@@ -45,6 +46,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const onSwitch = () => {
         toggle()
     }
+    const { result: unlerlingApy } = useUnderlingApy(vc)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#E8E8FD] gap-5'>
@@ -55,7 +57,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
                 </div>
             </div>
             <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>
-                <div className="text-lg font-medium">150%</div>
+                <div className="text-lg font-medium">{formatPercent(unlerlingApy)}</div>
                 <div className="text-xs font-semibold opacity-60">Underlying APY</div>
                 <div className="text-xs font-semibold opacity-60 ml-auto">Circulation amount</div>
                 <div className="text-lg font-medium">{displayBalance(btTotalSupply.result, undefined, bt.decimals)}</div>
