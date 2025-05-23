@@ -76,7 +76,12 @@ export const story = defineChain({
   rpcUrls: {
     default: { http: ['https://mainnet.storyrpc.io'] },
     // "https://berachain-mainnet.g.alchemy.com/v2/-yCJ0Aq6OmJoAtLknbSiImqfoPCzQCxe"
-    public: { http: ['https://rpc.ankr.com/story_mainnet', 'https://evm-rpc.story.mainnet.dteam.tech', 'https://evm-rpc-story.j-node.net', 'https://story-evm-rpc.krews.xyz'] },
+    public: {
+      http: [
+        'https://story-mainnet.g.alchemy.com/v2/7UXJgo01vxWHLJDk09Y0qZct8Y3zMDbX',
+        'https://rpc.ankr.com/story_mainnet',
+      ],
+    },
   },
   blockExplorers: {
     default: {

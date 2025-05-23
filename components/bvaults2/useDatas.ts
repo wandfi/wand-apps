@@ -134,6 +134,9 @@ export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
   return [roi, roito, priceimpact]
 }
 
+// LP的到期收益: underlying APY*剩余时间 * BTtp/365 +（1-pt2btPrice）*PT-YT*yt2btPrice
+// LP的成本：BTnet+PT*pt2btPrice+YT*yt2btPrice
+// LP APY： LP的到期收益/LP的成本 *（365/剩余时间 ）
 export function useLPApy(vc: BVault2Config) {
   // underlying APY * BTtp/(BTnet+PT*pt2btPrice+YT*yt2btPrice)
   const { result: underlyinApy } = useUnderlingApy(vc)
@@ -150,8 +153,12 @@ export function useLPApy(vc: BVault2Config) {
   const { result: bt2ptPrice } = useBT2PTPrice(vc)
   const pt2btPrice = bt2ptPrice > 0 ? 1 / bt2ptPrice : 0
   const yt2btPrice = calcYt2BtPrice(bt2ptPrice)
-  const apyBy = BTnet + PT * pt2btPrice + YT * yt2btPrice
-  const apy = apyBy != 0 ? (underlyinApy * BTtp) / apyBy : 0
+  const { result: remain } = useEpochRemain(vc)
+  const LP的到期收益 = (underlyinApy * remain * BTtp) / YearSeconds + (1 - pt2btPrice) * PT - YT * yt2btPrice
+  const LP的成本 = BTnet + PT * pt2btPrice + YT * yt2btPrice
+  const apy = LP的成本 > 0 && remain > 0 ? (LP的到期收益 / LP的成本) * (YearSeconds / remain) : 0
+  // const apyBy = BTnet + PT * pt2btPrice + YT * yt2btPrice
+  // const apy = apyBy != 0 ? (underlyinApy * BTtp) / apyBy : 0
   return apy
 }
 
