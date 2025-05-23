@@ -46,9 +46,11 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
         queryKey: calcPtSwapKey,
-        enabled: inputAssetBn > 0n && calcPtSwapKey.length > 1,
         initialData: 0n,
-        queryFn: async () => getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
+        queryFn: async () => {
+            if (inputAssetBn <= 0n || calcPtSwapKey.length == 1) return 0n
+            return getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
+        }
     })
     const [apy, apyto, priceimpcat] = usePTApy(vc, inputAssetBn, outAmount, isToggled ? 'pt' : 'bt')
     const onSwitch = () => {
