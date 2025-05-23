@@ -43,7 +43,7 @@ function PT({ vc }: { vc: BVault2Config }) {
                 displayBalance(item.redeemable, undefined, pt.decimals),
                 epochActive ? 'Active' : 'Mature',
                 <div key='redeemable'>
-                    {!epochActive && <MCoinAmount token={pt} amount={item.redeemable} />}
+                    {!epochActive && <MCoinAmount token={getTokenBy(vc.bt)} amount={item.redeemable} />}
                 </div>,
                 <div key='calim'>
                     {!epochActive && <ApproveAndTx
