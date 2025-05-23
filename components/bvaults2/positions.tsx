@@ -2,18 +2,20 @@ import { abiMaturityPool, abiRewardManager } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
 import { Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
+import { reFet } from "@/hooks/useFet";
 import { cn, getTokenBy } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
+import { now } from "lodash";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { ApproveAndTx } from "../approve-and-tx";
 import { CoinAmount } from "../coin-amount";
 import { CoinIcon } from "../icons/coinicon";
 import STable from "../simple-table";
-import { useBvault2LPBTRewards, useBvault2YTRewards, useBvualt2Data, useBvualt2PTRedeems } from "./useFets";
+import { getPtToken, getYtToken } from "./getToken";
+import { useBvault2LPBTRewards, useBvault2YTRewards, useBvualt2PTRedeems } from "./useFets";
 import { useBalance } from "./useToken";
-import { now } from "lodash";
-import { reFet } from "@/hooks/useFet";
+
 
 const MCoinAmount = ({ ...p }: Parameters<typeof CoinAmount>[0]) => {
     return <CoinAmount className="font-bold text-sm" symbolClassName="opacity-100" {...p} />
@@ -30,13 +32,12 @@ const claimColSize = 1.3;
 const statuColSize = 1.6
 function PT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
     const redeems = useBvualt2PTRedeems(vc)
     const data = useMemo(() => {
         if (!redeems.result.length) return []
         return redeems.result.map(item => {
             const epochActive = (item.startTime + item.duration) * 1000n > BigInt(now())
-            const pt = { address: item.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
+            const pt = getPtToken(vc, chainId, item.PT)
             return [
                 <TokenSymbol key="token" t={pt} />,
                 displayBalance(item.redeemable, undefined, pt.decimals),
@@ -77,7 +78,6 @@ function TokenBalance({ t }: { t?: Token }) {
 }
 function YT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
     const rewards = useBvault2YTRewards(vc)
     const { address } = useAccount()
     const data = useMemo(() => {
@@ -86,7 +86,7 @@ function YT({ vc }: { vc: BVault2Config }) {
         }
         return rewards.result.map(item => {
             const epochActive = (item.startTime + item.duration) * 1000n > BigInt(now())
-            const yt = { address: item.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+            const yt = getYtToken(vc, chainId, item.YT)
             return [
                 <TokenSymbol key="token" t={yt} />,
                 <TokenBalance t={yt} key='ytBalance' />,

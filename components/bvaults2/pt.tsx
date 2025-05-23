@@ -1,6 +1,5 @@
 import { abiBVault2, abiHook, abiMintPool } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
-import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
@@ -8,6 +7,7 @@ import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
+import _ from "lodash"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
 import { useAccount, useWalletClient } from "wagmi"
@@ -18,19 +18,18 @@ import { GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { Swap, SwapDown } from "../ui/bbtn"
+import { useBT2PTPrice, usePTApy } from "./useDatas"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { FetKEYS, useBT2PTPrice, usePTApy } from "./useDatas"
-import _ from "lodash"
+import { usePtToken, useYtToken } from "./getToken"
+import { FetKEYS } from "./fetKeys"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
     const bt = getTokenBy(vc.bt, chainId)
     const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
+    const pt = usePtToken(vc)!
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const [isToggled, toggle] = useToggle(false)
@@ -98,11 +97,9 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
 export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const baseAsset = getTokenBy(vc.asset, chainId)
     const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${baseAsset.symbol}`, decimals: baseAsset.decimals } as Token
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${baseAsset.symbol}`, decimals: baseAsset.decimals } as Token
+    const pt = usePtToken(vc)!
+    const yt = useYtToken(vc)!
     const input = getTokenBy(vc.bt, chainId)
     const inputBalance = useBalance(input)
     const ptBalance = useBalance(pt)
@@ -144,12 +141,10 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
 export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
     const out = getTokenBy(vc.bt, chainId)
     const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const pt = usePtToken(vc)!
+    const yt = useYtToken(vc)!
     const ptBalance = useBalance(pt)
     const ytBalance = useBalance(pt)
     const outBalance = useBalance(out)
@@ -188,10 +183,8 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
 
 export function PT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const baseAsset = getTokenBy(vc.asset, chainId)
-    const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${baseAsset.symbol}`, decimals: baseAsset.decimals } as Token
+    const asset = getTokenBy(vc.asset, chainId)
+    const pt = usePtToken(vc)!
     const ptc = useTotalSupply(pt)
     const { data: walletClient } = useWalletClient()
     const onAddPToken = () => {
@@ -204,7 +197,7 @@ export function PT({ vc }: { vc: BVault2Config }) {
                 <CoinIcon size={48} symbol='PToken' />
                 <div className='flex flex-col gap-3'>
                     <div className='text-xl leading-6 text-black dark:text-white font-semibold'>{pt.symbol}</div>
-                    <div className='text-xs leading-none text-black/60 dark:text-white/60 font-medium'>1 {pt.symbol} is equal to1 {baseAsset.symbol} at maturity</div>
+                    <div className='text-xs leading-none text-black/60 dark:text-white/60 font-medium'>1 {pt.symbol} is equal to1 {asset.symbol} at maturity</div>
                 </div>
             </div>
             <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>

@@ -1,14 +1,15 @@
 import { abiBVault2, abiMarket, abiRewardManager } from '@/config/abi/BVault2'
 import { BVault2Config } from '@/config/bvaults2'
-import { getCurrentChainId } from '@/config/network'
-import { Token } from '@/config/tokens'
 import { DECIMAL_10 } from '@/constants'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet } from '@/hooks/useFet'
 import { aarToNumber, bnRange, getTokenBy, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
 import { Address, erc20Abi, PublicClient, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
+import { getLpToken } from './getToken'
+import { FetKEYS } from './fetKeys'
 
 export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient = getPC()) {
   return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
@@ -47,9 +48,9 @@ export async function getHookData(vc: BVault2Config, user: Address, pc: PublicCl
 
 export type Vault2Data = UnPromise<ReturnType<typeof getBvaut2Data>>
 export function useBvualt2Data(vc: BVault2Config) {
-  // console.info('vd2:', vd.status, vdc.status)
+  const chainId = useCurrentChainId()
   return useFet({
-    key: `vault2Data:${vc.vault}`,
+    key: FetKEYS.Bvault2Data(chainId, vc),
     fetfn: async () => getBvaut2Data(vc),
   })
 }
@@ -80,10 +81,7 @@ export function getBvualt2Times(vd?: Vault2Data) {
 }
 
 export function useBvault2Epochs(vc: BVault2Config) {
-  const vd = useFet({
-    key: `vault2Data:${vc.vault}`,
-    fetfn: async () => getBvaut2Data(vc),
-  })
+  const vd = useBvualt2Data(vc)
   const epochs = useFet({
     key: vd.result && vd.result.epochIdCount > 0n ? `vault2Data:epoches:${vc.vault}:${vd.result.epochIdCount}` : '',
     initResult: [],
@@ -144,14 +142,14 @@ export function useBvault2YTRewards(vc: BVault2Config) {
   return rewards
 }
 export function useBvault2LPBTRewards(vc: BVault2Config) {
+  const chainId = useCurrentChainId()
   const vd = useBvualt2Data(vc)
-  const asset = getTokenBy(vc.asset)
   const { address } = useAccount()
   const rewards = useFet({
     key: address ? `vault2Data:RewardsForLPBT:${vc.vault}:` : '',
     initResult: [],
     fetfn: async () => {
-      const lp = { address: vc.hook, decimals: asset.decimals, symbol: `LP${asset.symbol}`, chain: [getCurrentChainId()] } as Token
+      const lp = getLpToken(vc, chainId)
       const bt = getTokenBy(vc.bt)
       const pc = getPC()
       const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, address!, pc), getRewardsBy(bt.address, address!, pc)])

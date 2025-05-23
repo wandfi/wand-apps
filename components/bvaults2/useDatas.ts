@@ -7,13 +7,10 @@ import { aarToNumber, getTokenBy, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import _ from 'lodash'
 import { formatEther, parseUnits } from 'viem'
+import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
 import { useBalance, useTotalSupply } from './useToken'
-import { Token } from '@/config/tokens'
-
-export const FetKEYS = {
-  Logs: (chainId: number, vc: BVault2Config) => `Logs:${chainId}:${vc.vault}`,
-}
+import { FetKEYS } from './fetKeys'
 
 export function useLogs(vc: BVault2Config) {
   const chainId = useCurrentChainId()
@@ -61,7 +58,7 @@ export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
   let apyto = apy
   let priceimpact = 0
   // calc change
-  if ((ptChange != 0n && btChange != 0n) && logs) {
+  if (ptChange != 0n && btChange != 0n && logs) {
     const nPrice = calcBt2PtPrice(logs, ptChange, btChange)
     priceimpact = Math.abs(nPrice - bt2ptPrice) / bt2ptPrice
     apyto = t > 0 ? _.round(Math.pow(nPrice, 1 / t) - 1, 5) : 0
@@ -113,11 +110,7 @@ export function useUnderlingApy(vc: BVault2Config) {
     fetfn: async () => 1.07,
   })
 }
-export function useYTRoi(
-  vc: BVault2Config,
-  ptChange: bigint = 0n,
-  btChange: bigint = 0n,
-) {
+export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: bigint = 0n) {
   const { result: logs } = useLogs(vc)
   const { result: btPrice } = useBTPriceUsd(vc)
   const { result: ytPriceBT } = useYTPriceBt(vc)
@@ -128,15 +121,8 @@ export function useYTRoi(
   const roi = Pyt != 0 ? _.round(Y / Pyt - 1, 5) : 0
   let roito = roi
   let priceimpact = 0
-  if ((ptChange != 0n && btChange != 0n) && logs) {
+  if (ptChange != 0n && btChange != 0n && logs) {
     const nBt2Pt = calcBt2PtPrice(logs, ptChange, btChange)
-    // if (inputs.bt2yt && inputs.bt2yt.inputBt > 0n && inputs.bt2yt.inputBt1 > 0n && inputs.bt2yt.refoundBt >= 0n) {
-    //   const { inputBt, inputBt1, refoundBt } = inputs.bt2yt
-    //   nBt2Pt = calcBt2PtPrice(logs, inputBt1, -refoundBt)
-    // } else if (inputs.yt2bt && inputs.yt2bt.inputYt > 0n && inputs.yt2bt.outBt > 0n) {
-    //   const { inputYt, outBt } = inputs.yt2bt
-    //   nBt2Pt = calcBt2PtPrice(logs, -inputYt, inputYt - outBt)
-    // }
     if (nBt2Pt != 0) {
       const nYtPriceBT = calcYt2BtPrice(nBt2Pt)
       const nPyt = btPrice * nYtPriceBT
@@ -150,16 +136,13 @@ export function useYTRoi(
 
 export function useLPApy(vc: BVault2Config) {
   // underlying APY * BTtp/(BTnet+PT*pt2btPrice+YT*yt2btPrice)
-  const chainId = useCurrentChainId()
   const { result: underlyinApy } = useUnderlingApy(vc)
   const { result: logs } = useLogs(vc)
   const asset = getTokenBy(vc.asset)
   const BTnet = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
   const BTtp = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
-  const vd = useBvualt2Data(vc)
-  const epoch = vd.result?.current
-  const pt = epoch ? ({ address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token) : undefined
-  const yt = epoch ? ({ address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token) : undefined
+  const pt = usePtToken(vc)
+  const yt = useYtToken(vc)
   const ptc = useTotalSupply(pt)
   const ytc = useTotalSupply(yt)
   const PT = ytc.result > ptc.result ? aarToNumber(ytc.result - ptc.result, asset.decimals) : 0
@@ -174,8 +157,7 @@ export function useLPApy(vc: BVault2Config) {
 
 export function useLpShare(vc: BVault2Config, lpUserChange: bigint) {
   const chainId = useCurrentChainId()
-  const asset = getTokenBy(vc.asset)
-  const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals } as Token
+  const lp = getLpToken(vc, chainId)
   const lpc = useTotalSupply(lp)
   const lpBalance = useBalance(lp)
   const poolShare = lpc.result > 0 ? _.round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0

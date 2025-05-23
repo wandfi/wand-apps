@@ -21,21 +21,20 @@ import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { useLogs, useLPApy, useLpShare } from "./useDatas"
+import {  useLogs, useLPApy, useLpShare } from "./useDatas"
 import _ from "lodash"
+import { getLpToken, usePtToken, useYtToken } from "./getToken"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const vdFS = useBvualt2Data(vc)
-    const vd = vdFS.result!
-    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const vd = useBvualt2Data(vc)
+    const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
-    const epoch = vd!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const pt = usePtToken(vc)!
+    const yt = useYtToken(vc)!
     const ptc = useTotalSupply(pt)
     const ytc = useTotalSupply(yt)
     const out = ptc.result >= ytc.result ? pt : yt
@@ -44,7 +43,6 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const inputAssetBn = parseEthers(inputAsset)
     const input = getTokenBy(vc.bt, chainId)
     const inputBalance = useBalance(input)
-    const lpBalance = useBalance(lp)
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
     const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
@@ -90,7 +88,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPAdd:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
-                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, ...vdFS.key)
+                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, vd.key)
             }}
         />
     </div>
@@ -100,13 +98,11 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
     const bt = getTokenBy(vc.bt, chainId)
-    const vdFS = useBvualt2Data(vc)
-    const vd = vdFS.result!
-    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const vd = useBvualt2Data(vc)
+    const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
-    const epoch = vd!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const pt = usePtToken(vc)!
+    const yt = useYtToken(vc)!
     const ptc = useTotalSupply(pt)
     const ytc = useTotalSupply(yt)
     const [keep, toggleKeep] = useToggle(false)
@@ -160,23 +156,18 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPRemove:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
-                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, ...vdFS.key)
+                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, vd.key)
             }}
         />
     </div>
 }
 export function LP({ vc }: { vc: BVault2Config }) {
-
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
     const bt = getTokenBy(vc.bt, chainId)
-    const vdFS = useBvualt2Data(vc)
-    const vd = vdFS.result!
-    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
-    const epoch = vd!.current!
-    const pt = { address: epoch.PT, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const pt = usePtToken(vc)!
+    const yt = useYtToken(vc)!
     const { data: walletClient } = useWalletClient()
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: lp }).catch(handleError)

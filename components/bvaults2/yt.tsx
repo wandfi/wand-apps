@@ -1,7 +1,6 @@
 import { abiBVault2, abiBvault2Query, abiHook } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
-import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
@@ -9,8 +8,10 @@ import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
+import _ from "lodash"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
+import { formatEther, parseUnits } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { ApproveAndTx } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
@@ -20,22 +21,20 @@ import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { Swap } from "../ui/bbtn"
 import { Tip } from "../ui/tip"
+import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
+import { usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { formatEther, parseUnits } from "viem"
-import { FetKEYS, usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
-import _ from "lodash"
+import { FetKEYS } from "./fetKeys"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
     const bt = getTokenBy(vc.bt, chainId)
     const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current!
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const yt = useYtToken(vc)!
     const ytBalance = useBalance(yt)
     const btBalance = useBalance(bt)
     const [inputAsset, setInputAsset] = useState('')
@@ -126,9 +125,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
 export function YT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const vd = useBvualt2Data(vc)
-    const epoch = vd.result!.current!
-    const yt = { address: epoch.YT, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    const yt = useYtToken(vc)!
     const ytTotalSupply = useTotalSupply(yt)
     const { data: walletClient } = useWalletClient()
     const onAddPToken = () => {

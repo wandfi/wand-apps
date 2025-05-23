@@ -2,7 +2,6 @@
 import { toBVault2 } from "@/app/routes";
 import { abiBVault2 } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
-import { Token } from "@/config/tokens";
 import { DECIMAL } from "@/constants";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
@@ -22,16 +21,16 @@ import { itemClassname, renderChoseSide, renderStat } from "../vault-card-ui";
 import { BT } from "./bt";
 import { LP } from "./lp";
 import { PT } from "./pt";
+import {  usePTApy, useYTRoi } from "./useDatas";
 import { getBvault2EpochTimes, getBvualt2BootTimes, getBvualt2Times, useBvualt2Data } from "./useFets";
 import { useBalance } from "./useToken";
 import { YT } from "./yt";
-import { usePTApy, useYTRoi } from "./useDatas";
+import { getLpToken } from "./getToken";
 
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const bt = getTokenBy(vc.bt, chainId)
-    const asset = getTokenBy(vc.asset, chainId)
     const input = bt;
     const inputBalance = useBalance(input)
     const [inputAsset, setInputAsset] = useState('')
@@ -43,7 +42,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const currentAmount = vd?.totalDeposits ?? 0n
     const { endTime } = getBvualt2BootTimes(vd)
     const progressNum = Math.round(aarToNumber(targetAmount > 0n ? currentAmount >= targetAmount ? DECIMAL : currentAmount * DECIMAL / targetAmount : 0n, 16))
-    const lp = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals, } as Token
+    const lp =  getLpToken(vc, chainId)
     const lpBalance = useBalance(lp)
     return <div className="card bg-white">
         <div className="flex items-center gap-2 text-xl font-medium">
