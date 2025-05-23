@@ -75,7 +75,7 @@ export function fmtPercent(percent: bigint, decimals: number | bigint, showDecim
 }
 
 export function formatPercent(percet: number, decimals: number = 2) {
-  return _.round(percet * 100, decimals) + '%'
+  return `${percet < 0 ? '-' : ''}${_.round(percet * 100, decimals)} %`
 }
 
 export function getBigint(result: any, path: string | (string | number)[], def: bigint = 0n) {
@@ -244,4 +244,8 @@ export function bnRange(end: bigint, start = 1n, step = 1n) {
     bns.push(index)
   }
   return bns
+}
+
+export function nowUnix() {
+  return BigInt(Math.round(now() / 1000))
 }

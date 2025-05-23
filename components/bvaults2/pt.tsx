@@ -20,7 +20,8 @@ import { SimpleTabs } from "../simple-tabs"
 import { Swap, SwapDown } from "../ui/bbtn"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { useBT2PTPrice, usePTApy } from "./useDatas"
+import { FetKEYS, useBT2PTPrice, usePTApy } from "./useDatas"
+import _ from "lodash"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
@@ -39,7 +40,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const outputBalance = useBalance(output)
 
     const { result: btPrice } = useBT2PTPrice(vc)
-    const swapPrice = `1 ${bt.symbol} = ${displayBalance(btPrice, undefined, bt.decimals)} ${pt.symbol}`
+    const swapPrice = `1 ${bt.symbol} = ${_.round(btPrice, 2)} ${pt.symbol}`
 
     const [calcPtSwapKey, setCalcPtSwapKey] = useState<any[]>(['calcPTSwapOut'])
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
@@ -86,7 +87,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTSwap:${isToggled ? 'PT->BT' : 'BT->PT'}:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
-                reFet(...vd.key, inputBalance.key, outputBalance.key)
+                reFet(vd.key, FetKEYS.Logs(chainId, vc), inputBalance.key, outputBalance.key)
             }}
         />
     </div>
@@ -132,7 +133,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTMint:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
-                reFet(...vd.key, inputBalance.key, ptBalance.key, ytBalance.key)
+                reFet(vd.key, FetKEYS.Logs(chainId, vc), inputBalance.key, ptBalance.key, ytBalance.key)
             }}
         />
     </div>
@@ -176,7 +177,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTRedeem:(${fmtBn(inputBn)})`)
                 setInput('')
-                reFet(...vd.key, ptBalance.key, ytBalance.key, outBalance.key)
+                reFet(vd.key, FetKEYS.Logs(chainId, vc), ptBalance.key, ytBalance.key, outBalance.key)
             }}
         />
     </div>

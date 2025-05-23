@@ -1,11 +1,11 @@
-import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
+import { abiBVault2, abiBvault2Query, abiHook } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
@@ -24,6 +24,8 @@ import { PTYTMint, PTYTRedeem } from "./pt"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
 import { formatEther, parseUnits } from "viem"
+import { FetKEYS, useYTPriceBt, useYTRoi } from "./useDatas"
+import _ from "lodash"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -42,34 +44,44 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const inputBalance = isToggled ? ytBalance : btBalance
     const input = isToggled ? yt : bt
     const output = isToggled ? bt : yt
-    const swapPrice = `1 ${input.symbol} = ${'23.3'} ${output.symbol}`
-    const priceImpact = `20%`
+
+    const { result: ytPriceBt } = useYTPriceBt(vc)
+    const price = _.round(isToggled ? ytPriceBt : ytPriceBt > 0 ? 1 / ytPriceBt : 0, 2)
+    const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
     const onSwitch = () => {
         toggle()
     }
     const [calcYtSwapKey, setCalcYtSwapKey] = useState<any[]>(['calcYTSwapOut'])
     useDebounce(() => setCalcYtSwapKey(['calcYTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
-    const { data: [outAmount, bt1Amount], isFetching: isFetchingOut } = useQuery({
+    const { data: [outAmount, bt1Amount, refoundBt], isFetching: isFetchingOut } = useQuery({
         queryKey: calcYtSwapKey,
-        enabled: inputAssetBn > 0n,
         retry: 0,
-        initialData: [0n, 0n],
+        initialData: [0n, 0n, 0n],
         queryFn: async () => {
+            if (inputAssetBn <= 0n) return [0n, 0n, 0n]
+            const pc = getPC(chainId);
             if (isToggled) {
-                const outAmount = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vc.hook, inputAssetBn] })
-                return [outAmount, 0n]
+                const outAmount = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactYTforBT', args: [vc.hook, inputAssetBn] })
+                return [outAmount, 0n, 0n]
             } else {
-                const [bestBT1, count] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.05', 18)] })
+                const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputAssetBn, parseUnits('0.05', 18)] })
                     .catch(() => [0n, 0n] as [bigint, bigint])
                 console.info('calcBT1:', formatEther(bestBT1), count)
-                if (bestBT1 == 0n) return [0n, 0n]
+                if (bestBT1 == 0n) return [0n, 0n, 0n]
                 // const bestBT1 = inputAssetBn * 99n / 100n;
-                const [outAmount] = await getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactBTforYT', args: [vc.hook, inputAssetBn, bestBT1] })
-                return [outAmount, bestBT1]
+                const [[outAmount], refoundBt] = await Promise.all([
+                    pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteExactBTforYT', args: [vc.hook, inputAssetBn, bestBT1] }),
+                    pc.readContract({ abi: abiHook, address: vc.hook, functionName: 'getAmountOutVPTToBT', args: [bestBT1] })
+                ])
+
+                return [outAmount, bestBT1, refoundBt]
             }
         }
     })
-
+    const [roi, roito, priceimpact] = useYTRoi(vc, {
+        yt2bt: isToggled ? { inputYt: inputAssetBn, outBt: outAmount } : undefined,
+        bt2yt: !isToggled ? { inputBt: inputAssetBn, inputBt1: bt1Amount, refoundBt } : undefined,
+    })
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <Swap onClick={onSwitch} />
@@ -80,11 +92,11 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         <AssetInput asset={output.symbol} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
-            <div>Price Impact: {priceImpact}</div>
+            <div>Price Impact: {formatPercent(priceimpact)}</div>
         </div>
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
             <div>
-                Est. ROI Change:   233% → 235%<br />
+                Est. ROI Change:   {formatPercent(roi)} → {formatPercent(roito)}<br />
                 Implied APY Change: 233% → 235%
             </div>
             <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
@@ -106,7 +118,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, isToggled ? `YTSwap:YT->BT:(${fmtBn(inputAssetBn)})` : `YTSwap:BT->YT:(${fmtBn(inputAssetBn)}, bt1:${fmtBn(bt1Amount)})`)
                 setInputAsset('')
-                reFet(...vd.key, btBalance.key, ytBalance.key)
+                reFet(vd.key, FetKEYS.Logs(chainId, vc), btBalance.key, ytBalance.key)
             }}
         />
     </div>
@@ -122,6 +134,7 @@ export function YT({ vc }: { vc: BVault2Config }) {
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: yt }).catch(handleError)
     }
+    const [roi] = useYTRoi(vc)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#E8E8FD] gap-5'>
@@ -132,7 +145,7 @@ export function YT({ vc }: { vc: BVault2Config }) {
                 </div>
             </div>
             <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>
-                <div className="text-lg font-medium">150%</div>
+                <div className="text-lg font-medium">{formatPercent(roi)}</div>
                 <div className="text-xs font-semibold opacity-60">Est.ROI <Tip>If underlying APY remains unchanged from now on</Tip></div>
                 <div className="text-xs font-semibold opacity-60 ml-auto">Circulation amount</div>
                 <div className="text-lg font-medium">{displayBalance(ytTotalSupply.result, undefined, yt.decimals)}</div>
