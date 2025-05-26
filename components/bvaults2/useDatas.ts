@@ -143,7 +143,7 @@ export function useLPApy(vc: BVault2Config) {
   const { result: logs } = useLogs(vc)
   const asset = getTokenBy(vc.asset)
   const BTnet = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
-  const BTtp = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
+  const BTtp = aarToNumber(logs?.BTtp ?? 0n, asset.decimals)
   const pt = usePtToken(vc)
   const yt = useYtToken(vc)
   const ptc = useTotalSupply(pt)
@@ -157,6 +157,8 @@ export function useLPApy(vc: BVault2Config) {
   const LP的到期收益 = (underlyinApy * remain * BTtp) / YearSeconds + (1 - pt2btPrice) * PT - YT * yt2btPrice
   const LP的成本 = BTnet + PT * pt2btPrice + YT * yt2btPrice
   const apy = LP的成本 > 0 && remain > 0 ? (LP的到期收益 / LP的成本) * (YearSeconds / remain) : 0
+  // console.info('LP的到期收益:', BTtp, pt2btPrice, PT, YT, yt2btPrice)
+  // console.info('lpApy:', LP的到期收益, LP的成本, apy)
   // const apyBy = BTnet + PT * pt2btPrice + YT * yt2btPrice
   // const apy = apyBy != 0 ? (underlyinApy * BTtp) / apyBy : 0
   return apy

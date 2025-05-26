@@ -169,7 +169,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const asset = getTokenBy(vc.asset)
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
-    const { endTime, duration } = getBvualt2Times(vd)
+    const { endTime, reamin } = getBvualt2Times(vd)
     const [apy] = usePTApy(vc)
     const [roi] = useYTRoi(vc)
     return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} onClick={() => toBVault2(r, vc.vault)}>
@@ -192,7 +192,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
             <div className='relative'>
                 <div className='flex gap-2 items-end'>
                     <span>{fmtDate(endTime, FMT.DATE2)}</span>
-                    <span className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{fmtDuration(duration)}</span>
+                    <span className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{fmtDuration(reamin)}</span>
                 </div>
                 {/* {bvd.epochCount > 0n && <div className='absolute top-full mt-1 left-0 text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{epochName}</div>} */}
             </div>
