@@ -148,6 +148,7 @@ function YT({ vc }: { vc: BVault2Config }) {
         if (matures && matures.length) {
             const tokens: { [k: Address]: bigint } = {}
             const yts: Address[] = []
+        
             matures.forEach(item => {
                 item.rewrads.forEach(([t, value]) => {
                     tokens[t] = (tokens[t] ?? 0n) + value

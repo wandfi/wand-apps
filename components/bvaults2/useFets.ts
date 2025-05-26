@@ -1,4 +1,4 @@
-import { abiBVault2, abiMarket, abiRewardManager } from '@/config/abi/BVault2'
+import { abiBVault2, abiBvault2Query, abiMarket, abiRewardManager } from '@/config/abi/BVault2'
 import { BVault2Config } from '@/config/bvaults2'
 import { DECIMAL_10 } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
@@ -10,6 +10,7 @@ import { Address, erc20Abi, PublicClient, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
 import { getLpToken } from './getToken'
 import { FetKEYS } from './fetKeys'
+import { codeBvualt2Query } from '@/config/abi/codes'
 
 export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient = getPC()) {
   return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
@@ -119,10 +120,13 @@ export function useBvualt2PTRedeems(vc: BVault2Config) {
 }
 
 export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient = getPC()) {
-  return Promise.all([
-    pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getRewardTokens' }),
-    pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getUserRewards', args: [user] }),
-  ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
+  return pc
+    .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'earned', args: [rewradManager, user] })
+    .then((item) => item.map((r) => [r.token, r.value] as [Address, bigint]))
+  // return Promise.all([
+  //   pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getRewardTokens' }),
+  //   pc.readContract({ abi: abiRewardManager, address: rewradManager, functionName: 'getUserRewards', args: [user] }),
+  // ]).then(([tokens, rewards]) => tokens.map((token, i) => [token, rewards[i]] as [Address, bigint]))
 }
 export function useBvault2YTRewards(vc: BVault2Config) {
   const epochs = useBvault2Epochs(vc)
