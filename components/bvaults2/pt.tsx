@@ -39,7 +39,8 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const outputBalance = useBalance(output)
 
     const { result: btPrice } = useBT2PTPrice(vc)
-    const swapPrice = `1 ${bt.symbol} = ${_.round(btPrice, 2)} ${pt.symbol}`
+    const price = isToggled ? _.round(1 / btPrice, 2) : _.round(btPrice, 2)
+    const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
 
     const [calcPtSwapKey, setCalcPtSwapKey] = useState<any[]>(['calcPTSwapOut'])
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
@@ -51,13 +52,14 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             return getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
         }
     })
+    const errorInput = !isFetchingOut && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
     // isInputBT ? -outputBn : inputBn, isInputBT ? inputBn : -outputBn
     const [apy, apyto, priceimpcat] = usePTApy(vc, isToggled ? inputAssetBn : -outAmount, isToggled ? -outAmount : inputAssetBn)
     const onSwitch = () => {
         toggle()
     }
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
+        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} error={errorInput} />
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
@@ -146,7 +148,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
     const ptBalance = useBalance(pt)
-    const ytBalance = useBalance(pt)
+    const ytBalance = useBalance(yt)
     const outBalance = useBalance(out)
 
     const [input, setInput] = useState('')

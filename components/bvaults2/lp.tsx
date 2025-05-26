@@ -21,7 +21,7 @@ import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import {  useLogs, useLPApy, useLpShare } from "./useDatas"
+import { useLogs, useLPApy, useLpShare } from "./useDatas"
 import _ from "lodash"
 import { getLpToken, usePtToken, useYtToken } from "./getToken"
 
@@ -67,9 +67,9 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
             <div className="font-bold">Receive</div>
             <GetvIP address={asset.address} />
         </div>
-        <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut} />
+        <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
-        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut} />
+        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
         <ApproveAndTx
             className='mx-auto mt-4'
@@ -110,12 +110,11 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     const inputAssetBn = parseEthers(inputAsset)
     const input = lp
     const inputBalance = useBalance(input)
-    const out = ptc.result >= ytc.result ? pt : yt
+    const out = ptc.result >= ytc.result ? yt : pt
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPRemoveOut'])
     useDebounce(() => setCalcOutsKey(['calcLPRemoveOut', inputAssetBn]), 300, [inputAssetBn])
     const { data: [btAmount, ptAmount, ytAmount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcOutsKey,
-        enabled: inputAssetBn > 0n && calcOutsKey.length > 1,
         initialData: [0n, 0n, 0n],
         queryFn: async () => {
             if (inputAssetBn <= 0n || calcOutsKey.length <= 1) return [0n, 0n, 0n]
@@ -135,9 +134,9 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
             <div className="font-bold">Receive</div>
             <GetvIP address={asset.address} />
         </div>
-        <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut} />
+        <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
-        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut} />
+        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
         <ApproveAndTx
             className='mx-auto mt-4'

@@ -77,12 +77,13 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             }
         }
     })
+    const errorInput = !isFetchingOut && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
     // by2yt: inputBt1, -refoundBt
     // yt2bt: -inputYt, inputYt - outBt
     const [roi, roito, priceimpact] = useYTRoi(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
     const [apy, apyTo] = usePTApy(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
+        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} error={errorInput}/>
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>

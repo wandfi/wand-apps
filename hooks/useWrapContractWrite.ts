@@ -2,7 +2,7 @@ import { getErrorMsg } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, SimulateContractParameters } from 'viem'
+import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, SimulateContractParameters, WalletClient } from 'viem'
 import { useWalletClient } from 'wagmi'
 
 export function useWrapContractWrite<
@@ -41,7 +41,7 @@ export function useWrapContractWrite<
         req = res.request as any
       }
       const hash = await wc.writeContract(req)
-      const txr = await pc.waitForTransactionReceipt({ hash , confirmations: opts?.confirmations })
+      const txr = await pc.waitForTransactionReceipt({ hash, confirmations: opts?.confirmations })
       if (txr.status !== 'success') {
         throw 'Transaction reverted'
       }
@@ -60,4 +60,13 @@ export function useWrapContractWrite<
     isLoading,
     isSuccess,
   }
+}
+
+export async function doTx(wc: WalletClient, config: SimulateContractParameters | (() => Promise<SimulateContractParameters>), confirmations: number = 3) {
+  const mconfig = typeof config === 'function' ? await config() : config
+  const pc = getPC(await wc.getChainId())
+  const { request } = await pc.simulateContract({ account: wc.account, ...mconfig })
+  const hash = await wc.writeContract(request)
+  const txr = await pc.waitForTransactionReceipt({ hash, confirmations })
+  return txr
 }

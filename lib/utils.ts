@@ -76,7 +76,8 @@ export function fmtPercent(percent: bigint, decimals: number | bigint, showDecim
 
 export function formatPercent(percet: number, decimals: number = 2) {
   const minValue = 1 / Math.pow(10, decimals + 2)
-  if (percet < minValue) {
+  if (Math.abs(percet) < minValue) {
+    if (percet < 0) return `>-${minValue * 100}%`
     return `<${minValue * 100}%`
   }
   return `${_.round(percet * 100, decimals)} %`
