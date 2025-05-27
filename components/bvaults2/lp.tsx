@@ -121,7 +121,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
             return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
         }
     })
-    const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
+    const outAmount = ptc.result >= ytc.result ? ytAmount : ptAmount
     const [poolShare, poolShareTo] = useLpShare(vc, -inputAssetBn)
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
