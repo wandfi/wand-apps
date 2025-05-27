@@ -80,6 +80,7 @@ export function formatPercent(percet: number, decimals: number = 2) {
     if (percet < 0) return `>-${minValue * 100}%`
     return `<${minValue * 100}%`
   }
+  
   return `${_.round(percet * 100, decimals)} %`
 }
 

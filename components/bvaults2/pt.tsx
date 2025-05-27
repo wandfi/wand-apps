@@ -1,7 +1,6 @@
 import { abiBVault2, abiHook, abiMintPool } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
@@ -18,17 +17,15 @@ import { GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { Swap, SwapDown } from "../ui/bbtn"
-import { useBT2PTPrice, usePTApy } from "./useDatas"
-import { useBvualt2Data } from "./useFets"
-import { useBalance, useTotalSupply } from "./useToken"
+import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
-import { FetKEYS } from "./fetKeys"
+import { useBT2PTPrice, usePTApy } from "./useDatas"
+import { useBalance, useTotalSupply } from "./useToken"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
     const bt = getTokenBy(vc.bt, chainId)
-    const vd = useBvualt2Data(vc)
     const pt = usePtToken(vc)!
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
@@ -91,7 +88,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTSwap:${isToggled ? 'PT->BT' : 'BT->PT'}:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
-                reFet(vd.key, FetKEYS.Logs(chainId, vc), inputBalance.key, outputBalance.key)
+                reFetWithBvault2(chainId, vc, inputBalance.key, outputBalance.key)
             }}
         />
     </div>
@@ -99,7 +96,6 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
 export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const vd = useBvualt2Data(vc)
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
     const input = getTokenBy(vc.bt, chainId)
@@ -135,7 +131,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTMint:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
-                reFet(vd.key, FetKEYS.Logs(chainId, vc), inputBalance.key, ptBalance.key, ytBalance.key)
+                reFetWithBvault2(chainId, vc, inputBalance.key, ptBalance.key, ytBalance.key)
             }}
         />
     </div>
@@ -144,7 +140,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
     const out = getTokenBy(vc.bt, chainId)
-    const vd = useBvualt2Data(vc)
+
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
     const ptBalance = useBalance(pt)
@@ -177,7 +173,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTRedeem:(${fmtBn(inputBn)})`)
                 setInput('')
-                reFet(vd.key, FetKEYS.Logs(chainId, vc), ptBalance.key, ytBalance.key, outBalance.key)
+                reFetWithBvault2(chainId, vc, ptBalance.key, ytBalance.key, outBalance.key)
             }}
         />
     </div>

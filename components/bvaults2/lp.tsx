@@ -1,11 +1,9 @@
 import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
-import { Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
-import { aarToNumber, fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
@@ -19,18 +17,17 @@ import { GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
-import { useBvualt2Data } from "./useFets"
-import { useBalance, useTotalSupply } from "./useToken"
-import { useLogs, useLPApy, useLpShare } from "./useDatas"
-import _ from "lodash"
+import { reFetWithBvault2 } from "./fetKeys"
 import { getLpToken, usePtToken, useYtToken } from "./getToken"
+import { useLogs, useLPApy, useLpShare } from "./useDatas"
+import { useBalance, useTotalSupply } from "./useToken"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
-    const vd = useBvualt2Data(vc)
+
     const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
@@ -88,7 +85,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPAdd:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
-                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, vd.key)
+                reFetWithBvault2(chainId, vc, ptc.key, ytc.key, lpc.key, inputBalance.key)
             }}
         />
     </div>
@@ -98,7 +95,6 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)
     const bt = getTokenBy(vc.bt, chainId)
-    const vd = useBvualt2Data(vc)
     const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
@@ -155,7 +151,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPRemove:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
-                reFet(ptc.key, ytc.key, lpc.key, inputBalance.key, vd.key)
+                reFetWithBvault2(chainId, vc, ptc.key, ytc.key, lpc.key, inputBalance.key)
             }}
         />
     </div>

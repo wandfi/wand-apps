@@ -68,7 +68,7 @@ export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
 
 export function useBTPriceUsd(vc: BVault2Config) {
   return useFet({
-    key: `btPrice:${vc.bt}`,
+    key: FetKEYS.BTPriceUsd(vc),
     initResult: 1,
     fetfn: async () => 1,
   })
@@ -84,7 +84,7 @@ export function useBTPriceYt(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
   const epoch = vd.result?.current
   return useFet({
-    key: epoch ? `btPriceYt:${epoch.YT}` : '',
+    key: FetKEYS.BTPriceYt(epoch?.YT),
     initResult: 0,
     fetfn: async () => {
       const one = parseUnits('1', asset.decimals)
@@ -105,7 +105,7 @@ export function useBTPriceYt(vc: BVault2Config) {
 
 export function useUnderlingApy(vc: BVault2Config) {
   return useFet({
-    key: `underlingApy:${vc.asset}`,
+    key: FetKEYS.UnderlingApy(vc),
     initResult: 1.07,
     fetfn: async () => 1.07,
   })

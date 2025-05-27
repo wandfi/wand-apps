@@ -2,7 +2,6 @@ import { abiBVault2, abiBvault2Query, abiHook } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { reFet } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
@@ -21,12 +20,12 @@ import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { Swap } from "../ui/bbtn"
 import { Tip } from "../ui/tip"
+import { reFetWithBvault2 } from "./fetKeys"
 import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
 import { useBvualt2Data } from "./useFets"
 import { useBalance, useTotalSupply } from "./useToken"
-import { FetKEYS } from "./fetKeys"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -118,7 +117,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, isToggled ? `YTSwap:YT->BT:(${fmtBn(inputAssetBn)})` : `YTSwap:BT->YT:(${fmtBn(inputAssetBn)}, bt1:${fmtBn(bt1Amount)})`)
                 setInputAsset('')
-                reFet(vd.key, FetKEYS.Logs(chainId, vc), btBalance.key, ytBalance.key)
+                reFetWithBvault2(chainId, vc,  btBalance.key, ytBalance.key)
             }}
         />
     </div>

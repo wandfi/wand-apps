@@ -68,7 +68,9 @@ function PT({ vc }: { vc: BVault2Config }) {
                 <div key='calim'>
                     <Txs
                         tx="Claim"
-                        className="w-28 font-semibold h-7" onTxSuccess={() => reFet(redeems.key)}
+                        className="w-28 font-semibold h-7" 
+                        onTxSuccess={() => reFet(redeems.key)}
+                        onItem={() => reFet(redeems.key)}
                         txs={matures.filter(item => item.redeemable > 0n).map(item => ({ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [item.PT, item.redeemable] }))}
                     />
                 </div>
@@ -148,7 +150,7 @@ function YT({ vc }: { vc: BVault2Config }) {
         if (matures && matures.length) {
             const tokens: { [k: Address]: bigint } = {}
             const yts: Address[] = []
-        
+
             matures.forEach(item => {
                 item.rewrads.forEach(([t, value]) => {
                     tokens[t] = (tokens[t] ?? 0n) + value
@@ -166,7 +168,14 @@ function YT({ vc }: { vc: BVault2Config }) {
                     {sumRewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
                 </div>,
                 '',
-                <Txs onTxSuccess={() => reFet(rewards.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" txs={yts.map((yt) => ({ abi: abiRewardManager, functionName: 'claimRewards', address: yt, args: [address!] }))} />
+                <Txs
+                    onTxSuccess={() => reFet(rewards.key)}
+                    onItem={() => reFet(rewards.key)}
+                    key="claim"
+                    className="w-28 font-semibold h-7"
+                    tx="Claim"
+                    txs={yts.map((yt) => ({ abi: abiRewardManager, functionName: 'claimRewards', address: yt, args: [address!] }))}
+                />
             ])
         }
         return res;
