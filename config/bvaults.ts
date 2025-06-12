@@ -19,7 +19,13 @@ export type BVaultConfig = {
   lpPoolIdx?: number
   isOld?: boolean
   onEnv?: TypeENV[]
+  newUI?: boolean
   ipAssetStaking: Address
+  compney: string
+  icon?: string
+  tit?: string
+  sub?: string
+  des?: string
 }
 
 export const ZooProtocolAddress: { [k: number]: Address } = {
@@ -53,6 +59,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = proxyGetDef(
     [storyTestnet.id]: [],
     [story.id]: [
       {
+        compney: 'Verio',
         vault: '0x29038303100931fA3Cd421ceb1632F1Bb22950Ac',
         asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
         pToken: '0x5e00cF234f4BD45542164EaF09A1D1D92C471Ed3',
@@ -67,6 +74,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = proxyGetDef(
         ipAssetStaking: '0x1ADd58A4bf810Bd706FE01458B610466F6e7f8cD',
       },
       {
+        compney: 'Verio',
         vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
         asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
         pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d4',
@@ -79,6 +87,26 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = proxyGetDef(
         onEnv: ['test', 'prod'],
         ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
       },
+      // {
+      //   vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
+      //   asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
+      //   pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d4',
+      //   assetSymbol: 'vIP',
+      //   pTokenSymbol: 'pvIP',
+      //   yTokenSymbol: 'yvIP',
+      //   protocolAddress: ZooProtocolAddress[story.id],
+      //   protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
+      //   bQueryAddres: BQueryAddress[story.id],
+      //   onEnv: ['test'],
+      //   ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
+      //   newUI: true,
+      //   rewardSymbol: 'Spice Points',
+      //   icon: 'GAIB',
+      //   compney: 'GAIB',
+      //   tit: 'GAIB AID Alpha',
+      //   sub: 'Pre-deposit Campaign',
+      //   des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
+      // },
     ],
   },
   [],

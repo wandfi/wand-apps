@@ -1,13 +1,14 @@
 'use client'
 
-import { BVaultB, BVaultCard, BVaultCardComming, BVaultP, BVaultRedeem, BVaultRedeemAll } from '@/components/b-vault'
+import { BVaultB, BVaultCard, BVaultCardComming, BVaultP, BVaultRedeemAll } from '@/components/b-vault'
+import * as BVaultN from '@/components/b-vault-new'
 import { BVaultAddReward } from '@/components/bvault-add-reward'
 import { Noti } from '@/components/noti'
 import { PageWrap } from '@/components/page-wrap'
 import { SimpleTabs } from '@/components/simple-tabs'
 import { abiBVault } from '@/config/abi'
 import { BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
-import { ENV, isBETA } from '@/constants'
+import { ENV } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useLoadBVaults } from '@/hooks/useLoads'
 import { tabToSearchParams } from '@/lib/utils'
@@ -18,9 +19,10 @@ import { useQuery } from '@tanstack/react-query'
 import { Grid } from '@tremor/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useMemo } from 'react'
+import { isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
-import { isAddressEqual } from 'viem'
+import BvaultEpochYtPrices from '@/components/bvault-epoch-ytprices'
 
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
@@ -62,6 +64,20 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
       return passes.includes(true) || isAddressEqual(address, '0xFE18Aa1EFa652660F36Ab84F122CD36108f903B6')
     },
   })
+  const r = useRouter()
+
+  if (bvc.newUI) {
+    return <>
+      <div className='grid lg:grid-cols-[1.6fr_1fr] gap-4 xl:gap-5'>
+        <BVaultN.Info vc={bvc} />
+        <div className='row-span-2'>
+          <BVaultN.PTYT vc={bvc} currentTab={currentTab}/>
+        </div>
+        <BvaultEpochYtPrices bvc={bvc} epochId={bvd.epochCount}/>
+      </div>
+      <BVaultN.MyPositions vc={bvc} />
+    </>
+  }
   const odata = [
     ...(bvd.closed ? [
       {
@@ -92,7 +108,6 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
       ]
       : odata
   const ctab = data.find((item) => tabToSearchParams(item.tab) == currentTab)?.tab
-  const r = useRouter()
 
   return (
     <SimpleTabs
@@ -113,7 +128,7 @@ export default function Vaults() {
   const paramsVault = params.get('vault')
   const paramsTab = params.get('tab')
   const currentTab = SupportTabs.includes(paramsTab as any) ? (paramsTab as (typeof SupportTabs)[number]) : ''
-  const currentVc = bvcs.find((item) => item.vault == paramsVault)
+  const currentVc = bvcs.findLast((item) => item.vault == paramsVault)
   // useUpdateBVaultsData(bvcs)
   useLoadBVaults()
   return (
@@ -125,7 +140,7 @@ export default function Vaults() {
             <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
             <Grid numItems={1} numItemsMd={2} numItemsLg={3} className='gap-5 mt-4'>
               {bvcs.map((item, index) => (
-                <BVaultCard key={`group_vault_item_${index}`} vc={item} />
+                item.newUI ? <BVaultN.BVaultCard key={`group_vault_item_${index}`} vc={item} /> : <BVaultCard key={`group_vault_item_${index}`} vc={item} />
               ))}
               {bvcs.length == 0 && (
                 <>

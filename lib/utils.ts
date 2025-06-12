@@ -7,7 +7,7 @@ import { NATIVE_TOKEN_ADDRESS } from '@/config/swap'
 import dayjs from 'dayjs'
 import { DECIMAL } from '@/constants'
 import { getCurrentChainId } from '@/config/network'
-import { TOKENS_MAP } from '@/config/tokens'
+import { Token, TOKENS_MAP } from '@/config/tokens'
 
 export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer S> ? S : T
 export type UnPromise<T extends (() => Promise<any>) | Promise<any>> = T extends () => Promise<infer U> ? U : T extends Promise<infer M> ? M : never
@@ -80,7 +80,7 @@ export function formatPercent(percet: number, decimals: number = 2) {
     if (percet < 0) return `>-${minValue * 100}%`
     return `<${minValue * 100}%`
   }
-  
+
   return `${_.round(percet * 100, decimals)} %`
 }
 
@@ -100,6 +100,10 @@ export function getBigintGt(result: any, path: string | (string | number)[], def
 export function bnMin(bns: bigint[]): bigint {
   if (bns.length <= 0) return 0n
   return bns.reduce((min, item) => (item < min ? item : min), bns[0])
+}
+export function bnMax(bns: bigint[]): bigint {
+  if (bns.length <= 0) return 0n
+  return bns.reduce((max, item) => (item > max ? item : max), bns[0])
 }
 
 export function swapThrusterLink(token: Address, token2: Address) {
@@ -226,8 +230,8 @@ export async function retry<T>(fn: () => Promise<T>, count: number = 3, wait: nu
 
 export const tabToSearchParams = (tab: string) => tab.toLowerCase().replaceAll(' ', '_')
 
-export function getTokenBy(address: Address, chainId: number = getCurrentChainId()) {
-  return TOKENS_MAP[`${chainId}_${address.toLowerCase() as Address}`]
+export function getTokenBy(address: Address, chainId: number = getCurrentChainId(), def?: Partial<Token>) {
+  return TOKENS_MAP[`${chainId}_${address.toLowerCase() as Address}`] ?? def
 }
 
 export function genDeadline(duration: bigint = 60n * 5n) {
@@ -254,4 +258,40 @@ export function bnRange(end: bigint, start = 1n, step = 1n) {
 
 export function nowUnix() {
   return BigInt(Math.round(now() / 1000))
+}
+
+type NonFunction<T> = T extends Function ? never : T
+
+export async function promiseT<T>(promiseOrData: NonFunction<T> | (() => Promise<NonFunction<T>> | NonFunction<T>)) {
+  if (typeof promiseOrData !== 'function') return promiseOrData
+  return (promiseOrData as () => Promise<NonFunction<T>> | NonFunction<T>)()
+}
+
+export const sqrt = function (value: bigint) {
+  if (value < 2n) {
+    return value
+  }
+
+  if (value < 16n) {
+    return BigInt(Math.sqrt(Number(value)) | 0)
+  }
+
+  let x0, x1
+  if (value < 4503599627370496n) {
+    //1n<<52n
+    x1 = BigInt(Math.sqrt(Number(value)) | 0) - 3n
+  } else {
+    let vlen = value.toString().length
+    if (!(vlen & 1)) {
+      x1 = 10n ** BigInt(vlen / 2)
+    } else {
+      x1 = 4n * 10n ** BigInt((vlen / 2) | 0)
+    }
+  }
+
+  do {
+    x0 = x1
+    x1 = (value / x0 + x0) >> 1n
+  } while (x0 !== x1 && x0 !== x1 - 1n)
+  return x0
 }

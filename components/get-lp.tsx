@@ -3,6 +3,7 @@ import { getBexPoolURL } from "@/config/network"
 import { Address } from "viem"
 import Link from 'next/link'
 import { CoinIcon } from "./icons/coinicon"
+import { getTokenBy } from "@/lib/utils"
 
 export function GetLP({ address }: { address: Address }) {
     const lp = LP_TOKENS[address]
@@ -17,6 +18,8 @@ export function GetLP({ address }: { address: Address }) {
 }
 
 export function GetvIP({ address }: { address: Address }) {
+    const token = getTokenBy(address)
+    if(token.symbol !== 'vIP')
     return <div className='text-xs font-medium flex gap-2 justify-end items-center'>
         <CoinIcon symbol="verio" size={18} />
         <Link target='_blank' className='underline' href={getBexPoolURL(address)}>

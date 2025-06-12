@@ -16,7 +16,7 @@ export function useLogs(vc: BVault2Config) {
   const chainId = useCurrentChainId()
   return useFet({
     key: FetKEYS.Logs(chainId, vc),
-    fetfn: async () => getPC(chainId).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.protocal, vc.bt] }),
+    fetfn: async () => getPC(chainId).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.protocal, vc.bt] }).catch(() => undefined),
   })
 }
 export function useBT2PTPrice(vc: BVault2Config) {

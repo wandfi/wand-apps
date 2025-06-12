@@ -1,10 +1,12 @@
 import { useApproves, useNftApproves } from '@/hooks/useApprove'
-import { doTx, useWrapContractWrite } from '@/hooks/useWrapContractWrite'
+import { useWrapContractWrite } from '@/hooks/useWrapContractWrite'
 import { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, SimulateContractParameters } from 'viem'
+import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, SimulateContractParameters } from 'viem'
 
-import { handleError } from '@/lib/utils'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { getErrorMsg, handleError, promiseT } from '@/lib/utils'
+import { getPC } from '@/providers/publicClient'
 import { useMutation } from '@tanstack/react-query'
 import { toast as tos } from 'sonner'
 import { useWalletClient } from 'wagmi'
@@ -135,32 +137,55 @@ export function NftApproveAndTx<
 
 
 export type TX = SimulateContractParameters | (() => Promise<SimulateContractParameters>)
+
+
 export function Txs({
-  className, tx, txs, disabled, busyShowTxet = true, toast = true, onItem, onTxSuccess }:
+  className, tx, txs, disabled, busyShowTxet = true, toast = true, onTxSuccess }:
   {
-    className?: string, tx: string, disabled?: boolean, txs: TX[], busyShowTxet?: boolean, toast?: boolean
-    onItem?: (stat: 'error' | 'success', tx: TX, index: number) => void
+    className?: string, tx: string, disabled?: boolean, txs: TX[] | (() => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean
     onTxSuccess?: () => void
   }) {
   const { data: wc } = useWalletClient()
+  // const { sendCallsAsync } = useSendCalls()
+  const chainId = useCurrentChainId()
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      let i = 0;
-      for (const txitem of txs) {
-        const itemRes = await doTx(wc!, txitem)
-        if (itemRes.status !== 'success') {
-          onItem?.('error', txitem, i);
-          throw new Error("Transaction reverted")
+      if (!wc) return
+      const calls = await promiseT(txs).then(items => Promise.all(items.map(promiseT)))
+      console.info('calls:', wc.account.address, calls)
+      try {
+        const { id } = await wc.sendCalls({
+          account: wc.account.address,
+          calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
+        })
+        while (true) {
+          const res = await wc.waitForCallsStatus({ id })
+          if (res.status == 'pending') continue
+          if (res.status == 'success') {
+            toast && tos.success("Transactions Success")
+            onTxSuccess?.()
+          } else {
+            throw new Error(`Transactions ${res.status} ${JSON.stringify(res)}`)
+          }
+          break
         }
-        onItem?.('success', txitem, i);
-        toast && tos.success(`${i + 1}/${txs.length} Transaction success`)
-        i++;
+      } catch (error) {
+        const msg = getErrorMsg(error)
+        if (msg && msg.includes('wallet_sendCalls')) {
+          const pc = getPC(chainId)
+          for (const item of calls) {
+            const tx = await wc.writeContract(item)
+            const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 1 })
+            if (res.status !== 'success') throw new Error('Transactions Reverted')
+          }
+          toast && tos.success("Transactions Success")
+          onTxSuccess?.()
+        }
       }
-      onTxSuccess?.()
     },
     onError: toast ? handleError : () => { }
   })
-  const txDisabled = disabled || isPending || txs.length === 0 || !wc
+  const txDisabled = disabled || isPending || (typeof txs !== 'function' && txs.length == 0) || !wc
   return <BBtn className={twMerge('flex items-center justify-center gap-4', className)} onClick={() => mutate()} busy={isPending} busyShowContent={busyShowTxet} disabled={txDisabled}>
     {tx}
   </BBtn>

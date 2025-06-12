@@ -10,6 +10,7 @@ import { useAccount } from 'wagmi'
 import { BVaultEpochDTO } from './sliceBVaultsStore'
 import { BoundStoreType, useBoundStore, useStore } from './useBoundStore'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
+import { LP_TOKENS } from '@/config/lpTokens'
 
 export function useResetBVaultsData() {
   const chainId = useCurrentChainId()
@@ -29,6 +30,24 @@ export function useBVault(vault: Address) {
       proxyGetDef<Exclude<BoundStoreType['sliceBVaultsStore']['bvaults'][Address], undefined>>({ current: proxyGetDef<BVaultEpochDTO>({}, 0n) }, 0n),
     [`sliceBVaultsStore.bvaults.${vault}`],
   )
+}
+
+export function useBvaultTVL(vc: BVaultConfig) {
+  const bvd = useBVault(vc.vault)
+  const lp = LP_TOKENS[vc.asset]
+  const prices = useStore((s) => s.sliceTokenStore.prices, ['sliceTokenStore.prices'])
+  const lpBasePrice = lp ? prices[lp.base] || 0n : 0n
+  const lpQuotePrice = lp ? prices[lp.quote] || 0n : 0n
+  const lpBase = bvd.lpBase || 0n
+  const lpQuote = bvd.lpQuote || 0n
+  const lpBaseTvlBn = (lpBase * lpBasePrice) / DECIMAL
+  const lpQuoteTvlBn = (lpQuote * lpQuotePrice) / DECIMAL
+  // console.info('lpTypes', lpBaseTvlBn, lpQuoteTvlBn , lpQuoteTvlBn == lpBaseTvlBn)
+  let vaultTvlBn = lpBaseTvlBn + lpQuoteTvlBn
+  if (vaultTvlBn === 0n) {
+    vaultTvlBn = ((bvd.lockedAssetTotal || 0n) * (prices[vc.asset] || 0n)) / DECIMAL
+  }
+  return [vaultTvlBn, lpBaseTvlBn, lpQuoteTvlBn]
 }
 
 export function useBVaultEpoches(vault: Address) {

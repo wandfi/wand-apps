@@ -58,7 +58,11 @@ const SupportICONS: { [k: string]: string } = {
   yvIP: 'YToken.svg',
   LPvIP: 'LPvIP.svg',
   bvIP: 'bvIP.svg',
-  WIP: 'WIP.png'
+  WIP: 'WIP.png',
+  GAIB: 'GAIB.svg',
+  pAIDaUSDC: 'pAIDaUSDC.svg',
+  yAIDaUSDC: 'yAIDaUSDC.svg',
+  'Spice Points': 'GAIB.svg'
 }
 
 export function CoinIcon({ symbol, size = 48, url, ...p }: { symbol: string; className?: string; style?: CSSProperties; size?: number; url?: string }) {

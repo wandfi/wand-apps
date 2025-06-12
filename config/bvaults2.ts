@@ -1,5 +1,5 @@
 import { Address } from 'viem'
-import { sepolia } from 'viem/chains'
+import { sepolia, hashkeyTestnet } from 'viem/chains'
 import { TypeENV } from './env'
 import { proxyGetDef } from '@/lib/utils'
 
@@ -36,6 +36,22 @@ export const BVAULTS2CONIG: { [k: number]: BVault2Config[] } = proxyGetDef(
         onEnv: ['test'],
       },
     ],
+    [hashkeyTestnet.id]: [
+      {
+        tit: 'YTK Vault',
+        vault: '0xfb0c36f93e2ed8c9045c19faded5e4b199ed9931',
+        asset: '0xfa9eeeaf51a053bfb94643ad3d80837c661d99eb',
+        bt: '0x8eeca063d0ec83b98f6af9008c535b1ca2c03e93',
+        market: '0x282425c7fc8566b45ca18add90ba9ae7e4e875ae',
+        mintpool: '0xbe824bfe01a78b5c42e0830ede7fb9fefabd6458',
+        maturitypool: '0x767fe539b32a42fc5dbce5b20d8dea01da47ebd4',
+        protocal: '0xd27adcd2f312e68ef93fdbe9278530833ce3c837',
+        protocalSettings: '0x25bcf9957d6f186c3f1ddd0ce35853b16cb81639',
+        hook: '0x66c07dd8f1d708f9a4d9926c7d492a0fe6c13a88',
+        mockInfraredVault: '0x0383bb45ef1dff46e649563218c509628d5eca16',
+        onEnv: ['test']
+      }
+    ]
   },
   [],
 )

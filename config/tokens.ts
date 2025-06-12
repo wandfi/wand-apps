@@ -1,5 +1,5 @@
 import { Address, zeroAddress } from 'viem'
-import { mainnet, sepolia } from 'viem/chains'
+import { hashkeyTestnet, mainnet, sepolia } from 'viem/chains'
 import { story } from './network'
 
 export type Token = {
@@ -23,6 +23,9 @@ export const TOKENS: Token[] = [
 
   { address: '0xb09a8ba59615a552231cefcee80c3b88706597ed', symbol: 'YTK', decimals: 18, chain: [sepolia.id] },
   { address: '0xf37b6ec18cee80634de01aef83701d6e726e7fc9', symbol: 'BT-INFRA', decimals: 18, chain: [sepolia.id] },
+
+  { address: '0xfa9eeeaf51a053bfb94643ad3d80837c661d99eb', symbol: 'YTK', decimals: 18, chain: [hashkeyTestnet.id] },
+  { address: '0x8eeca063d0ec83b98f6af9008c535b1ca2c03e93', symbol: 'BT-INFRA', decimals: 18, chain: [hashkeyTestnet.id] },
 ]
 
 export const TOKENS_MAP: { [k: `${number}_${Address}`]: Token } = TOKENS.reduce((map, item) => {

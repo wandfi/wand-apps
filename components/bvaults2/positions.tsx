@@ -70,7 +70,6 @@ function PT({ vc }: { vc: BVault2Config }) {
                         tx="Claim"
                         className="w-28 font-semibold h-7" 
                         onTxSuccess={() => reFet(redeems.key)}
-                        onItem={() => reFet(redeems.key)}
                         txs={matures.filter(item => item.redeemable > 0n).map(item => ({ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [item.PT, item.redeemable] }))}
                     />
                 </div>
@@ -170,7 +169,6 @@ function YT({ vc }: { vc: BVault2Config }) {
                 '',
                 <Txs
                     onTxSuccess={() => reFet(rewards.key)}
-                    onItem={() => reFet(rewards.key)}
                     key="claim"
                     className="w-28 font-semibold h-7"
                     tx="Claim"
