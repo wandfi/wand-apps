@@ -498,7 +498,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
         <div key={'airdrops'}>
           {airdropsOne.map((item, i) => <MCoinAmount key={`airdrops_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
-        <Txs tx='Redeem' className='w-32' txs={txsOne} onTxSuccess={upForUserAction} />
+        <Txs key="redeem" tx='Redeem' className='w-32' txs={txsOne} onTxSuccess={upForUserAction} />
       ],
       ...(showMatures ? [[
         '', '', 'Rewards for mature YT',
@@ -508,7 +508,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
         <div key={'airdrops'}>
           {maturesAirdrops.map((item, i) => <MCoinAmount key={`airdrops_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
-        <Txs tx='Redeem' className='w-32' txs={txsMatures} onTxSuccess={upForUserAction} />
+        <Txs key="redeem" tx='Redeem' className='w-32' txs={txsMatures} onTxSuccess={upForUserAction} />
       ]] : [])
     ]
   }, [epochesData, vd])
