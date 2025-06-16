@@ -1,10 +1,11 @@
 import { abiBVault2, abiBvault2Query } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
+import { getTokenBy } from '@/config/tokens'
 import { DECIMAL_10 } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet } from '@/hooks/useFet'
-import { aarToNumber, bnRange, getTokenBy, promiseAll, UnPromise } from '@/lib/utils'
+import { aarToNumber, bnRange, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
 import { Address, erc20Abi, PublicClient } from 'viem'
@@ -141,7 +142,7 @@ export function useBvault2LPBTRewards(vc: BVault2Config) {
     initResult: [],
     fetfn: async () => {
       const lp = getLpToken(vc, chainId)
-      const bt = getTokenBy(vc.bt)
+      const bt = getTokenBy(vc.bt, chainId)!
       const pc = getPC(chainId)
       const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, address!, pc), getRewardsBy(bt.address, address!, pc)])
       return [

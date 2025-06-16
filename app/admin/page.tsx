@@ -7,11 +7,12 @@ import { abiBVault, abiLntVault, abiMockERC20, abiMockERC721, abiMockPriceFeed, 
 import { abiBVault2, abiMockInfraredVault, abiRewardManager } from '@/config/abi/BVault2'
 import { getCurrentChain, SUPPORT_CHAINS } from '@/config/network'
 import { PROTOCOL_SETTINGS_ADDRESS, VaultConfig, WAND_PROTOCOL_ADDRESS } from '@/config/swap'
+import { getTokenBy } from '@/config/tokens'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVaultsConfigs } from '@/hooks/useVaultsConfigs'
 import { useWandContractRead, useWandContractReads } from '@/hooks/useWand'
-import { cn, getTokenBy, parseEthers } from '@/lib/utils'
+import { cn, parseEthers } from '@/lib/utils'
 import { useMemo } from 'react'
 import Select from 'react-select'
 import { useMeasure, useSetState } from 'react-use'
@@ -386,8 +387,8 @@ export default function AdminPage() {
             <GeneralAction tit='transferOwnership' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
             <GeneralAction tit='upsertParamConfig' abi={abiProtocolSettings} functionName='upsertParamConfig' address={current.data.protocalSettings} />
             {chain?.testnet && <>
-              <GeneralAction tit={`mint (${getTokenBy(current.data.asset).symbol})`} abi={abiMockERC20} functionName='mint' address={current.data.asset} />
-              <GeneralAction tit={`setTester (${getTokenBy(current.data.asset).symbol})`} abi={abiMockERC20} functionName='setTester' address={current.data.asset} />
+              <GeneralAction tit={`mint (${getTokenBy(current.data.asset, chainId)!.symbol})`} abi={abiMockERC20} functionName='mint' address={current.data.asset} />
+              <GeneralAction tit={`setTester (${getTokenBy(current.data.asset, chainId)!.symbol})`} abi={abiMockERC20} functionName='setTester' address={current.data.asset} />
 
             </>}
 

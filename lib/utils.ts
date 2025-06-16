@@ -230,10 +230,6 @@ export async function retry<T>(fn: () => Promise<T>, count: number = 3, wait: nu
 
 export const tabToSearchParams = (tab: string) => tab.toLowerCase().replaceAll(' ', '_')
 
-export function getTokenBy(address: Address, chainId: number = getCurrentChainId(), def?: Partial<Token>) {
-  return TOKENS_MAP[`${chainId}_${address.toLowerCase() as Address}`] ?? def
-}
-
 export function genDeadline(duration: bigint = 60n * 5n) {
   return BigInt(round(now() / 1000)) + duration
 }

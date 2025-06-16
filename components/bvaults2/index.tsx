@@ -5,7 +5,7 @@ import { BVault2Config } from "@/config/bvaults2";
 import { DECIMAL } from "@/constants";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
-import { aarToNumber, cn, FMT, fmtDate, fmtDuration, formatPercent, genDeadline, getTokenBy, parseEthers } from "@/lib/utils";
+import { aarToNumber, cn, FMT, fmtDate, fmtDuration, formatPercent, genDeadline, parseEthers } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@tremor/react";
 import { useRouter } from "next/navigation";
@@ -23,14 +23,15 @@ import { LP } from "./lp";
 import { PT } from "./pt";
 import {  usePTApy, useYTRoi } from "./useDatas";
 import { getBvault2EpochTimes, getBvualt2BootTimes, getBvualt2Times, useBvualt2Data } from "./useFets";
-import { useBalance } from "./useToken";
+import { useBalance } from "../../hooks/useToken";
 import { YT } from "./yt";
 import { getLpToken } from "./getToken";
+import { getTokenBy } from "@/config/tokens";
 
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)
+    const bt = getTokenBy(vc.bt, chainId)!
     const input = bt;
     const inputBalance = useBalance(input)
     const [inputAsset, setInputAsset] = useState('')
@@ -166,7 +167,7 @@ export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
 
 export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const r = useRouter()
-    const asset = getTokenBy(vc.asset)
+    const asset = getTokenBy(vc.asset)!
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { endTime, reamin } = getBvualt2Times(vd)

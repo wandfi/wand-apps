@@ -3,7 +3,7 @@ import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
@@ -25,13 +25,14 @@ import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
 import { useBvualt2Data } from "./useFets"
-import { useBalance, useTotalSupply } from "./useToken"
+import { useBalance, useTotalSupply } from "../../hooks/useToken"
+import { getTokenBy } from "@/config/tokens"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)
+    const bt = getTokenBy(vc.bt, chainId)!
     const vd = useBvualt2Data(vc)
     const yt = useYtToken(vc)!
     const ytBalance = useBalance(yt)
@@ -124,7 +125,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
 }
 export function YT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
+    const asset = getTokenBy(vc.asset, chainId)!
     const yt = useYtToken(vc)!
     const ytTotalSupply = useTotalSupply(yt)
     const { data: walletClient } = useWalletClient()

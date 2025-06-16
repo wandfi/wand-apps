@@ -2,24 +2,24 @@ import { toBVault } from '@/app/routes'
 import { abiAdhocBribesPool, abiBVault, abiStakingBribesPool } from '@/config/abi'
 import { BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
-import { Token } from '@/config/tokens'
+import { getTokenBy, Token } from '@/config/tokens'
 import { DECIMAL } from '@/constants'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
-import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, getTokenBy, handleError, parseEthers } from '@/lib/utils'
+import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleError, parseEthers } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useStore } from '@/providers/useBoundStore'
 import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
-import _ from 'lodash'
+import _, { union } from 'lodash'
 import { useRouter } from 'next/navigation'
 import { Fragment, ReactNode, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useToggle } from 'react-use'
-import { isAddressEqual, zeroAddress } from 'viem'
+import { Address, isAddressEqual, zeroAddress } from 'viem'
 import { useWalletClient } from 'wagmi'
 import { ApproveAndTx, TX, Txs } from './approve-and-tx'
 import { AssetInput } from './asset-input'
@@ -30,7 +30,16 @@ import STable from './simple-table'
 import { SimpleTabs } from './simple-tabs'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
+import { TokenInput } from './token-input'
 
+function useTokens(vc: BVaultConfig) {
+  const chainId = useCurrentChainId()
+  return useMemo(() => {
+    const tokenAdds = [vc.asset, ...(vc.moreAssets || [])]
+    const tokens: Token[] = union(tokenAdds.map(item => item.toLowerCase())).map(item => getTokenBy(item as Address, chainId)).filter(Boolean) as any
+    return tokens;
+  }, [vc])
+}
 function TupleTxt(p: { tit: string; sub: ReactNode; subClassname?: string }) {
   return (
     <div className='flex items-center gap-5'>
@@ -183,7 +192,7 @@ export function Info({ vc }: { vc: BVaultConfig }) {
       </div>
       <div className="flex flex-col whitespace-nowrap font-semibold gap-1 ml-auto">
         <div className="text-sm">Underlying Asset</div>
-        <CoinAmount token={getTokenBy(vc.asset, chainId)} />
+        <CoinAmount token={getTokenBy(vc.asset, chainId, { symbol: vc.assetSymbol || 'vIP', decimals: 18 })!} />
       </div>
       <div className="flex flex-col whitespace-nowrap font-semibold gap-1">
         <div className="text-sm">Total Vaule Locked</div>
@@ -232,7 +241,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
       })
       .catch(handleError)
   }
-
+  const tokens = useTokens(vc)
   // const params = useSearchParams()
   // const subtab = params.get('subtab') as string
   // const r = useRouter()
@@ -256,7 +265,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
       </div>
     </div>
     <div className='flex flex-col gap-1'>
-      <AssetInput asset={vc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+      <TokenInput tokens={tokens} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
       <GetvIP address={vc.asset} />
       <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div>
       <ApproveAndTx
@@ -401,8 +410,8 @@ const statuColSize = 1.6
 function PositonPT({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
   const bvd = useBVault(vc.vault)
-  const pt = getTokenBy(vc.pToken, chainId)
-  const asset = getTokenBy(vc.asset, chainId)
+  const pt = getTokenBy(vc.pToken, chainId)!
+  const asset = getTokenBy(vc.asset, chainId)!
   const pTokenBalance = useStore((s) => s.sliceTokenStore.balances[vc.pToken] || 0n, [`sliceTokenStore.balances.${vc.pToken}`])
   const upForUserAction = useUpBVaultForUserAction(vc)
   const { data: wc } = useWalletClient()
@@ -467,7 +476,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
             if (other) {
               other.amount += item.bribeAmount
             } else {
-              items.push({ token: getTokenBy(item.bribeToken, chainId, { address: item.bribeToken, symbol: item.bribeSymbol, decimals: 18 }), amount: item.bribeAmount })
+              items.push({ token: getTokenBy(item.bribeToken, chainId, { address: item.bribeToken, symbol: item.bribeSymbol, decimals: 18 })!, amount: item.bribeAmount })
             }
           }
         })

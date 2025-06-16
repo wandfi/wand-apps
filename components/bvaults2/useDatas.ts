@@ -3,14 +3,15 @@ import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet } from '@/hooks/useFet'
-import { aarToNumber, getTokenBy, nowUnix } from '@/lib/utils'
+import { aarToNumber, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import _ from 'lodash'
 import { formatEther, parseUnits } from 'viem'
+import { useBalance, useTotalSupply } from '../../hooks/useToken'
+import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
-import { useBalance, useTotalSupply } from './useToken'
-import { FetKEYS } from './fetKeys'
+import { getTokenBy } from '@/config/tokens'
 
 export function useLogs(vc: BVault2Config) {
   const chainId = useCurrentChainId()
@@ -80,7 +81,7 @@ export function useYTPriceBt(vc: BVault2Config) {
 }
 export function useBTPriceYt(vc: BVault2Config) {
   const chainId = useCurrentChainId()
-  const asset = getTokenBy(vc.asset, chainId)
+  const asset = getTokenBy(vc.asset, chainId)!
   const vd = useBvualt2Data(vc)
   const epoch = vd.result?.current
   return useFet({
@@ -141,7 +142,8 @@ export function useLPApy(vc: BVault2Config) {
   // underlying APY * BTtp/(BTnet+PT*pt2btPrice+YT*yt2btPrice)
   const { result: underlyinApy } = useUnderlingApy(vc)
   const { result: logs } = useLogs(vc)
-  const asset = getTokenBy(vc.asset)
+  const chainId = useCurrentChainId()
+  const asset = getTokenBy(vc.asset, chainId)!
   const BTnet = aarToNumber(logs?.BTnet ?? 0n, asset.decimals)
   const BTtp = aarToNumber(logs?.BTtp ?? 0n, asset.decimals)
   const pt = usePtToken(vc)

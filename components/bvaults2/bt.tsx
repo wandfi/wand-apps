@@ -1,7 +1,7 @@
 import { abiBT } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
-import { fmtBn, formatPercent, getTokenBy, handleError, parseEthers } from "@/lib/utils";
+import { fmtBn, formatPercent, handleError, parseEthers } from "@/lib/utils";
 import { useState } from "react";
 import { useDebounce, useToggle } from "react-use";
 import { useAccount, useWalletClient } from "wagmi";
@@ -10,17 +10,18 @@ import { AssetInput } from "../asset-input";
 import { GetvIP } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { Swap } from "../ui/bbtn";
-import { useBalance, useTotalSupply } from "./useToken";
+import { useBalance, useTotalSupply } from "../../hooks/useToken";
 import { displayBalance } from "@/utils/display";
 import { reFet } from "@/hooks/useFet";
 import { useQuery } from "@tanstack/react-query";
 import { getPC } from "@/providers/publicClient";
 import { useUnderlingApy } from "./useDatas";
+import { getTokenBy } from "@/config/tokens";
 
 export function BT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
-    const bt = getTokenBy(vc.bt, chainId)
+    const asset = getTokenBy(vc.asset, chainId)!
+    const bt = getTokenBy(vc.bt, chainId)!
     const { data: walletClient } = useWalletClient()
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: bt }).catch(handleError)

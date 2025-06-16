@@ -1,5 +1,6 @@
 'use client'
 
+import { Token } from '@/config/tokens'
 import { parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
 import clsx from 'clsx'
@@ -7,11 +8,10 @@ import _ from 'lodash'
 import { useMemo, useRef, useState } from 'react'
 import { useMeasure } from 'react-use'
 import { formatUnits } from 'viem'
-import { Spinner } from './spinner'
-import { Token } from '@/config/tokens'
-import { useBalance } from './bvaults2/useToken'
-import { SimpleSelect } from './ui/select'
+import { useBalance } from '../hooks/useToken'
 import { CoinIcon } from './icons/coinicon'
+import { Spinner } from './spinner'
+import { SimpleSelect } from './ui/select'
 
 
 function TokenSymbol({ token }: { token: Token }) {
@@ -37,7 +37,7 @@ export function TokenInput({
   loading,
   error = '',
 }: {
-  tokens: [Token, ...(Token[])],
+  tokens: Token[],
   checkBalance?: boolean
   balance?: bigint
   balanceTit?: string
@@ -68,7 +68,7 @@ export function TokenInput({
     checkBalance && typeof balance !== 'undefined' && parseEthers(typeof amount == 'number' ? amount + '' : amount || '', token.decimals) > (typeof balance == 'bigint' ? balance : 0n)
   const isError = Boolean(error) || balanceInsufficient
   const [coinSymbolRef, { width: coinSymbolWidth }] = useMeasure<HTMLDivElement>()
-
+  if (tokens.length == 0) return null
   return (
     <div
       className='relative w-full'
@@ -81,8 +81,8 @@ export function TokenInput({
           {price && <div className='text-neutral-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>{price}</div>}
           {exchange && <div className='text-slate-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>~${exchange}</div>}
         </div>
-        <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2' ref={coinSymbolRef}>
-          {tokens.length > 1 ? <SimpleSelect options={options} onChange={(n) => setToken(n.data)} /> : <TokenSymbol token={token} />}
+        <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2 z-50' ref={coinSymbolRef}>
+          {tokens.length > 1 ? <SimpleSelect className='border-none' options={options} onChange={(n) => setToken(n.data)} /> : <TokenSymbol token={token} />}
         </div>
         <input
           value={loading ? '' : amount}

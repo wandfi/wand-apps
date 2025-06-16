@@ -26,6 +26,7 @@ export type BVaultConfig = {
   tit?: string
   sub?: string
   des?: string
+  moreAssets?: Address[]
 }
 
 export const ZooProtocolAddress: { [k: number]: Address } = {
@@ -87,26 +88,27 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = proxyGetDef(
         onEnv: ['test', 'prod'],
         ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
       },
-      // {
-      //   vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
-      //   asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
-      //   pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d4',
-      //   assetSymbol: 'vIP',
-      //   pTokenSymbol: 'pvIP',
-      //   yTokenSymbol: 'yvIP',
-      //   protocolAddress: ZooProtocolAddress[story.id],
-      //   protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
-      //   bQueryAddres: BQueryAddress[story.id],
-      //   onEnv: ['test'],
-      //   ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
-      //   newUI: true,
-      //   rewardSymbol: 'Spice Points',
-      //   icon: 'GAIB',
-      //   compney: 'GAIB',
-      //   tit: 'GAIB AID Alpha',
-      //   sub: 'Pre-deposit Campaign',
-      //   des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
-      // },
+      {
+        vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b6',
+        asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0686aD',
+        moreAssets: ['0x5267F7eE069CEB3D8F1c760c215569b79d0689aE'],
+        pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d5',
+        assetSymbol: 'AIDaUSDC',
+        pTokenSymbol: 'pAIDaUSDC',
+        yTokenSymbol: 'yAIDaUSDC',
+        protocolAddress: ZooProtocolAddress[story.id],
+        protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
+        bQueryAddres: BQueryAddress[story.id],
+        onEnv: ['test'],
+        ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
+        newUI: true,
+        rewardSymbol: 'Spice Points',
+        icon: 'GAIB',
+        compney: 'GAIB',
+        tit: 'GAIB AID Alpha',
+        sub: 'Pre-deposit Campaign',
+        des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
+      },
     ],
   },
   [],

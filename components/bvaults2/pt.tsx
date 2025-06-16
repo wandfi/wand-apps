@@ -2,7 +2,7 @@ import { abiBVault2, abiHook, abiMintPool } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
@@ -20,12 +20,13 @@ import { Swap, SwapDown } from "../ui/bbtn"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, usePTApy } from "./useDatas"
-import { useBalance, useTotalSupply } from "./useToken"
+import { useBalance, useTotalSupply } from "../../hooks/useToken"
+import { getTokenBy } from "@/config/tokens"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)
+    const bt = getTokenBy(vc.bt, chainId)!
     const pt = usePtToken(vc)!
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
@@ -98,7 +99,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
-    const input = getTokenBy(vc.bt, chainId)
+    const input = getTokenBy(vc.bt, chainId)!
     const inputBalance = useBalance(input)
     const ptBalance = useBalance(pt)
     const ytBalance = useBalance(yt)
@@ -139,7 +140,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
 export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const out = getTokenBy(vc.bt, chainId)
+    const out = getTokenBy(vc.bt, chainId)!
 
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
@@ -181,7 +182,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
 
 export function PT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
+    const asset = getTokenBy(vc.asset, chainId)!
     const pt = usePtToken(vc)!
     const ptc = useTotalSupply(pt)
     const { data: walletClient } = useWalletClient()

@@ -1,12 +1,11 @@
-import { BVault2Config } from "@/config/bvaults2"
-import { Token } from "@/config/tokens"
-import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { getTokenBy } from "@/lib/utils"
-import { Address } from "viem"
-import { useBvualt2Data } from "./useFets"
+import { BVault2Config } from '@/config/bvaults2'
+import { Token, getTokenBy } from '@/config/tokens'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { Address } from 'viem'
+import { useBvualt2Data } from './useFets'
 
 export function getPtToken(vc: BVault2Config, chainId: number, pt: Address) {
-  const asset = getTokenBy(vc.asset, chainId)
+  const asset = getTokenBy(vc.asset, chainId)!
   return { address: pt, chain: [chainId], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
 }
 export function usePtToken(vc: BVault2Config) {
@@ -17,7 +16,7 @@ export function usePtToken(vc: BVault2Config) {
 }
 
 export function getYtToken(vc: BVault2Config, chainId: number, yt: Address) {
-  const asset = getTokenBy(vc.asset, chainId)
+  const asset = getTokenBy(vc.asset, chainId)!
   return { address: yt, chain: [chainId], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
 }
 export function useYtToken(vc: BVault2Config) {
@@ -28,6 +27,6 @@ export function useYtToken(vc: BVault2Config) {
 }
 
 export function getLpToken(vc: BVault2Config, chainId: number) {
-  const asset = getTokenBy(vc.asset)
+  const asset = getTokenBy(vc.asset)!
   return { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [chainId], decimals: asset.decimals } as Token
 }

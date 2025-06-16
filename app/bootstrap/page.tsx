@@ -27,7 +27,6 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
         {isSuccess(vd) && <Fragment>
             {
                 showBootstrap ? <>
-                    <div className="card bg-white mb-5"><BT vc={vc} /></div>
                     <div className='page-title'>Bootstrap</div>
                     <Noti data='Deposit underlying assets to earn rewards. The Vault will launch once the target value is reached.' />
                     <BVault2Bootstrap vc={vc} />

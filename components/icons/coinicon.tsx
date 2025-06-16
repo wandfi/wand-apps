@@ -60,6 +60,7 @@ const SupportICONS: { [k: string]: string } = {
   bvIP: 'bvIP.svg',
   WIP: 'WIP.png',
   GAIB: 'GAIB.svg',
+  AIDaUSDC: 'AIDaUSDC.svg',
   pAIDaUSDC: 'pAIDaUSDC.svg',
   yAIDaUSDC: 'yAIDaUSDC.svg',
   'Spice Points': 'GAIB.svg'

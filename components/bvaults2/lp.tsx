@@ -3,7 +3,7 @@ import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, formatPercent, genDeadline, getTokenBy, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
@@ -20,13 +20,14 @@ import { SwapDown } from "../ui/bbtn"
 import { reFetWithBvault2 } from "./fetKeys"
 import { getLpToken, usePtToken, useYtToken } from "./getToken"
 import { useLogs, useLPApy, useLpShare } from "./useDatas"
-import { useBalance, useTotalSupply } from "./useToken"
+import { useBalance, useTotalSupply } from "../../hooks/useToken"
+import { getTokenBy } from "@/config/tokens"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
+    const asset = getTokenBy(vc.asset, chainId)!
 
     const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
@@ -38,7 +39,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const [keep, toggleKeep] = useToggle(false)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
-    const input = getTokenBy(vc.bt, chainId)
+    const input = getTokenBy(vc.bt, chainId)!
     const inputBalance = useBalance(input)
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
@@ -93,8 +94,8 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
 function LPRemove({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)
-    const bt = getTokenBy(vc.bt, chainId)
+    const asset = getTokenBy(vc.asset, chainId)!
+    const bt = getTokenBy(vc.bt, chainId)!
     const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
@@ -158,7 +159,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
 }
 export function LP({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)
+    const bt = getTokenBy(vc.bt, chainId)!
     const lp = getLpToken(vc, chainId)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!

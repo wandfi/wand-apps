@@ -1,21 +1,21 @@
 import { abiMaturityPool, abiRewardManager } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
-import { Token } from "@/config/tokens";
+import { getTokenBy, Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
-import { cn, getTokenBy } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
 import _, { now } from "lodash";
 import { useMemo } from "react";
+import { Address } from "viem";
 import { useAccount } from "wagmi";
+import { useBalance } from "../../hooks/useToken";
 import { ApproveAndTx, Txs } from "../approve-and-tx";
 import { CoinAmount } from "../coin-amount";
 import { CoinIcon } from "../icons/coinicon";
 import STable from "../simple-table";
 import { getPtToken, getYtToken } from "./getToken";
 import { useBvault2LPBTRewards, useBvault2YTRewards, useBvualt2PTRedeems } from "./useFets";
-import { useBalance } from "./useToken";
-import { Address } from "viem";
 
 
 const MCoinAmount = ({ ...p }: Parameters<typeof CoinAmount>[0]) => {
@@ -63,12 +63,12 @@ function PT({ vc }: { vc: BVault2Config }) {
                 displayBalance(sum, undefined, pt.decimals),
                 'Mature',
                 <div key='redeemable'>
-                    <MCoinAmount token={getTokenBy(vc.bt)} amount={sum} />
+                    <MCoinAmount token={getTokenBy(vc.bt, chainId)!} amount={sum} />
                 </div>,
                 <div key='calim'>
                     <Txs
                         tx="Claim"
-                        className="w-28 font-semibold h-7" 
+                        className="w-28 font-semibold h-7"
                         onTxSuccess={() => reFet(redeems.key)}
                         txs={matures.filter(item => item.redeemable > 0n).map(item => ({ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [item.PT, item.redeemable] }))}
                     />
@@ -140,7 +140,7 @@ function YT({ vc }: { vc: BVault2Config }) {
                 <TokenBalance t={yt} key='ytBalance' />,
                 'Active',
                 <div key="token2">
-                    {active.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
+                    {active.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token, chainId)!} key={`rewards_${token}`} amount={amount} />)}
                 </div>,
                 '',
                 <ApproveAndTx disabled={disableClaim} onTxSuccess={() => reFet(rewards.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: yt.address, args: [address!] }} />,
@@ -164,7 +164,7 @@ function YT({ vc }: { vc: BVault2Config }) {
                 '',
                 'Rewards for mature YT',
                 <div key="token2">
-                    {sumRewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
+                    {sumRewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token, chainId)!} key={`rewards_${token}`} amount={amount} />)}
                 </div>,
                 '',
                 <Txs
@@ -206,7 +206,7 @@ function YT({ vc }: { vc: BVault2Config }) {
     </div>
 }
 function LPBT({ vc }: { vc: BVault2Config }) {
-    useCurrentChainId()
+    const chainId = useCurrentChainId()
     const rewards = useBvault2LPBTRewards(vc)
     const { address } = useAccount()
     const data = useMemo(() => {
@@ -214,9 +214,9 @@ function LPBT({ vc }: { vc: BVault2Config }) {
 
         return rewards.result.map(item => [
             <TokenSymbol key="token" t={item.token} />, <TokenBalance t={item.token} key={'tokenBalance'} />, '', <div key="token2">
-                {item.rewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
+                {item.rewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token, chainId)!} key={`rewards_${token}`} amount={amount} />)}
             </div>,
-            <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD')} />,
+            <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD', chainId)!} />,
             <ApproveAndTx disabled={!item.rewards.find(item => item[1] > 0n)} onTxSuccess={() => reFet(rewards.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: item.token.address, args: [address!] }} />,
         ])
     }, [rewards.result])
