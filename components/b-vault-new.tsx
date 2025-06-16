@@ -35,7 +35,7 @@ import { TokenInput } from './token-input'
 function useTokens(vc: BVaultConfig) {
   const chainId = useCurrentChainId()
   return useMemo(() => {
-    const tokenAdds = [vc.asset, ...(vc.moreAssets || [])]
+    const tokenAdds = [...(vc.moreAssets || []), vc.asset]
     const tokens: Token[] = union(tokenAdds.map(item => item.toLowerCase())).map(item => getTokenBy(item as Address, chainId)).filter(Boolean) as any
     return tokens;
   }, [vc])
@@ -248,7 +248,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
   return <div className={cn('flex flex-col gap-5 w-full')}>
     <div className='card !p-0 overflow-hidden w-full'>
       <div className='flex p-5 bg-[#10B98126] gap-5'>
-        <CoinIcon size={54} symbol='PToken' />
+        <CoinIcon size={54} symbol={vc.pTokenSymbol} />
         <div className='flex flex-col gap-2'>
           <div className='text-xl text-black dark:text-white font-semibold'>{vc.pTokenSymbol}</div>
           <div className='text-xs text-black/60 dark:text-white/60 font-medium'>1 {vc.pTokenSymbol} is equal to 1 {vc.assetSymbol} deposited in {vc.compney} at maturity</div>
@@ -324,6 +324,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(vc)
   const { roi, roiChange } = useBvaultROI(vc, outputYTokenForInput, afterYtAssetPrice)
+  const tokens = useTokens(vc)
   return (
     <div className='flex flex-col gap-5'>
       <div className='card !p-0 overflow-hidden w-full'>
@@ -342,7 +343,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
-        <AssetInput asset={vc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+        <TokenInput tokens={tokens} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
         <GetvIP address={vc.asset} />
         <div className='text-base font-bold my-2'>Receive</div>
         <AssetInput asset={vc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
