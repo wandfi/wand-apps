@@ -68,8 +68,8 @@ const MinumAmount = BigInt(1e16)
 export function BVaultApy({ bvc, showTip = false }: { bvc: BVaultConfig, showTip?: boolean }) {
   const [fmtApy, apy] = useBVaultApy(bvc)
   const { data: stakeApy } = useVerioStakeApy()
-  const fmtTotal = fmtPercent(apy + stakeApy, 10)
-  if (showTip)
+  const fmtTotal = fmtPercent(bvc.assetSymbol === 'vIP' ? apy + stakeApy : apy, 10)
+  if (bvc.assetSymbol === 'vIP' && showTip)
     return <Tip className='underline underline-offset-[3px]' node={fmtTotal}>
       <div>vIP Base: {fmtPercent(stakeApy, 10)}</div>
       <div>YT Income: {fmtApy}</div>
@@ -123,7 +123,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
         ),
       )}
       {renderStat('Reward', vc.rewardSymbol || 'vIP', <Fragment>
-        <span>{vc.rewardSymbol || 'vIP'}</span>
+        <span>{vc.rewardSymbol === 'Spice Points' ? `${vc.rewardSymbol} 20x` : vc.rewardSymbol || 'vIP'}</span>
         {(vc.rewardSymbol || 'vIP') == 'vIP' && <div className='text-xs whitespace-nowrap absolute top-2/3 left-1/2 -translate-x-1/2'>Underlying APY:
           <Tip node={<span className='underline underline-offset-2'>{fmtPercent(underlyingApy, 18, 2)}</span>}>
             <div className='grid grid-cols-3'>
@@ -282,7 +282,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       <div className='flex items-baseline justify-between px-5 pt-5 gap-5'>
-        <TupleTxt tit='APY Est.' sub={<BVaultApy bvc={vc} showTip={vc.assetSymbol === 'vIP'} />} />
+        <TupleTxt tit='APY Est.' sub={<BVaultApy bvc={vc} showTip />} />
         <TupleTxt tit='Total Supply' sub={<>{displayBalance(vd.pTokenTotal)}</>} />
       </div>
       <div className='flex px-2 pb-5'>
