@@ -30,6 +30,7 @@ export const TOKENS: Token[] = [
   { address: '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42', symbol: 'AIDaUSDC', decimals: 6, chain: [story.id] },
   { address: '0xF1815bd50389c46847f0Bda824eC8da914045D14', symbol: 'USDC', decimals: 6, chain: [story.id] },
   { address: '0x66B4CB07229EcCC6f48161DfcC229Ac06af25457', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
+  { address: '0x67B7B0B3fA057703E077D1Df6b50065a1229D41A', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
 
 
 ]
