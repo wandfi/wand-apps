@@ -233,16 +233,16 @@ export function Info({ vc }: { vc: BVaultConfig }) {
 
 function PT({ vc }: { vc: BVaultConfig }) {
   const [inputAsset, setInputAsset] = useState('')
-  const inputAssetBn = parseEthers(inputAsset)
+
   const lp = LP_TOKENS[vc.asset]
   const isLP = !!lp
   const pTokenSymbolShort = isLP ? 'PT' : vc.pTokenSymbol
   const assetSymbolShort = isLP ? 'LP' : vc.assetSymbol
   const vd = useBVault(vc.vault)
-
   // const [fmtApy] = useBVaultApy(bvc.vault)
   const { data: walletClient } = useWalletClient()
   const chainId = useCurrentChainId()
+  const pt = getTokenBy(vc.pToken, chainId)!
   const { address } = useAccount()
   const upForUserAction = useUpBVaultForUserAction(vc)
   const onAddPToken = () => {
@@ -260,6 +260,18 @@ function PT({ vc }: { vc: BVaultConfig }) {
   const tokens = useTokens(vc)
   const [currentToken, setCurrentToken] = useState(tokens[0])
   const inputBalance = useBalance(currentToken)
+  const inputAssetBn = parseEthers(inputAsset, currentToken.decimals)
+  const minumError = inputAssetBn > 0n && vc.assetSymbol === 'vIP' && inputAssetBn < MinumAmount
+  const { data: outPt, isFetching: isFetchingSwap } = useQuery({
+    queryKey: ['calcPTout', chainId, inputAssetBn, currentToken],
+    initialData: 0n,
+    queryFn: async () => {
+      if (isAddressEqual(vc.asset, currentToken.address)) {
+        return inputAssetBn
+      }
+      return getPC(chainId).readContract({ abi: erc4626Abi, address: vc.asset, functionName: 'previewDeposit', args: [inputAssetBn] })
+    }
+  })
   return <div className={cn('flex flex-col gap-5 w-full')}>
     <div className='card !p-0 overflow-hidden w-full'>
       <div className='flex p-5 bg-[#10B98126] gap-5'>
@@ -270,7 +282,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       <div className='flex items-baseline justify-between px-5 pt-5 gap-5'>
-        <TupleTxt tit='APY Est.' sub={<BVaultApy bvc={vc} showTip />} />
+        <TupleTxt tit='APY Est.' sub={<BVaultApy bvc={vc} showTip={vc.assetSymbol === 'vIP'} />} />
         <TupleTxt tit='Total Supply' sub={<>{displayBalance(vd.pTokenTotal)}</>} />
       </div>
       <div className='flex px-2 pb-5'>
@@ -280,13 +292,15 @@ function PT({ vc }: { vc: BVaultConfig }) {
       </div>
     </div>
     <div className='flex flex-col gap-1'>
-      <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+      <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={minumError ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
       <GetvIP address={vc.asset} />
-      <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div>
+      <div className='text-base font-bold my-2'>Receive</div>
+      <TokenInput tokens={[pt]} balance={false} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={fmtBn(outPt, pt.decimals)} />
+      {/* <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div> */}
       <Txs
         className='mx-auto mt-4'
         tx='Buy'
-        disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || inputAssetBn < MinumAmount}
+        disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || minumError}
         txs={async () => {
           const { txs, sharesBn } = await wrapIfErc4626({ chainId, vc, token: currentToken.address, inputBn: inputAssetBn, user: address! })
           return [
@@ -306,12 +320,14 @@ function PT({ vc }: { vc: BVaultConfig }) {
 }
 
 function YT({ vc }: { vc: BVaultConfig }) {
+  const tokens = useTokens(vc)
+  const [currentToken, setCurrentToken] = useState(tokens[0])
   const isLP = vc.assetSymbol.includes('-')
   const pTokenSymbolShort = isLP ? 'PT' : vc.pTokenSymbol
   const yTokenSymbolShort = isLP ? 'YT' : vc.yTokenSymbol
   const assetSymbolShort = isLP ? 'LP token' : vc.assetSymbol
   const [inputAsset, setInputAsset] = useState('')
-  const inputAssetBn = parseEthers(inputAsset)
+  const inputAssetBn = parseEthers(inputAsset, currentToken.decimals)
   const vd = useBVault(vc.vault)
 
   const chainId = useCurrentChainId()
@@ -338,9 +354,9 @@ function YT({ vc }: { vc: BVaultConfig }) {
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(vc)
   const { roi, roiChange } = useBvaultROI(vc, outputYTokenForInput, afterYtAssetPrice)
-  const tokens = useTokens(vc)
-  const [currentToken, setCurrentToken] = useState(tokens[0])
   const inputBalance = useBalance(currentToken)
+  const minumError = inputAssetBn > 0n && vc.assetSymbol === 'vIP' && inputAssetBn < MinumAmount
+
   return (
     <div className='flex flex-col gap-5'>
       <div className='card !p-0 overflow-hidden w-full'>
@@ -359,10 +375,10 @@ function YT({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
-        <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+        <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={minumError ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
         <GetvIP address={vc.asset} />
         <div className='text-base font-bold my-2'>Receive</div>
-        <AssetInput asset={vc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
+        <AssetInput asset={vc.yTokenSymbol} decimals={currentToken.decimals} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
         <div className='text-xs font-medium  flex justify-between select-none'>
           <div className='flex items-center gap-2'>
             <RiLoopLeftFill className='text-sm text-primary cursor-pointer inline-block' onClick={() => togglePriceSwap()} />
@@ -376,7 +392,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
         <Txs
           className='mx-auto mt-auto'
           tx='Buy'
-          disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || inputAssetBn < MinumAmount}
+          disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || minumError}
           txs={async () => {
             const { txs, sharesBn } = await wrapIfErc4626({ chainId, vc, token: currentToken.address, inputBn: inputAssetBn, user: address! })
             return [

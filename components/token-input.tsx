@@ -24,6 +24,7 @@ function TokenSymbol({ token }: { token: Token }) {
 export function TokenInput({
   tokens,
   checkBalance = true,
+  balance: showBalance = true,
   balanceTit = 'Balance',
   exchange,
   readonly,
@@ -40,7 +41,7 @@ export function TokenInput({
 }: {
   tokens: Token[],
   checkBalance?: boolean
-  balance?: bigint
+  balance?: boolean
   balanceTit?: string
   exchange?: string | number
   readonly?: boolean
@@ -117,7 +118,7 @@ export function TokenInput({
       </div>
 
       <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
-        {balance != undefined && <div className={balanceClassName}>
+        {showBalance && <div className={balanceClassName}>
           <span>
             {balanceTit}: {displayBalance(balance, undefined, token.decimals)}
           </span>
