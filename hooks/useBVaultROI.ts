@@ -5,16 +5,16 @@ import { DECIMAL, YEAR_SECONDS } from '@/constants'
 import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
-import _, { flatten } from 'lodash'
+import _ from 'lodash'
 import { Address, formatEther, parseAbi, parseEther, zeroAddress } from 'viem'
 
-export function useBVaultIPAssets(vault: Address) {
+export function useBVaultIPAssets(vault?: Address) {
   return useQuery({
     initialData: [],
     queryKey: ['bvualtipassets', vault],
     enabled: Boolean(vault),
     queryFn: async () => {
-      const ipAssets = await getPC().readContract({ abi: abiBVault, address: vault, functionName: 'ipAssets' })
+      const ipAssets = await getPC().readContract({ abi: abiBVault, address: vault!, functionName: 'ipAssets' })
       console.info('ipAssets:', ipAssets)
       return ipAssets
     },
@@ -44,10 +44,9 @@ export const ipAssetsTit: { [k: Address]: string } = {
 // 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
 export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
   const vault = vc.vault
-  const { data: ipAssets } = useBVaultIPAssets(vault)
+  const { data: ipAssets } = useBVaultIPAssets(vc.assetSymbol === 'vIP' ? vault : undefined)
   return useQuery({
     initialData: { avrageApy: 0n, items: [] },
-
     queryKey: ['bvualtunderlyingapy', vault, ipAssets],
     enabled: Boolean(vault) && ipAssets.length > 0 && vc.assetSymbol == 'vIP',
     gcTime: 60 * 60 * 1000,
@@ -58,8 +57,10 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
       const blockTime = parseEther('2.367')
       const apyByIpAsset = async (ipAsset: Address) => {
         const [
-          // rewardPools, 
-          [totalStaked], totalStakedWeighted] = await Promise.all([
+          // rewardPools,
+          [totalStaked],
+          totalStakedWeighted,
+        ] = await Promise.all([
           // pc.readContract({
           //   abi: abiIPA,
           //   functionName: 'getRewardPools',
@@ -80,10 +81,10 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
           }),
         ])
         // const rewardsPerEpoch = flatten(rewardPools).find((item) => item.rewardsPerEpoch > 0n)?.rewardsPerEpoch || 0n
-        const rewardsPerEpoch = parseEther("0.00009")
-        let baseApy = totalStakedWeighted > 0n ? (rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime * DECIMAL / totalStakedWeighted : 0n
+        const rewardsPerEpoch = parseEther('0.00009')
+        let baseApy = totalStakedWeighted > 0n ? (((rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime) * DECIMAL) / totalStakedWeighted : 0n
         if (totalStaked >= parseEther('100') && ratio > 0n && totalStakedWeighted > 0n) {
-          baseApy += ((parseEther('7.5') * DECIMAL) / ratio) * (totalStaked * DECIMAL / totalStakedWeighted) / DECIMAL/ 100n
+          baseApy += (((parseEther('7.5') * DECIMAL) / ratio) * ((totalStaked * DECIMAL) / totalStakedWeighted)) / DECIMAL / 100n
         }
         const apy = baseApy * multiplier
         console.info('underlyingApy:', vault, ipAsset, formatEther(apy))
