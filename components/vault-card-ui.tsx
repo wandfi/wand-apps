@@ -1,12 +1,11 @@
 import { cn } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import { AllHTMLAttributes, ButtonHTMLAttributes, EventHandler, HTMLAttributes, MouseEventHandler, ReactEventHandler, ReactNode } from 'react'
-import { IconsMap } from './icons'
+import { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react'
 import { CoinIcon } from './icons/coinicon'
 import { BBtn } from './ui/bbtn'
 
 export const itemClassname = 'py-5 flex flex-col items-center gap-2 relative dark:border-border border-solid'
-export const renderToken = (symbol: string, amount: bigint, usd: bigint, borderL: boolean = false) => {
+export const renderToken = (symbol: string, amount: bigint, usd: bigint, decimals: number = 18, borderL: boolean = false) => {
   return (
     <div className={cn(itemClassname, 'border-b', { 'border-l': borderL })}>
       <div>
@@ -15,8 +14,8 @@ export const renderToken = (symbol: string, amount: bigint, usd: bigint, borderL
           {symbol}
         </div>
         <div className='flex mt-2 flex-col gap-1 pl-[1.375rem] text-xs font-medium'>
-          <span className=''>{displayBalance(amount)}</span>
-          <span className=' text-[#64748B] dark:text-slate-50/60'>{`$${displayBalance(usd, 2)}`}</span>
+          <span className=''>{displayBalance(amount, undefined, decimals)}</span>
+          <span className=' text-[#64748B] dark:text-slate-50/60'>{`$${displayBalance(usd, 2, decimals)}`}</span>
         </div>
       </div>
     </div>

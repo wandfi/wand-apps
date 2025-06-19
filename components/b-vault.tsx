@@ -730,7 +730,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       {lp && renderToken(token1, lpBase, lpBaseTvlBn)}
-      {lp && renderToken(token2, lpQuote, lpQuoteTvlBn, true)}
+      {lp && renderToken(token2, lpQuote, lpQuoteTvlBn, 18, true)}
       {renderStat(
         'Settlement Time',
         bvd.closed ? 'status-red' : 'status-green',

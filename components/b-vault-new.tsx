@@ -78,9 +78,11 @@ export function BVaultApy({ bvc, showTip = false }: { bvc: BVaultConfig, showTip
 }
 
 export function BVaultCard({ vc }: { vc: BVaultConfig }) {
+  const chainId = useCurrentChainId()
   const r = useRouter()
   const [token1, token2] = vc.assetSymbol.split('-')
   const bvd = useBVault(vc.vault)
+  const asset = getTokenBy(vc.asset, chainId)!
   const [tvl, lpBaseTvlBn, lpQuoteTvlBn] = useBvaultTVL(vc)
   const lp = LP_TOKENS[vc.asset]
   const lpBase = bvd.lpBase || 0n
@@ -102,11 +104,11 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
         </div>
         <div className='ml-auto'>
           <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{'Total Value Locked'}</div>
-          <div className='text-sm font-medium'>${displayBalance(tvl, 2)}</div>
+          <div className='text-sm font-medium'>${displayBalance(tvl, 2, asset.decimals)}</div>
         </div>
       </div>
       {lp && renderToken(token1, lpBase, lpBaseTvlBn)}
-      {lp && renderToken(token2, lpQuote, lpQuoteTvlBn, true)}
+      {lp && renderToken(token2, lpQuote, lpQuoteTvlBn, 18, true)}
       {renderStat(
         'Settlement Time',
         bvd.closed ? 'status-red' : 'status-green',
@@ -184,6 +186,7 @@ export function BVaultCardComming({ symbol = '' }: { symbol?: string }) {
 
 export function Info({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
+  const asset = getTokenBy(vc.asset, chainId)!
   const vd = useBVault(vc.vault)
   const epoch = vd.current;
   const [tvl] = useBvaultTVL(vc)
@@ -210,7 +213,7 @@ export function Info({ vc }: { vc: BVaultConfig }) {
       </div>
       <div className="flex flex-col whitespace-nowrap font-semibold gap-1">
         <div className="text-sm">Total Vaule Locked</div>
-        <div className="text-xs opacity-60">${displayBalance(tvl, 2)}</div>
+        <div className="text-xs opacity-60">${displayBalance(tvl, 2, asset.decimals)}</div>
       </div>
     </div >
     <div className="opacity-60 text-sm font-medium leading-normal whitespace-pre-wrap">{vc.des ?? ''}</div>
@@ -283,7 +286,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
       </div>
       <div className='flex items-baseline justify-between px-5 pt-5 gap-5'>
         <TupleTxt tit='APY Est.' sub={<BVaultApy bvc={vc} showTip />} />
-        <TupleTxt tit='Total Supply' sub={<>{displayBalance(vd.pTokenTotal)}</>} />
+        <TupleTxt tit='Total Supply' sub={<>{displayBalance(vd.pTokenTotal, undefined, pt.decimals)}</>} />
       </div>
       <div className='flex px-2 pb-5'>
         <button className='btn-link ml-auto text-black/60 dark:text-white/60 text-xs' onClick={onAddPToken}>
@@ -320,6 +323,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
 }
 
 function YT({ vc }: { vc: BVaultConfig }) {
+
   const tokens = useTokens(vc)
   const [currentToken, setCurrentToken] = useState(tokens[0])
   const isLP = vc.assetSymbol.includes('-')
@@ -331,6 +335,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const vd = useBVault(vc.vault)
 
   const chainId = useCurrentChainId()
+  const asset = getTokenBy(vc.asset, chainId)!
   const { address } = useAccount()
   const [calcSwapKey, setCalcSwapKey] = useState(['calcSwap', vc.vault, inputAssetBn, chainId])
   useDebounce(() => setCalcSwapKey(['calcSwap', vc.vault, inputAssetBn, chainId]), 300, ['calcSwap', vc.vault, inputAssetBn, chainId])
@@ -368,9 +373,9 @@ function YT({ vc }: { vc: BVaultConfig }) {
           </div>
         </div>
         <div className='flex flex-col items-end justify-between px-5 pt-5 gap-1 pb-5'>
-          <TupleTxt tit='Circulation amount' sub={<>{displayBalance(vd.current.yTokenAmountForSwapYT)}</>} />
+          <TupleTxt tit='Circulation amount' sub={<>{displayBalance(vd.current.yTokenAmountForSwapYT, undefined, asset.decimals)}</>} />
           <span className='text-xs '>
-            1{yTokenSymbolShort} = Yield of {displayBalance(oneYTYieldOfAsset, 2)} {assetSymbolShort}
+            1{yTokenSymbolShort} = Yield of {displayBalance(oneYTYieldOfAsset, 2, asset.decimals)} {assetSymbolShort}
           </span>
         </div>
       </div>
@@ -481,6 +486,7 @@ function PositonPT({ vc }: { vc: BVaultConfig }) {
 }
 function PositonYT({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
+  const asset = getTokenBy(vc.asset, chainId)!
   const epochesData = useEpochesData(vc.vault)
   const vd = useBVault(vc.vault)
   const upForUserAction = useUpBVaultForUserAction(vc)
@@ -528,10 +534,10 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
     return [
       [
         <TokenSymbol key={'token'} t={{ address: zeroAddress, symbol: vc.yTokenSymbol, decimals: 18, chain: [chainId] }} />,
-        displayBalance(yBalance),
+        displayBalance(yBalance, undefined, asset.decimals),
         vd.closed ? 'Mature' : 'Active',
         <div key={'yields'}>
-          {ytPoints > 0n && <div className='flex gap-3 items-center'>{'YT Points'} <span>{displayBalance(ytPoints, undefined, 23)}</span></div>}
+          {ytPoints > 0n && <div className='flex gap-3 items-center'>{'YT Points'} <span>{displayBalance(ytPoints, undefined, asset.decimals + 5)}</span></div>}
           {yieldsOne.map((item, i) => <MCoinAmount key={`yields_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
         <div key={'airdrops'}>
