@@ -49,7 +49,7 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
     initialData: { avrageApy: 0n, items: [] },
 
     queryKey: ['bvualtunderlyingapy', vault, ipAssets],
-    enabled: Boolean(vault) && ipAssets.length > 0,
+    enabled: Boolean(vault) && ipAssets.length > 0 && vc.assetSymbol == 'vIP',
     gcTime: 60 * 60 * 1000,
     queryFn: async () => {
       const pc = getPC(getCurrentChainId(), 1)

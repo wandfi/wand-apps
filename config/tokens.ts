@@ -27,9 +27,9 @@ export const TOKENS: Token[] = [
   { address: '0xfa9eeeaf51a053bfb94643ad3d80837c661d99eb', symbol: 'YTK', decimals: 18, chain: [hashkeyTestnet.id] },
   { address: '0x8eeca063d0ec83b98f6af9008c535b1ca2c03e93', symbol: 'BT-INFRA', decimals: 18, chain: [hashkeyTestnet.id] },
 
-  { address: '0x5267F7eE069CEB3D8F1c760c215569b79d0686aD', symbol: 'AIDaUSDC', decimals: 6, chain: [story.id] },
-  { address: '0x5267F7eE069CEB3D8F1c760c215569b79d0689aE', symbol: 'USDC', decimals: 6, chain: [story.id] },
-  { address: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d5', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
+  { address: '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42', symbol: 'AIDaUSDC', decimals: 6, chain: [story.id] },
+  { address: '0xF1815bd50389c46847f0Bda824eC8da914045D14', symbol: 'USDC', decimals: 6, chain: [story.id] },
+  { address: '0x66B4CB07229EcCC6f48161DfcC229Ac06af25457', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
 
 
 ]

@@ -6,6 +6,7 @@ import { getTokenBy, Token } from '@/config/tokens'
 import { DECIMAL } from '@/constants'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { useBalance } from '@/hooks/useToken'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleError, parseEthers } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
@@ -19,19 +20,32 @@ import { useRouter } from 'next/navigation'
 import { Fragment, ReactNode, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useToggle } from 'react-use'
-import { Address, isAddressEqual, zeroAddress } from 'viem'
-import { useWalletClient } from 'wagmi'
-import { ApproveAndTx, TX, Txs } from './approve-and-tx'
+import { Address, erc20Abi, erc4626Abi, isAddressEqual, zeroAddress } from 'viem'
+import { useAccount, useWalletClient } from 'wagmi'
+import { TX, Txs } from './approve-and-tx'
 import { AssetInput } from './asset-input'
 import { CoinAmount } from './coin-amount'
 import { GetvIP } from './get-lp'
 import { CoinIcon } from './icons/coinicon'
 import STable from './simple-table'
 import { SimpleTabs } from './simple-tabs'
+import { TokenInput } from './token-input'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
-import { TokenInput } from './token-input'
 
+
+async function wrapIfErc4626({ chainId, vc, token, inputBn, user }: { chainId: number, vc: BVaultConfig, token: Address, inputBn: bigint, user: Address }) {
+  let txs: TX[] = []
+  let sharesBn = inputBn;
+  if (!isAddressEqual(vc.asset, token)) {
+    sharesBn = await getPC(chainId).readContract({ abi: erc4626Abi, address: vc.asset, functionName: 'previewDeposit', args: [inputBn] })
+    txs = [
+      { abi: erc20Abi, address: token, functionName: 'approve', args: [vc.asset, inputBn] },
+      { abi: erc4626Abi, address: vc.asset, functionName: 'deposit', args: [inputBn, user] },
+    ]
+  }
+  return { txs, sharesBn }
+}
 function useTokens(vc: BVaultConfig) {
   const chainId = useCurrentChainId()
   return useMemo(() => {
@@ -225,9 +239,11 @@ function PT({ vc }: { vc: BVaultConfig }) {
   const pTokenSymbolShort = isLP ? 'PT' : vc.pTokenSymbol
   const assetSymbolShort = isLP ? 'LP' : vc.assetSymbol
   const vd = useBVault(vc.vault)
-  const assetBalance = useStore((s) => s.sliceTokenStore.balances[vc.asset] || 0n, [`sliceTokenStore.balances.${vc.asset}`])
+
   // const [fmtApy] = useBVaultApy(bvc.vault)
   const { data: walletClient } = useWalletClient()
+  const chainId = useCurrentChainId()
+  const { address } = useAccount()
   const upForUserAction = useUpBVaultForUserAction(vc)
   const onAddPToken = () => {
     walletClient
@@ -242,9 +258,8 @@ function PT({ vc }: { vc: BVaultConfig }) {
       .catch(handleError)
   }
   const tokens = useTokens(vc)
-  // const params = useSearchParams()
-  // const subtab = params.get('subtab') as string
-  // const r = useRouter()
+  const [currentToken, setCurrentToken] = useState(tokens[0])
+  const inputBalance = useBalance(currentToken)
   return <div className={cn('flex flex-col gap-5 w-full')}>
     <div className='card !p-0 overflow-hidden w-full'>
       <div className='flex p-5 bg-[#10B98126] gap-5'>
@@ -265,22 +280,20 @@ function PT({ vc }: { vc: BVaultConfig }) {
       </div>
     </div>
     <div className='flex flex-col gap-1'>
-      <TokenInput tokens={tokens} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+      <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
       <GetvIP address={vc.asset} />
       <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div>
-      <ApproveAndTx
+      <Txs
         className='mx-auto mt-4'
         tx='Buy'
-        disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance || inputAssetBn < MinumAmount}
-        spender={vc.vault}
-        approves={{
-          [vc.asset]: inputAssetBn,
-        }}
-        config={{
-          abi: abiBVault,
-          address: vc.vault,
-          functionName: 'deposit',
-          args: [inputAssetBn],
+        disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || inputAssetBn < MinumAmount}
+        txs={async () => {
+          const { txs, sharesBn } = await wrapIfErc4626({ chainId, vc, token: currentToken.address, inputBn: inputAssetBn, user: address! })
+          return [
+            ...txs,
+            { abi: erc20Abi, address: currentToken.address, functionName: 'approve', args: [vc.vault, sharesBn] },
+            { abi: abiBVault, address: vc.vault, functionName: 'deposit', args: [sharesBn] }
+          ]
         }}
         onTxSuccess={() => {
           setInputAsset('')
@@ -300,8 +313,9 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const [inputAsset, setInputAsset] = useState('')
   const inputAssetBn = parseEthers(inputAsset)
   const vd = useBVault(vc.vault)
-  const assetBalance = useStore((s) => s.sliceTokenStore.balances[vc.asset] || 0n, [`sliceTokenStore.balances.${vc.asset}`])
+
   const chainId = useCurrentChainId()
+  const { address } = useAccount()
   const [calcSwapKey, setCalcSwapKey] = useState(['calcSwap', vc.vault, inputAssetBn, chainId])
   useDebounce(() => setCalcSwapKey(['calcSwap', vc.vault, inputAssetBn, chainId]), 300, ['calcSwap', vc.vault, inputAssetBn, chainId])
   const { data: result, isFetching: isFetchingSwap } = useQuery({
@@ -325,6 +339,8 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const upForUserAction = useUpBVaultForUserAction(vc)
   const { roi, roiChange } = useBvaultROI(vc, outputYTokenForInput, afterYtAssetPrice)
   const tokens = useTokens(vc)
+  const [currentToken, setCurrentToken] = useState(tokens[0])
+  const inputBalance = useBalance(currentToken)
   return (
     <div className='flex flex-col gap-5'>
       <div className='card !p-0 overflow-hidden w-full'>
@@ -343,7 +359,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
-        <TokenInput tokens={tokens} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+        <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
         <GetvIP address={vc.asset} />
         <div className='text-base font-bold my-2'>Receive</div>
         <AssetInput asset={vc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
@@ -357,21 +373,18 @@ function YT({ vc }: { vc: BVaultConfig }) {
         {outputYTokenForInput > 0n && <div className='text-xs font-medium text-center my-auto text-black/80 dark:text-white/80'>
           Implied ROI Change: {fmtPercent(roi, 18, 2)} {'->'} <span className={cn({ 'text-red-400': (roi - roiChange) >= BigInt(1e17) })}>{fmtPercent(roiChange, 18, 2)}</span>
         </div>}
-        <ApproveAndTx
+        <Txs
           className='mx-auto mt-auto'
           tx='Buy'
-          skipSimulate
-          disabled={inputAssetBn <= 0n || inputAssetBn > assetBalance || inputAssetBn < MinumAmount}
-          config={{
-            abi: abiBVault,
-            address: vc.vault,
-            functionName: 'swap',
-            args: [inputAssetBn],
+          disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || inputAssetBn < MinumAmount}
+          txs={async () => {
+            const { txs, sharesBn } = await wrapIfErc4626({ chainId, vc, token: currentToken.address, inputBn: inputAssetBn, user: address! })
+            return [
+              ...txs,
+              { abi: erc20Abi, address: vc.asset, functionName: 'approve', args: [vc.vault, sharesBn] },
+              { abi: abiBVault, address: vc.vault, functionName: 'swap', args: [sharesBn] }
+            ]
           }}
-          approves={{
-            [vc.asset]: inputAssetBn,
-          }}
-          spender={vc.vault}
           onTxSuccess={() => {
             setInputAsset('')
             upForUserAction()

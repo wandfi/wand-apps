@@ -36,6 +36,7 @@ export function TokenInput({
   balanceClassName = '',
   loading,
   error = '',
+  onTokenChange
 }: {
   tokens: Token[],
   checkBalance?: boolean
@@ -52,6 +53,7 @@ export function TokenInput({
   loading?: boolean
   balanceClassName?: string
   error?: string
+  onTokenChange?: (token: Token) => void
 }) {
   const options = useMemo(() => {
     return tokens.map((item => ({
@@ -82,7 +84,7 @@ export function TokenInput({
           {exchange && <div className='text-slate-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>~${exchange}</div>}
         </div>
         <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2 z-50' ref={coinSymbolRef}>
-          {tokens.length > 1 ? <SimpleSelect className='border-none' options={options} onChange={(n) => setToken(n.data)} /> : <TokenSymbol token={token} />}
+          {tokens.length > 1 ? <SimpleSelect className='border-none' options={options} onChange={(n) => { setToken(n.data); onTokenChange?.(n.data) }} /> : <TokenSymbol token={token} />}
         </div>
         <input
           value={loading ? '' : amount}
