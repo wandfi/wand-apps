@@ -11,7 +11,7 @@ import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleError, parseEthers } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useStore } from '@/providers/useBoundStore'
-import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
+import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData, useUpBVaultForUserAction, useUserBVaultEpoches } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
@@ -334,6 +334,9 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const inputAssetBn = parseEthers(inputAsset, currentToken.decimals)
   const vd = useBVault(vc.vault)
 
+  const epoches = useUserBVaultEpoches(vc.vault)
+  const currentEpoch = epoches?.[0]
+
   const chainId = useCurrentChainId()
   const asset = getTokenBy(vc.asset, chainId)!
   const { address } = useAccount()
@@ -358,11 +361,19 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const priceImpact = afterYtAssetPrice > ytAssetPriceBn && ytAssetPriceBn > 0n ? ((afterYtAssetPrice - ytAssetPriceBn) * BigInt(1e10)) / ytAssetPriceBn : 0n
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(vc)
-  const { roi, roiChange } = useBvaultROI(vc, outputYTokenForInput, afterYtAssetPrice)
+  // const { roi, roiChange } = useBvaultROI(vc, outputYTokenForInput, afterYtAssetPrice)
+  const userYtBalance = currentEpoch?.userBalanceYToken ?? 0n;
+  const ytShare = vd.current.yTokenAmountForSwapYT > 0n && userYtBalance > 0n ? userYtBalance * BigInt(1e10) / vd.current.yTokenAmountForSwapYT : 0n
+  const ytShareFmt = fmtPercent(ytShare, 10, 2);
+  let ytShareChange = ytShare
+  if (inputAssetBn > 0n && outputYTokenForInput > 0n) {
+    ytShareChange = (userYtBalance + outputYTokenForInput) * BigInt(1e10) / (vd.current.yTokenAmountForSwapYT + outputYTokenForInput)
+  }
+  const ytShareChangeFmt = fmtPercent(ytShare, 10, 2);
   const inputBalance = useBalance(currentToken)
   const minumError = inputAssetBn > 0n && vc.assetSymbol === 'vIP' && inputAssetBn < MinumAmount
   const maxnumError = inputAssetBn > 0n && inputAssetBn * 50n > vd.pTokenTotal
-  const error = minumError ? `Minimum amount is ${displayBalance(MinumAmount)}`: maxnumError? 'Exceeded purchase limit': ''
+  const error = minumError ? `Minimum amount is ${displayBalance(MinumAmount)}` : maxnumError ? 'Exceeded purchase limit' : ''
   return (
     <div className='flex flex-col gap-5'>
       <div className='card !p-0 overflow-hidden w-full'>
@@ -392,9 +403,12 @@ function YT({ vc }: { vc: BVaultConfig }) {
           </div>
           <div className='flex gap-2 items-center'>{`Price Impact: ${fmtPercent(priceImpact, 10, 2)}`}</div>
         </div>
-        {outputYTokenForInput > 0n && <div className='text-xs font-medium text-center my-auto text-black/80 dark:text-white/80'>
+        {/* {outputYTokenForInput > 0n && <div className='text-xs font-medium text-center my-auto text-black/80 dark:text-white/80'>
           Implied ROI Change: {fmtPercent(roi, 18, 2)} {'->'} <span className={cn({ 'text-red-400': (roi - roiChange) >= BigInt(1e17) })}>{fmtPercent(roiChange, 18, 2)}</span>
-        </div>}
+        </div>} */}
+        <div className='text-xs font-medium opacity-60'>
+          YT Share: {ytShareFmt}{' '}{ytShareChange !== ytShare ? `-> ${ytShareChangeFmt}` : ''}
+        </div>
         <Txs
           className='mx-auto mt-auto'
           tx='Buy'
