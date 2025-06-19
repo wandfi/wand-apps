@@ -361,7 +361,8 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const { roi, roiChange } = useBvaultROI(vc, outputYTokenForInput, afterYtAssetPrice)
   const inputBalance = useBalance(currentToken)
   const minumError = inputAssetBn > 0n && vc.assetSymbol === 'vIP' && inputAssetBn < MinumAmount
-
+  const maxnumError = inputAssetBn > 0n && inputAssetBn * 50n > vd.pTokenTotal
+  const error = minumError ? `Minimum amount is ${displayBalance(MinumAmount)}`: maxnumError? 'Exceeded purchase limit': ''
   return (
     <div className='flex flex-col gap-5'>
       <div className='card !p-0 overflow-hidden w-full'>
@@ -380,7 +381,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
         </div>
       </div>
       <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
-        <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={minumError ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
+        <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={error} />
         <GetvIP address={vc.asset} />
         <div className='text-base font-bold my-2'>Receive</div>
         <AssetInput asset={vc.yTokenSymbol} decimals={currentToken.decimals} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
