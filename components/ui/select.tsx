@@ -8,7 +8,7 @@ export type OptionBase = string | {
     show: ReactNode,
 }
 export function SimpleSelect<T extends OptionBase>({ options, value, defValue, onChange, className, itemClassName, currentClassName }: {
-    options: T[],
+    options: T[] | readonly T[],
     value?: T,
     onChange?: (data: T) => void,
     className?: string

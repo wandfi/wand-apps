@@ -51,8 +51,8 @@ export function useLoadBVaults() {
   const chainId = useCurrentChainId()
   const bvcs = useMemo(() => BVAULTS_CONFIG[chainId].filter((vc) => (vc.onEnv || []).includes(ENV)), [chainId, ENV])
   // useUpdateBVaultsData(bvcs)
-  useQuery({
-    queryKey: ["UpdateBVaults",bvcs],
+  const { isLoading: isLoading1 } = useQuery({
+    queryKey: ['UpdateBVaults', bvcs],
     queryFn: async () => {
       await Promise.all([useBoundStore.getState().sliceBVaultsStore.updateBvaults(bvcs), useBoundStore.getState().sliceBVaultsStore.updateYTokenSythetic(bvcs)])
       return true
@@ -67,7 +67,7 @@ export function useLoadBVaults() {
         .reduce<Address[]>((union, item) => (union.includes(item) ? union : [...union, item]), []),
     [bvcs],
   )
-  useQuery({
+  const { isLoading: isLoading2 } = useQuery({
     queryKey: ['UpdateBvautlsTokens', tokens],
     queryFn: async () => {
       await Promise.all([useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(tokens), useBoundStore.getState().sliceTokenStore.updateTokenPrices(tokens)])
@@ -78,7 +78,7 @@ export function useLoadBVaults() {
       return false
     },
   })
-  useQuery({
+  const { isLoading: isLoading3 } = useQuery({
     queryKey: ['UpdateUserBvautlsTokens', tokens, address],
     queryFn: async () => {
       if (!address) return false
@@ -86,6 +86,7 @@ export function useLoadBVaults() {
       return true
     },
   })
+  return { loading: isLoading1 || isLoading2 || isLoading3 }
 }
 export function useLoadLntVaults() {
   const chainId = useCurrentChainId()
