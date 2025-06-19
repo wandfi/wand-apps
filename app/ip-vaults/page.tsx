@@ -154,7 +154,7 @@ export default function Vaults() {
             <div className='page-title'>IP-Vaults</div>
             <div className='flex items-center gap-8 justify-between'>
               <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
-              <SimpleSelect options={vaultsFilters} onChange={wrapSetFilter} />
+              <SimpleSelect value={currentFilter} options={vaultsFilters} onChange={wrapSetFilter} />
             </div>
             {loading ? <div className='w-full flex items-center justify-center pt-40'>
               <FaSpinner className='animate-spin text-4xl opacity-80' />

@@ -70,7 +70,7 @@ export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = proxyGetDef(
         protocolAddress: '0xE092612505661721053fA22b2D40fD6ae1eA87c2',
         protocolSettingsAddress: '0xf2B9B6489AB734ddA51Ca0311d335684874D24b4',
         bQueryAddres: BQueryAddress[story.id],
-        onEnv: ['test'],
+        onEnv: ['test', 'prod'],
         ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
         newUI: true,
         rewardSymbol: 'Spice Points',
