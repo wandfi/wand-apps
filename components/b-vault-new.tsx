@@ -305,7 +305,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
           const { txs, sharesBn } = await wrapIfErc4626({ chainId, vc, token: currentToken.address, inputBn: inputAssetBn, user: address! })
           return [
             ...txs,
-            { abi: erc20Abi, address: currentToken.address, functionName: 'approve', args: [vc.vault, sharesBn] },
+            { abi: erc20Abi, address: vc.asset, functionName: 'approve', args: [vc.vault, sharesBn] },
             { abi: abiBVault, address: vc.vault, functionName: 'deposit', args: [sharesBn] }
           ]
         }}
