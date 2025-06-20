@@ -62,7 +62,7 @@ export const renderChoseSide = (
             <CoinIcon symbol={leftSymbol} size={36} />
             <div className='flex flex-col items-start gap-2'>
               <div className='text-white/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>{leftTitle}</div>
-              <span className=' text-[14px] leading-[14px] font-medium'>{leftSub}</span>
+              {Boolean(leftSub) && <span className=' text-[14px] leading-[14px] font-medium'>{leftSub}</span>}
             </div>
           </div>
         </BtnWrap>
@@ -71,7 +71,7 @@ export const renderChoseSide = (
             <CoinIcon symbol={rightSymbol} size={36} />
             <div className='flex flex-col items-end gap-2'>
               <div className='text-white/60 text-xs font-semibold leading-[12px] whitespace-nowrap'>{rightTitle}</div>
-              <span className=' text-[14px] leading-[14px] font-medium'>{rightSub}</span>
+              {Boolean(rightSub) && <span className=' text-[14px] leading-[14px] font-medium'>{rightSub}</span>}
             </div>
           </div>
         </BtnWrap>

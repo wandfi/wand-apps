@@ -147,7 +147,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
         <BVaultApy bvc={vc} />,
         vc.yTokenSymbol,
         'Yield Token',
-        `${fmtPercent(roi, 18, 2)}`, // `${fmtBoost}x`,
+        `${vc.rewardSymbol !== 'Spice Points' ? fmtPercent(roi, 18, 2) : ''}`, // `${fmtBoost}x`,
         (e) => {
           e.stopPropagation()
           toBVault(r, vc.vault, 'pt')
