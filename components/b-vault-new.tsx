@@ -357,7 +357,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
     : `1 ${yTokenSymbolShort}=${displayBalance(ytAssetPriceBn)} ${assetSymbolShort}`
 
   const afterYtAssetPrice = vualtYTokenBalance > outputYTokenForInput ? ((vd.Y + inputAssetBn) * DECIMAL) / (vualtYTokenBalance - outputYTokenForInput) : 0n
-  const outputYTokenFmt = fmtBn(outputYTokenForInput, undefined, true)
+  const outputYTokenFmt = fmtBn(outputYTokenForInput, asset.decimals)
   const priceImpact = afterYtAssetPrice > ytAssetPriceBn && ytAssetPriceBn > 0n ? ((afterYtAssetPrice - ytAssetPriceBn) * BigInt(1e10)) / ytAssetPriceBn : 0n
   // console.info('result:', inputAssetBn, result, fmtBn(afterYtAssetPrice), fmtBn(ytAssetPriceBn))
   const upForUserAction = useUpBVaultForUserAction(vc)
@@ -367,9 +367,10 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const ytShareFmt = fmtPercent(ytShare, 10, 2);
   let ytShareChange = ytShare
   if (inputAssetBn > 0n && outputYTokenForInput > 0n) {
+
     ytShareChange = (userYtBalance + outputYTokenForInput) * BigInt(1e10) / (vd.current.yTokenAmountForSwapYT + outputYTokenForInput)
   }
-  const ytShareChangeFmt = fmtPercent(ytShare, 10, 2);
+  const ytShareChangeFmt = fmtPercent(ytShareChange, 10, 2);
   const inputBalance = useBalance(currentToken)
   const minumError = inputAssetBn > 0n && vc.assetSymbol === 'vIP' && inputAssetBn < MinumAmount
   const maxnumError = inputAssetBn > 0n && inputAssetBn * 50n > vd.pTokenTotal
