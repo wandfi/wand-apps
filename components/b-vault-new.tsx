@@ -15,7 +15,7 @@ import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData
 import { displayBalance } from '@/utils/display'
 import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
-import _, { union } from 'lodash'
+import _, { toUpper, union } from 'lodash'
 import { useRouter } from 'next/navigation'
 import { Fragment, ReactNode, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
@@ -431,10 +431,12 @@ function YT({ vc }: { vc: BVaultConfig }) {
     </div>
   )
 }
-export function PTYT({ vc }: { vc: BVaultConfig, currentTab?: string }) {
+export function PTYT({ vc, currentTab }: { vc: BVaultConfig, currentTab?: string }) {
+  const tab = ['PT', 'YT'].find(item => item == toUpper(currentTab ?? 'PT')) ?? 'PT'
   return <div className='card bg-white h-full'>
     <SimpleTabs
       listClassName="p-0 gap-8 mb-4 w-full"
+      currentTab={tab}
       triggerClassName={(i) => `text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2`}
       data={[
         { tab: 'PT', content: <PT vc={vc} /> },

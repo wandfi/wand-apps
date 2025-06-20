@@ -29,7 +29,7 @@ function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
 
-const SupportTabs = ['redeem', 'principal_panda', 'yield_token', 'add_reward'] as const
+const SupportTabs = ['pt', 'yt'] as const
 
 function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: string }) {
   const { address } = useAccount()

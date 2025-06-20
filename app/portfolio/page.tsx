@@ -28,6 +28,7 @@ import { FiShare } from 'react-icons/fi'
 import { MdArrowOutward } from 'react-icons/md'
 import { toBVault } from '../routes'
 import { BVaultApy } from '@/components/b-vault'
+import { getTokenBy } from '@/config/tokens'
 
 function PortfolioItem({
   title,
@@ -228,11 +229,12 @@ function BoostItem() {
             epochInfo: epochInfo(bvc.vault, parseInt(epoch.epochId.toString())),
             settled: s.sliceBVaultsStore.epoches[`${bvc.vault}_${parseInt(epoch.epochId.toString())}`]?.settled || false,
           }))
-          .filter((item) => !!item.epochInfo)
-        return { bvc, epochsData }
+          .filter((item) => !!item.epochInfo && (item.userBalanceYToken > 0n || item.userBalanceYTokenSyntyetic > 0n || item.userClaimableYTokenSyntyetic > 0n))
+        return { bvc, epochsData, ytDecimals: getTokenBy(bvc.asset, chainId)!.decimals }
       })
       .filter((item) => item.epochsData.length)
-    return datas.map(({ bvc, epochsData }) => [
+
+    return datas.map(({ bvc, epochsData, ytDecimals }) => [
       <CoinText key={'coin'} symbol={bvc.assetSymbol} txt={bvc.yTokenSymbol} size={32} />,
       <div key={'epochs'}>
         {epochsData.map((epoch) => (
@@ -246,12 +248,12 @@ function BoostItem() {
       </div>,
       <div key={'amount'}>
         {epochsData.map((epoch) => (
-          <div key={epoch.epochId.toString()}>{displayBalance(epoch.userBalanceYToken)}</div>
+          <div key={epoch.epochId.toString()}>{displayBalance(epoch.userBalanceYToken, undefined, ytDecimals)}</div>
         ))}
       </div>,
       <div key={'time weighted'}>
         {epochsData.map((epoch) => (
-          <div key={epoch.epochId.toString()}>{displayBalance(epoch.userBalanceYTokenSyntyetic, undefined, 23)}</div>
+          <div key={epoch.epochId.toString()}>{displayBalance(epoch.userBalanceYTokenSyntyetic, undefined, ytDecimals + 5)}</div>
         ))}
       </div>,
       // <div key={'my share'}>
