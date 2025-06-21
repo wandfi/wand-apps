@@ -11,6 +11,7 @@ import { useBoundStore, useStore } from '@/providers/useBoundStore'
 import _ from 'lodash'
 import { BVAULTS_CONFIG } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
+import { getTokenBy } from '@/config/tokens'
 
 export function useTVLV1() {
   const chainId = useCurrentChainId()
@@ -73,6 +74,7 @@ export function useTVL() {
         const usdAmount = (price * amount) / DECIMAL
         return {
           ...item,
+          decimals: 18,
           price,
           amount,
           usdAmount,
@@ -85,10 +87,12 @@ export function useTVL() {
             const lvd = lvaults[vc.vault]
             const amount = (lvd?.sellPoolTotalStaking || 0n) + (lvd?.buyPoolBalance || 0n)
             const price = prices[vc.assetTokenAddress]
-            const usdAmount = (price * amount) / DECIMAL
+            const decimals = getTokenBy(vc.assetTokenAddress, chainId)!.decimals;
+            const usdAmount = (price * amount) / (10n ** BigInt(decimals))
             return {
               name: vc.assetTokenSymbol + vc.version,
               symbol: vc.assetTokenSymbol,
+              decimals,
               address: vc.assetTokenAddress,
               price,
               amount,
@@ -107,13 +111,15 @@ export function useTVL() {
             // const amount = lpEnable ? bvd.lpLiq! : 0n
             // const price = tprices[bvc.asset] || DECIMAL
             const amount = bvd?.lpLiq || bvd?.lockedAssetTotal || 0n
+            const decimals = getTokenBy(bvc.asset, chainId)!.decimals;
             return {
               name: bvc.assetSymbol,
               symbol: bvc.assetSymbol,
               address: bvc.asset,
+              decimals,
               price,
               amount,
-              usdAmount: (price * amount) / DECIMAL,
+              usdAmount: (price * amount) / (10n ** BigInt(decimals)),
             }
           })
           .values()

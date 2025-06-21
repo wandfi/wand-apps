@@ -20,6 +20,7 @@ import { BVaultApy } from '@/components/b-vault'
 import { ReactNode, useContext, useMemo } from 'react'
 import { Address } from 'viem'
 import { useBvaultROI } from '@/hooks/useBVaultROI'
+import { getTokenBy } from '@/config/tokens'
 
 const TableCell = (p: React.TdHTMLAttributes<HTMLTableCellElement> & React.RefAttributes<HTMLTableCellElement>) => {
   return <_TableCell {...p} className={`!p-3 w-max ${p.className}`} />
@@ -59,7 +60,7 @@ function TVLItem() {
         <span>{item.symbol}</span>
       </div>,
       `$${displayBalance(item.price)}`,
-      displayBalance(item.amount),
+      displayBalance(item.amount, undefined, item.decimals),
       `$${displayBalance(item.usdAmount)}`,
     ])
   }, [tvl.tvlItems])
@@ -113,9 +114,10 @@ function BVaultsItem() {
 
   const data: ReactNode[][] = useMemo(() => {
     const datas = bvcs.map((bvc) => {
+      const decimals = getTokenBy(bvc.asset, chainId)!.decimals
       const totalDeposit = getBigint(bvaults, [bvc.vault, 'lockedAssetTotal'])
 
-      let totalDepositUsd = (totalDeposit * getBigint(prices, [bvc.asset])) / DECIMAL
+      let totalDepositUsd = (totalDeposit * getBigint(prices, [bvc.asset])) / (10n ** BigInt(decimals))
       const lp = LP_TOKENS[bvc.asset]
       if (lp) {
         const base = getBigint(bvaults, [bvc.vault, 'lpBase']);
@@ -125,11 +127,11 @@ function BVaultsItem() {
       const [baseSymbol, quoteSymbol] = lp ? bvc.assetSymbol.split('-') : ['', '']
       const totalLeftWidth = Math.max(22 + displayBalance(totalDeposit).length * 5, displayBalance(totalDepositUsd).length * 5 + 5)
 
-      return { bvc, totalDeposit, totalDepositUsd, totalLeftWidth, lp, baseSymbol, quoteSymbol }
+      return { bvc, totalDeposit, decimals, totalDepositUsd, totalLeftWidth, lp, baseSymbol, quoteSymbol }
     })
     const totalLeftWidth = datas.reduce((max, item) => Math.max(max, item.totalLeftWidth), 0) + 20
 
-    return datas.map(({ bvc, totalDeposit, totalDepositUsd, lp, baseSymbol, quoteSymbol }) => [
+    return datas.map(({ bvc, totalDeposit, decimals, totalDepositUsd, lp, baseSymbol, quoteSymbol }) => [
       <div key='icon' className='flex gap-2 items-center'>
         {<CoinIcon symbol={bvc.assetSymbol} size={20} />}
         <span>{bvc.assetSymbol}</span>
@@ -138,7 +140,7 @@ function BVaultsItem() {
         <div style={{ width: totalLeftWidth }}>
           <div key='icon' className='flex gap-2 items-center'>
             {<CoinIcon symbol={bvc.assetSymbol} size={14} />}
-            <span>{displayBalance(totalDeposit)}</span>
+            <span>{displayBalance(totalDeposit, undefined, decimals)}</span>
           </div>
           <div className='opacity-60'>~{displayBalance(totalDepositUsd)}</div>
         </div>
@@ -160,7 +162,7 @@ function BVaultsItem() {
         <span>Epoch {getBigint(bvaults, [bvc.vault, 'epochCount']).toString()}</span>
       </div>,
       <BVaultApy key={'apy'} bvc={bvc} />,
-      <BVaultROI key={'roi'} vc={bvc}/>,
+      <BVaultROI key={'roi'} vc={bvc} />,
     ])
   }, [bvcs, bvaults, prices])
   return <DashItem title='B-Vault' tHeader={['Vaults', 'Total Deposit', 'Status', 'PT APY', 'YT ROI']} tData={data} />
