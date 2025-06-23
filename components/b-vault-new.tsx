@@ -452,9 +452,9 @@ export function PTYT({ vc, currentTab }: { vc: BVaultConfig, currentTab?: string
 const MCoinAmount = ({ ...p }: Parameters<typeof CoinAmount>[0]) => {
   return <CoinAmount className="font-bold text-sm" symbolClassName="opacity-100" {...p} />
 }
-function TokenSymbol({ t, size = 32, className }: { t?: Token, size?: number, className?: string }) {
+function TokenSymbol({ t, size = 32, className, onClick }: { t?: Token, size?: number, className?: string, onClick?: () => void }) {
   if (!t) return null
-  return <div className={cn("flex gap-2 items-center font-semibold", className)}>
+  return <div className={cn("flex gap-2 items-center font-semibold", className)} onClick={onClick}>
     <CoinIcon symbol={t.symbol} size={size} />
     {t.symbol}
   </div>
@@ -559,21 +559,29 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
         <div key={'yields'}>
           {ytPoints > 0n && <div className='flex gap-3 items-center'>{'YT Points'} <span>{displayBalance(ytPoints, undefined, asset.decimals + 5)}</span></div>}
           {yieldsOne.map((item, i) => <MCoinAmount key={`yields_${i}`} token={item.token} amount={item.amount} />)}
+          {vc.rewardSymbol == 'Spice Points' &&
+            <TokenSymbol
+              t={{ chain: [1], decimals: 18, symbol: 'Spice Points', address: '0x' }}
+              size={16}
+              className='cursor-pointer underline underline-offset-2'
+              onClick={() => open("https://aid.gaib.ai", '_blank')} />
+          }
         </div>,
         <div key={'airdrops'}>
           {airdropsOne.map((item, i) => <MCoinAmount key={`airdrops_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
-        <Txs key="redeem" tx='Redeem' className='w-32' txs={txsOne} onTxSuccess={upForUserAction} />
+        <Txs key="redeem" tx='Claim' className='w-32' txs={txsOne} onTxSuccess={upForUserAction} />
       ],
       ...(showMatures ? [[
         '', '', 'Rewards for mature YT',
         <div key={'yields'}>
           {maturesYields.map((item, i) => <MCoinAmount key={`yields_${i}`} token={item.token} amount={item.amount} />)}
+
         </div>,
         <div key={'airdrops'}>
           {maturesAirdrops.map((item, i) => <MCoinAmount key={`airdrops_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
-        <Txs key="redeem" tx='Redeem' className='w-32' txs={txsMatures} onTxSuccess={upForUserAction} />
+        <Txs key="redeem" tx='Claim' className='w-32' txs={txsMatures} onTxSuccess={upForUserAction} />
       ]] : [])
     ]
   }, [epochesData, vd])
