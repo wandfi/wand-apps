@@ -48,6 +48,7 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
 export default function BootstrapPage() {
     const chainId = useCurrentChainId()
     const vcs = BVAULTS2CONIG[chainId].filter(item => item.onEnv.includes(ENV))
+    console.info("bootstrap:", vcs)
     const params = useSearchParams()
     const paramsVault = params.get('vault')
     if (vcs.length == 0) return null

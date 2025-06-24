@@ -167,12 +167,14 @@ export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
 
 export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const r = useRouter()
-    const asset = getTokenBy(vc.asset)!
+    const chainId = useCurrentChainId()
+    const asset = getTokenBy(vc.asset, chainId)!
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { endTime, reamin } = getBvualt2Times(vd)
     const [apy] = usePTApy(vc)
     const [roi] = useYTRoi(vc)
+    if(!asset) return null
     return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} onClick={() => toBVault2(r, vc.vault)}>
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
             <CoinIcon symbol={asset.symbol} size={44} />
