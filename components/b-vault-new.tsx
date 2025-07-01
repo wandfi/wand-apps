@@ -550,16 +550,16 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
     const showMatures = txsMatures.length > 0;
     const maturesYields = bribes(epochesData.slice(1), 'sBribes')
     const maturesAirdrops = bribes(epochesData.slice(1), 'aBribes')
-
+    const isSpicePoints = vc.rewardSymbol === 'Spice Points'
     return [
       [
         <TokenSymbol key={'token'} t={{ address: zeroAddress, symbol: vc.yTokenSymbol, decimals: 18, chain: [chainId] }} />,
         displayBalance(yBalance, undefined, asset.decimals),
         vd.closed ? 'Mature' : 'Active',
         <div key={'yields'}>
-          {ytPoints > 0n && <div className='flex gap-3 items-center'>{'YT Points'} <span>{displayBalance(ytPoints, undefined, asset.decimals + 5)}</span></div>}
+          {ytPoints > 0n && !isSpicePoints && <div className='flex gap-3 items-center'>{'YT Points'} <span>{displayBalance(ytPoints, undefined, asset.decimals + 5)}</span></div>}
           {yieldsOne.map((item, i) => <MCoinAmount key={`yields_${i}`} token={item.token} amount={item.amount} />)}
-          {vc.rewardSymbol == 'Spice Points' &&
+          {isSpicePoints &&
             <TokenSymbol
               t={{ chain: [1], decimals: 18, symbol: 'Spice Points', address: '0x' }}
               size={16}
@@ -570,18 +570,17 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
         <div key={'airdrops'}>
           {airdropsOne.map((item, i) => <MCoinAmount key={`airdrops_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
-        <Txs key="redeem" tx='Claim' className='w-32' txs={txsOne} onTxSuccess={upForUserAction} />
+        isSpicePoints ? '' : <Txs key="redeem" tx='Claim' className='w-32' txs={txsOne} onTxSuccess={upForUserAction} />
       ],
       ...(showMatures ? [[
         '', '', 'Rewards for mature YT',
         <div key={'yields'}>
           {maturesYields.map((item, i) => <MCoinAmount key={`yields_${i}`} token={item.token} amount={item.amount} />)}
-
         </div>,
         <div key={'airdrops'}>
           {maturesAirdrops.map((item, i) => <MCoinAmount key={`airdrops_${i}`} token={item.token} amount={item.amount} />)}
         </div>,
-        <Txs key="redeem" tx='Claim' className='w-32' txs={txsMatures} onTxSuccess={upForUserAction} />
+        isSpicePoints ? '' : <Txs key="redeem" tx='Claim' className='w-32' txs={txsMatures} onTxSuccess={upForUserAction} />
       ]] : [])
     ]
   }, [epochesData, vd])
