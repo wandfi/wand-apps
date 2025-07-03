@@ -2,7 +2,7 @@ import { abiBT } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
 import { getTokenBy, Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
-import { reFet } from "@/hooks/useFet";
+import { reFet, useFet } from "@/hooks/useFet";
 import { fmtBn, formatPercent, handleError, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
@@ -13,7 +13,6 @@ import { Address, isAddressEqual, SimulateContractParameters } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
 import { TX, Txs, withTokenApprove } from "../approve-and-tx";
-import { AssetInput } from "../asset-input";
 import { GetvIP } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
@@ -42,8 +41,14 @@ export async function unwrapBT({ chainId, bt, token, btShareBn, user }: { chainI
 }
 
 export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
-    return useMemo(() => [vc.asset, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt])
+    const data = useFet({
+        key: `btInputs${vc.bt}`,
+        initResult: [vc.asset],
+        fetfn: async () => getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'getTokensIn' })
+    })
+    return useMemo(() => [...data.result, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt, data.result])
 }
+
 export function BT({ vc }: { vc: BVault2Config }) {
     const chainId = useCurrentChainId()
     const asset = getTokenBy(vc.asset, chainId)!
@@ -62,32 +67,43 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const [isToggled, toggle] = useToggle(false)
-    const inputBalance = isToggled ? btBalance : assetBalance
     const input = isToggled ? bt : cToken
     const output = isToggled ? cToken : bt
+    const inputSetCT = (t: Token) => !isToggled && setCToken(t)
+    const outputSetCT = (t: Token) => isToggled && setCToken(t)
     const [calcOutAmountKey, setCalcOutAmountKey] = useState<any[]>(['calcBTSwapOut'])
-    useDebounce(() => setCalcOutAmountKey(['calcBTSwapOut', isToggled, inputAssetBn, cToken]), 300, [isToggled, inputAssetBn, cToken])
+    useDebounce(() => setCalcOutAmountKey(['calcBTSwapOut', isToggled, inputAssetBn, input]), 300, [isToggled, inputAssetBn, input])
     const { data: outAmount, isFetching: isFetchingCalc } = useQuery({
         queryKey: calcOutAmountKey,
         initialData: 0n,
         queryFn: async () => {
             if (calcOutAmountKey.length <= 1) return 0n
-            return getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [cToken.address, inputAssetBn] })
+            return getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [input.address, inputAssetBn] })
         }
     })
     const onSwitch = () => {
         toggle()
     }
     const getTxs = async () => {
-        const tx: SimulateContractParameters = {
-            abi: abiBT,
-            address: bt.address,
-            functionName: isToggled ? 'redeem' : 'deposit',
-            args: isToggled ? [address!, inputAssetBn, asset.address, 0n] : [address!, asset.address, inputAssetBn, 0n],
+        if (isToggled) {
+            const unwrapTxs = await unwrapBT({
+                chainId: vc.chain,
+                bt: vc.bt,
+                token: cToken.address,
+                btShareBn: inputAssetBn,
+                user: address!
+            })
+            return [...unwrapTxs]
+        } else {
+            const wrapBt = await wrapToBT({
+                chainId: vc.chain,
+                bt: vc.bt,
+                token: cToken.address,
+                inputBn: inputAssetBn,
+                user: address!
+            })
+            return [...wrapBt.txs]
         }
-
-        if (isToggled) return [tx]
-        return withTokenApprove({ pc: getPC(vc.chain), user: address!, approves: [{ spender: bt.address, token: cToken.address, amount: inputAssetBn, }], tx })
     }
     const { result: unlerlingApy } = useUnderlingApy(vc)
     return <div className="flex flex-col gap-4 w-full">
@@ -113,20 +129,13 @@ export function BT({ vc }: { vc: BVault2Config }) {
 
         </div>
         <div className='card !p-4 flex flex-col gap-1'>
-            {
-                isToggled ?
-                    <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
-                    : <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCToken} />
-            }
+            <TokenInput tokens={isToggled ? [bt] : tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={inputSetCT} />
             <Swap onClick={onSwitch} />
             <div className="flex justify-between items-center">
                 <div className="font-bold">Receive</div>
                 <GetvIP address={asset.address} />
             </div>
-            {
-                isToggled ? <TokenInput disable tokens={tokens} loading={isFetchingCalc && inputAssetBn > 0n} amount={fmtBn(outAmount, output.decimals)} onTokenChange={setCToken} /> :
-                    <AssetInput asset={output.symbol} loading={isFetchingCalc && inputAssetBn > 0n} disable amount={fmtBn(outAmount, output.decimals)} />
-            }
+            <TokenInput disable tokens={isToggled ? tokens : [bt]} loading={isFetchingCalc && inputAssetBn > 0n} amount={fmtBn(outAmount, output.decimals)} onTokenChange={outputSetCT} />
             <Txs
                 className='mx-auto mt-4'
                 tx={isToggled ? 'Unwrap' : 'Wrap'}

@@ -1,6 +1,6 @@
 import { abiBT, abiBVault2 } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
-import { getTokenBy } from "@/config/tokens"
+import { getTokenBy, Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
@@ -112,14 +112,16 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         }
 
     }
+    const inputSetCT = (t: Token) => !isToggled && setCT(t)
+    const outputSetCT = (t: Token) => isToggled && setCT(t)
     return <div className='flex flex-col gap-1'>
-        <TokenInput tokens={inputs} onTokenChange={setCT} amount={inputAsset} setAmount={setInputAsset} error={errorInput} />
+        <TokenInput tokens={inputs} onTokenChange={inputSetCT} amount={inputAsset} setAmount={setInputAsset} error={errorInput} />
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={bt.address} />
         </div>
-        <TokenInput tokens={outputs} onTokenChange={setCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
+        <TokenInput tokens={outputs} onTokenChange={outputSetCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
             <div>Price Impact: {formatPercent(priceimpcat)}</div>
