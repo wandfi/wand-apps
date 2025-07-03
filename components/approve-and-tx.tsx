@@ -2,15 +2,28 @@ import { useApproves, useNftApproves } from '@/hooks/useApprove'
 import { useWrapContractWrite } from '@/hooks/useWrapContractWrite'
 import { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, SimulateContractParameters } from 'viem'
+import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, SimulateContractParameters, WalletClient, zeroAddress } from 'viem'
 
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { useCurrentChainId, useNetworkWrong } from '@/hooks/useCurrentChainId'
 import { getErrorMsg, handleError, promiseT } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useMutation } from '@tanstack/react-query'
 import { toast as tos } from 'sonner'
-import { useWalletClient } from 'wagmi'
+import { useSwitchChain, useWalletClient } from 'wagmi'
 import { BBtn } from './ui/bbtn'
+
+
+export function SwitchNet({ className }: { className?: string }) {
+  const sc = useSwitchChain()
+  const chainId = useCurrentChainId()
+  return <BBtn
+    className={twMerge('flex items-center justify-center gap-4 whitespace-nowrap w-fit min-w-[200px]', className)}
+    onClick={() => sc.switchChainAsync({ chainId }).catch(console.error)}
+    busy={sc.isPending}
+    disabled={sc.isPending}>
+    Switch Network
+  </BBtn>
+}
 export function ApproveAndTx<
   const abi extends Abi | readonly unknown[],
   functionName extends ContractFunctionName<abi, 'nonpayable' | 'payable'>,
@@ -58,7 +71,10 @@ export function ApproveAndTx<
   }, [isApproveSuccess])
 
   const approveDisabled = disabled || !approve || isApproveLoading
-
+  const isNetWrong = useNetworkWrong()
+  if (isNetWrong) {
+    return <SwitchNet className={className} />
+  }
   if (shouldApprove)
     return (
       <BBtn className={twMerge('flex items-center justify-center gap-4', className)} onClick={approve} busy={isApproveLoading} disabled={approveDisabled}>
@@ -121,7 +137,10 @@ export function NftApproveAndTx<
   }, [isApproveSuccess])
 
   const approveDisabled = disabled || !approve || isApproveLoading
-
+  const isNetWrong = useNetworkWrong()
+  if (isNetWrong) {
+    return <SwitchNet className={className} />
+  }
   if (shouldApprove)
     return (
       <BBtn className={twMerge('flex items-center justify-center gap-4', className)} onClick={approve} busy={isApproveLoading} disabled={approveDisabled}>
@@ -146,6 +165,7 @@ export function Txs({
     onTxSuccess?: () => void
   }) {
   const { data: wc } = useWalletClient()
+  const isNetwrong = useNetworkWrong()
   // const { sendCallsAsync } = useSendCalls()
   const chainId = useCurrentChainId()
   const { mutate, isPending } = useMutation({
@@ -171,7 +191,7 @@ export function Txs({
         }
       } catch (error) {
         const msg = getErrorMsg(error)
-        if (msg && msg.includes('wallet_sendCalls')) {
+        if (msg && (msg.includes('wallet_sendCalls') || msg.includes('EIP-7702 not supported'))) {
           const pc = getPC(chainId)
           for (const item of calls) {
             const tx = await wc.writeContract(item)
@@ -186,7 +206,28 @@ export function Txs({
     onError: toast ? handleError : () => { }
   })
   const txDisabled = disabled || isPending || (typeof txs !== 'function' && txs.length == 0) || !wc
+  if (isNetwrong) return <SwitchNet />
   return <BBtn className={twMerge('flex items-center justify-center gap-4', className)} onClick={() => mutate()} busy={isPending} busyShowContent={busyShowTxet} disabled={txDisabled}>
     {tx}
   </BBtn>
+}
+
+
+export async function withTokenApprove({ approves, pc, user, tx }: {
+  approves: { spender: Address, token: Address, amount: bigint }[],
+  pc: PublicClient
+  user: Address,
+  tx: SimulateContractParameters
+}) {
+  let nativeAmount = 0n;
+  const needApproves = await Promise.all(approves.map(async item => {
+    if (zeroAddress === item.token) {
+      nativeAmount += item.amount;
+      return null
+    }
+    const allowance = await pc.readContract({ abi: erc20Abi, address: item.token, functionName: 'allowance', args: [user, item.spender] })
+    if (allowance >= item.amount) return null
+    return { abi: erc20Abi, address: item.token, functionName: 'approve', args: [item.spender, item.amount - allowance] } as SimulateContractParameters
+  })).then(txs => txs.filter(item => item !== null))
+  return [...needApproves, { ...tx, ...(nativeAmount > 0n ? { value: nativeAmount } : {}) }]
 }

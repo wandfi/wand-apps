@@ -2,37 +2,37 @@
 import { toBVault2 } from "@/app/routes";
 import { abiBVault2 } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
+import { getTokenBy } from "@/config/tokens";
 import { DECIMAL } from "@/constants";
-import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
 import { aarToNumber, cn, FMT, fmtDate, fmtDuration, formatPercent, genDeadline, parseEthers } from "@/lib/utils";
+import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@tremor/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BsFire } from "react-icons/bs";
-import { ApproveAndTx } from "../approve-and-tx";
-import { AssetInput } from "../asset-input";
+import { useAccount } from "wagmi";
+import { useBalance } from "../../hooks/useToken";
+import { ApproveAndTx, Txs, withTokenApprove } from "../approve-and-tx";
 import { GetvIP } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { SimpleTabs } from "../simple-tabs";
+import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
 import { itemClassname, renderChoseSide, renderStat } from "../vault-card-ui";
-import { BT } from "./bt";
+import { BT, useWrapBtTokens, wrapToBT } from "./bt";
+import { getLpToken } from "./getToken";
 import { LP } from "./lp";
 import { PT } from "./pt";
-import {  usePTApy, useYTRoi } from "./useDatas";
+import { usePTApy, useYTRoi } from "./useDatas";
 import { getBvault2EpochTimes, getBvualt2BootTimes, getBvualt2Times, useBvualt2Data } from "./useFets";
-import { useBalance } from "../../hooks/useToken";
 import { YT } from "./yt";
-import { getLpToken } from "./getToken";
-import { getTokenBy } from "@/config/tokens";
-
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
-    const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)!
-    const input = bt;
+    const tokens = useWrapBtTokens(vc)
+    const [ct, setCT] = useState(tokens[0])
+    const input = ct;
     const inputBalance = useBalance(input)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
@@ -43,8 +43,18 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const currentAmount = vd?.totalDeposits ?? 0n
     const { endTime } = getBvualt2BootTimes(vd)
     const progressNum = Math.round(aarToNumber(targetAmount > 0n ? currentAmount >= targetAmount ? DECIMAL : currentAmount * DECIMAL / targetAmount : 0n, 16))
-    const lp =  getLpToken(vc, chainId)
+    const lp = getLpToken(vc)
     const lpBalance = useBalance(lp)
+
+    const { address } = useAccount()
+    const getTxs = async () => {
+        const { txs, sharesBn } = await wrapToBT({ chainId: vc.chain, bt: vc.bt, token: ct.address, inputBn: inputAssetBn, user: address! })
+        const txsApprove = await withTokenApprove({
+            approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user: address!,
+            tx: { abi: abiBVault2, address: vc.vault, functionName: 'addLiquidity', args: [sharesBn, genDeadline()], }
+        })
+        return [...txs, ...txsApprove]
+    }
     return <div className="card bg-white">
         <div className="flex items-center gap-2 text-xl font-medium">
             <BsFire className='text-[#ff0000]' />
@@ -56,24 +66,14 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
         </div>
         <div className="flex flex-col h-auto lg:flex-row lg:h-[13.75rem] gap-8">
             <div className="flex-1 w-full lg:w-0 h-full flex flex-col pt-5">
-                <AssetInput asset={bt.symbol} amount={inputAsset} setAmount={setInputAsset} balance={inputBalance.result} />
+                {/* <AssetInput asset={bt.symbol} amount={inputAsset} setAmount={setInputAsset} balance={inputBalance.result} /> */}
+                <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCT} />
                 <GetvIP address={vc.asset} />
-                <ApproveAndTx
+                <Txs
                     className='mx-auto mt-auto'
                     tx='Deposit'
                     disabled={!inited || inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
-                    spender={vc.vault}
-                    approves={{
-                        [input.address]: inputAssetBn,
-                    }}
-                    // skipSimulate
-                    config={{
-                        abi: abiBVault2,
-                        address: vc.vault,
-                        functionName: 'addLiquidity',
-                        args: [inputAssetBn, genDeadline()],
-                        // gas: 61917552n,
-                    }}
+                    txs={getTxs}
                     onTxSuccess={() => {
                         setInputAsset('')
                         reFet(inputBalance.key, vdFS.key)
@@ -154,7 +154,7 @@ export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
     return <div className="card bg-white h-full min-h-[49.25rem]">
         <SimpleTabs
             listClassName="p-0 gap-8 mb-4 w-full"
-            triggerClassName={(i) => `text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2 ${i == 3? 'ml-auto': ''}`}
+            triggerClassName={(i) => `text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2 ${i == 3 ? 'ml-auto' : ''}`}
             data={[
                 { tab: 'PT', content: <PT vc={vc} /> },
                 { tab: 'YT', content: <YT vc={vc} /> },
@@ -167,14 +167,13 @@ export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
 
 export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const r = useRouter()
-    const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)!
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { endTime, reamin } = getBvualt2Times(vd)
     const [apy] = usePTApy(vc)
     const [roi] = useYTRoi(vc)
-    if(!asset) return null
+    if (!asset) return null
     return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} onClick={() => toBVault2(r, vc.vault)}>
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
             <CoinIcon symbol={asset.symbol} size={44} />

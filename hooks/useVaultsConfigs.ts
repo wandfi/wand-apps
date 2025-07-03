@@ -22,7 +22,7 @@ export function useVaultsConfigs() {
   const pvcs = PLAIN_VAULTS_CONFIG[chainId] || []
   const bvcs = useMemo(() => (BVAULTS_CONFIG[chainId] || []).filter((vc) => vc.onEnv && vc.onEnv.includes(ENV)), [chainId])
   const lntvcs = useMemo(() => (LNTVAULTS_CONFIG[chainId] || []).filter((vc) => vc.onEnv && vc.onEnv.includes(ENV)), [chainId])
-  const b2vcs = useMemo(() => (BVAULTS2CONIG[chainId] || []).filter((vc) => vc.onEnv && vc.onEnv.includes(ENV)), [chainId])
+  const b2vcs = useMemo(() => BVAULTS2CONIG.filter((vc) => vc.onEnv && vc.onEnv.includes(ENV) && vc.chain === chainId), [chainId])
 
   const options: OptionsItem[] = useMemo(() => {
     const vcsOpt = vcs.map<OptionItem<VaultConfig, 'L-Vault'>>((vc) => ({

@@ -1,10 +1,10 @@
-import { abiBvault2Query, abiMarket } from '@/config/abi/BVault2'
+import { abiBvault2Query } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
 import { isPROD } from '@/constants'
 import { getPC } from '@/providers/publicClient'
 import { mapValues } from 'lodash'
-import { Address, erc20Abi, zeroAddress } from 'viem'
+import { Address, erc20Abi } from 'viem'
 import { fmtBn, retry } from './utils'
 
 export function saveLogs(item: any, key: string = 'logs') {
@@ -28,7 +28,7 @@ export async function logUserAction(vc: BVault2Config, user: Address, action: st
     async () => {
       const pc = getPC()
       const [log, Share] = await Promise.all([
-        pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.protocal, vc.bt] }),
+        pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] }),
         pc.readContract({ abi: erc20Abi, address: vc.hook, functionName: 'balanceOf', args: [user] }),
       ])
       const data = mapValues(log, (item) => fmtBn(item, 18))

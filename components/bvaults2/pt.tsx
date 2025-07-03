@@ -1,5 +1,6 @@
-import { abiBVault2, abiHook, abiMintPool } from "@/config/abi/BVault2"
+import { abiBT, abiBVault2 } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
+import { getTokenBy } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
@@ -10,7 +11,8 @@ import _ from "lodash"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
 import { useAccount, useWalletClient } from "wagmi"
-import { ApproveAndTx } from "../approve-and-tx"
+import { useBalance, useTotalSupply } from "../../hooks/useToken"
+import { TX, Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { Fees } from "../fees"
 import { GetvIP } from "../get-lp"
@@ -20,34 +22,44 @@ import { Swap, SwapDown } from "../ui/bbtn"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, usePTApy } from "./useDatas"
-import { useBalance, useTotalSupply } from "../../hooks/useToken"
-import { getTokenBy } from "@/config/tokens"
+import { unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
+import { TokenInput } from "../token-input"
+import { isAddressEqual } from "viem"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
-    const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)!
+    const bt = getTokenBy(vc.bt, vc.chain)!
     const pt = usePtToken(vc)!
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const [isToggled, toggle] = useToggle(false)
-    const input = isToggled ? pt : bt
-    const output = isToggled ? bt : pt
+    const tokens = useWrapBtTokens(vc)
+    const [ct, setCT] = useState(tokens[0])
+    const inputs = isToggled ? [pt] : tokens
+    const outputs = isToggled ? tokens : [pt]
+    const input = isToggled ? pt : ct
+    const output = isToggled ? ct : pt
     const inputBalance = useBalance(input)
     const outputBalance = useBalance(output)
-
     const { result: btPrice } = useBT2PTPrice(vc)
     const price = isToggled ? _.round(1 / btPrice, 2) : _.round(btPrice, 2)
     const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
-
     const [calcPtSwapKey, setCalcPtSwapKey] = useState<any[]>(['calcPTSwapOut'])
-    useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn]), 300, [isToggled, inputAssetBn])
+    useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn, input, output]), 300, [isToggled, inputAssetBn, input, output])
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
         queryKey: calcPtSwapKey,
         initialData: 0n,
         queryFn: async () => {
             if (inputAssetBn <= 0n || calcPtSwapKey.length == 1) return 0n
-            return getPC().readContract({ abi: abiHook, address: vc.hook, functionName: isToggled ? 'getAmountOutVPTToBT' : 'getAmountOutBTToVPT', args: [inputAssetBn] })
+            const pc = getPC(vc.chain)
+            if (isToggled) {
+                const btAmount = await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactPTforBT', args: [inputAssetBn] })
+                if (isAddressEqual(vc.bt, output.address)) return btAmount
+                return pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [output.address, btAmount] })
+            } else {
+                const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] })
+                return pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactBTforPT', args: [btAmount] })
+            }
         }
     })
     const errorInput = !isFetchingOut && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
@@ -56,14 +68,58 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const onSwitch = () => {
         toggle()
     }
+    const getTxs = async () => {
+        if (isToggled) {
+            const txsApproves = await withTokenApprove({
+                approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
+                pc: getPC(vc.chain),
+                user: address!,
+                tx: {
+                    abi: abiBVault2,
+                    address: vc.vault,
+                    functionName: 'swapExactPTForBT',
+                    args: [inputAssetBn, 0n, genDeadline()],
+                }
+            })
+            const unwrapBTtxs = await unwrapBT({
+                chainId: vc.chain,
+                bt: vc.bt,
+                btShareBn: outAmount,
+                token: output.address,
+                user: address!
+            })
+            return [...txsApproves, ...unwrapBTtxs]
+        } else {
+            const wrapBt = await wrapToBT({
+                chainId: vc.chain,
+                bt: vc.bt,
+                inputBn: inputAssetBn,
+                token: input.address,
+                user: address!
+            })
+            const txsApprove = await withTokenApprove({
+                approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBt.sharesBn }],
+                pc: getPC(vc.chain),
+                user: address!,
+                tx: {
+                    abi: abiBVault2,
+                    address: vc.vault,
+                    functionName: 'swapExactBTForPT',
+                    args: [wrapBt.sharesBn, 0n, genDeadline()],
+                }
+            })
+            return [...wrapBt.txs, ...txsApprove]
+        }
+
+    }
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} error={errorInput} />
+        <TokenInput tokens={inputs} onTokenChange={setCT} amount={inputAsset} setAmount={setInputAsset} error={errorInput} />
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={bt.address} />
         </div>
-        <AssetInput asset={output.symbol} loading={isFetchingOut && inputAssetBn > 0n} disable amount={fmtBn(outAmount, output.decimals)} />
+        <TokenInput tokens={outputs} onTokenChange={setCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
             <div>Price Impact: {formatPercent(priceimpcat)}</div>
@@ -72,85 +128,123 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             <div>Implied APY Change: {formatPercent(apy)} → {formatPercent(apyto)}</div>
             <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
         </div>
-        <ApproveAndTx
+        <Txs
             className='mx-auto mt-4'
             tx='Swap'
             disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
-            spender={vc.vault}
-            approves={{
-                [input.address]: inputAssetBn,
-            }}
-            config={{
-                abi: abiBVault2,
-                address: vc.vault,
-                functionName: isToggled ? 'swapExactPTForBT' : 'swapExactBTForPT',
-                args: [inputAssetBn, 0n, genDeadline()],
-            }}
+            txs={getTxs}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTSwap:${isToggled ? 'PT->BT' : 'BT->PT'}:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
-                reFetWithBvault2(chainId, vc, inputBalance.key, outputBalance.key)
+                reFetWithBvault2(vc, inputBalance.key, outputBalance.key)
             }}
         />
     </div>
 }
 export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
-    const chainId = useCurrentChainId()
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
-    const input = getTokenBy(vc.bt, chainId)!
+    const bt = getTokenBy(vc.bt, vc.chain)!
+    const tokens = useWrapBtTokens(vc)
+    const [ct, setCT] = useState(tokens[0])
+    const input = ct
     const inputBalance = useBalance(input)
     const ptBalance = useBalance(pt)
     const ytBalance = useBalance(yt)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
+    const [calcKey, setCalcKey] = useState<any[]>(['calcPTYTMintOut'])
+    useDebounce(() => setCalcKey(['calcPTYTMintOut', inputAssetBn, input]), 300, [inputAssetBn, input])
+    const { data: outAmount, isFetching: isFetchingOut } = useQuery({
+        queryKey: calcKey,
+        initialData: 0n,
+        queryFn: async () => {
+            if (inputAssetBn <= 0n || setCalcKey.length == 1) return 0n
+            const pc = getPC(vc.chain)
+            const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] })
+            return btAmount
+        }
+    })
+    const txs = async (): Promise<TX[]> => {
+        if (!address) return []
+        const wrapBT = await wrapToBT({
+            chainId: vc.chain,
+            bt: vc.bt,
+            inputBn: inputAssetBn,
+            token: input.address,
+            user: address!
+        })
+        const txsApprove = await withTokenApprove({
+            approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBT.sharesBn, }],
+            pc: getPC(vc.chain), user: address,
+            tx: { abi: abiBVault2, address: vc.vault, functionName: 'mintPTandYT', args: [wrapBT.sharesBn] }
+        })
+        return [...wrapBT.txs, ...txsApprove]
+    }
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
+        <TokenInput tokens={tokens} onTokenChange={setCT} amount={inputAsset} setAmount={setInputAsset} />
         <SwapDown />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={vc.asset} />
         </div>
-        <AssetInput asset={pt.symbol} disable amount={inputAsset} />
+        <AssetInput asset={pt.symbol} disable amount={fmtBn(outAmount, bt.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
-        <AssetInput asset={yt.symbol} disable amount={inputAsset} />
-        <ApproveAndTx
+        <AssetInput asset={yt.symbol} disable amount={fmtBn(outAmount, bt.decimals)} loading={isFetchingOut} />
+        <Txs
             className='mx-auto mt-4'
             tx='Mint'
             disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
-            spender={vc.mintpool}
-            approves={{
-                [input.address]: inputAssetBn,
-            }}
-            config={{
-                abi: abiMintPool,
-                address: vc.mintpool,
-                functionName: 'mint',
-                args: [vc.bt, inputAssetBn],
-            }}
+            txs={txs}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTMint:(${fmtBn(inputAssetBn)})`)
                 setInputAsset('')
-                reFetWithBvault2(chainId, vc, inputBalance.key, ptBalance.key, ytBalance.key)
+                reFetWithBvault2(vc, inputBalance.key, ptBalance.key, ytBalance.key)
             }}
         />
     </div>
 }
 export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
-    const chainId = useCurrentChainId()
-    const out = getTokenBy(vc.bt, chainId)!
-
+    const tokens = useWrapBtTokens(vc)
+    const [ct, setCT] = useState(tokens[0])
+    const out = ct
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
     const ptBalance = useBalance(pt)
     const ytBalance = useBalance(yt)
     const outBalance = useBalance(out)
-
     const [input, setInput] = useState('')
     const inputBn = parseEthers(input)
-
+    const [calcKey, setCalcKey] = useState<any[]>(['calcPTYTRedeemOut'])
+    useDebounce(() => setCalcKey(['calcPTYTRedeemOut', inputBn, out]), 300, [inputBn, input])
+    const { data: outAmount, isFetching: isFetchingOut } = useQuery({
+        queryKey: calcKey,
+        initialData: 0n,
+        queryFn: async () => {
+            if (inputBn <= 0n || setCalcKey.length == 1) return 0n
+            const pc = getPC(vc.chain)
+            const outAmount = isAddressEqual(vc.bt, out.address) ? inputBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [out.address, inputBn] })
+            return outAmount
+        }
+    })
+    const getTxs = async () => {
+        const redeemTxs = [{
+            abi: abiBVault2,
+            address: vc.vault,
+            functionName: 'redeemByPTandYT',
+            args: [inputBn]
+        }]
+        const unwrapBTtxs = await unwrapBT({
+            chainId: vc.chain,
+            bt: vc.bt,
+            btShareBn: outAmount,
+            token: out.address,
+            user: address!
+        })
+        return [...redeemTxs, ...unwrapBTtxs]
+    }
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={pt.symbol} amount={input} balance={ptBalance.result} setAmount={setInput} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
@@ -160,21 +254,16 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
             <div className="font-bold">Receive</div>
             <GetvIP address={vc.asset} />
         </div>
-        <AssetInput asset={out.symbol} disable amount={displayBalance(inputBn, undefined, out.decimals)} />
-        <ApproveAndTx
+        <TokenInput tokens={tokens} onTokenChange={setCT} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputBn > 0n} />
+        <Txs
             className='mx-auto mt-4'
             tx='Redeem'
             disabled={inputBn <= 0n || inputBn < ptBalance.result || inputBn < ytBalance.result}
-            config={{
-                abi: abiMintPool,
-                address: vc.mintpool,
-                functionName: 'redeem',
-                args: [vc.bt, inputBn],
-            }}
+            txs={getTxs}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTRedeem:(${fmtBn(inputBn)})`)
                 setInput('')
-                reFetWithBvault2(chainId, vc, ptBalance.key, ytBalance.key, outBalance.key)
+                reFetWithBvault2(vc, ptBalance.key, ytBalance.key, outBalance.key)
             }}
         />
     </div>

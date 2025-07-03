@@ -3,8 +3,8 @@ import { reFet } from '@/hooks/useFet'
 import { Address } from 'viem'
 
 export const FetKEYS = {
-  Logs: (chainId: number, vc: BVault2Config) => `Logs:${chainId}:${vc.vault}`,
-  Bvault2Data: (chainid: number, vc: BVault2Config) => `vault2Data:${chainid}:${vc.vault}`,
+  Logs: (vc: BVault2Config) => `Logs:${vc.chain}:${vc.vault}`,
+  Bvault2Data: (vc: BVault2Config) => `vault2Data:${vc.chain}:${vc.vault}`,
   Bvault2Epochs: (vc: BVault2Config, epochCount: bigint = 0n) => (epochCount > 0n ? `vault2Data:epoches:${vc.vault}:${epochCount}` : ''),
   Bvualt2PTRedeems: (vc: BVault2Config, user?: Address, epochs: any[] = []) => (user && epochs.length > 0 ? `vault2Data:epochesPTRedeems:${vc.vault}:${user}` : ''),
   Bvault2YTRewards: (vc: BVault2Config, user?: Address, epochs: any[] = []) => (user && epochs.length > 0 ? `vault2Data:epochesRewardsForYT:${vc.vault}:${user}` : ''),
@@ -14,6 +14,6 @@ export const FetKEYS = {
   UnderlingApy: (vc: BVault2Config) => `underlingApy:${vc.asset}`,
 }
 
-export function reFetWithBvault2(chainId: number, vc: BVault2Config, ...keys: string[]) {
-  reFet(FetKEYS.Bvault2Data(chainId, vc), FetKEYS.Logs(chainId, vc), ...keys)
+export function reFetWithBvault2(vc: BVault2Config, ...keys: string[]) {
+  reFet(FetKEYS.Bvault2Data(vc), FetKEYS.Logs(vc), ...keys)
 }

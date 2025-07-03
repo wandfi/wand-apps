@@ -1,15 +1,14 @@
 'use client'
 import { BVault2Bootstrap, BVault2Card, BVault2Info, BVault2Swaps } from "@/components/bvaults2"
-import { BT } from "@/components/bvaults2/bt"
 import { MyPositions } from "@/components/bvaults2/positions"
 import { useBvualt2Data } from "@/components/bvaults2/useFets"
 import { BVault2Chart } from "@/components/bvaut2-chart"
 import { Noti } from "@/components/noti"
 import { PageWrap } from "@/components/page-wrap"
 import { Spinner } from "@/components/spinner"
+import { ConfigChainsProvider } from "@/components/support-chains"
 import { BVault2Config, BVAULTS2CONIG } from "@/config/bvaults2"
 import { ENV } from "@/constants"
-import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { isError, isLoading, isSuccess } from "@/hooks/useFet"
 import { Grid } from "@tremor/react"
 import { useSearchParams } from "next/navigation"
@@ -46,9 +45,7 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
 }
 
 export default function BootstrapPage() {
-    const chainId = useCurrentChainId()
-    const vcs = BVAULTS2CONIG[chainId].filter(item => item.onEnv.includes(ENV))
-    console.info("bootstrap:", vcs)
+    const vcs = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
     const params = useSearchParams()
     const paramsVault = params.get('vault')
     if (vcs.length == 0) return null
@@ -58,10 +55,12 @@ export default function BootstrapPage() {
             <div className='w-full max-w-[1368px] px-4 mx-auto md:pb-8'>
                 {
                     currentVC ?
-                        <Bvualt2Page vc={currentVC} /> :
+                        <ConfigChainsProvider chains={[currentVC.chain]}><Bvualt2Page vc={currentVC} /> </ConfigChainsProvider> :
                         <Grid numItems={1} numItemsMd={2} numItemsLg={3} className='gap-5 mt-4'>
                             {vcs.map((item, index) => (
-                                <BVault2Card key={`b_vault2_item_${index}`} vc={item} />
+                                <ConfigChainsProvider key={`b_vault2_item_${index}`} chains={[item.chain]}>
+                                    <BVault2Card vc={item} />
+                                </ConfigChainsProvider>
                             ))}
                         </Grid>
                 }

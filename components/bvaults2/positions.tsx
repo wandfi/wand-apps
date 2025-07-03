@@ -1,4 +1,4 @@
-import { abiMaturityPool, abiRewardManager } from "@/config/abi/BVault2";
+import { abiBVault2, abiRewardManager } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
 import { getTokenBy, Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
@@ -43,7 +43,7 @@ function PT({ vc }: { vc: BVault2Config }) {
         const res = []
         const active = groups['active']?.[0]
         if (active) {
-            const pt = getPtToken(vc, chainId, active.PT)
+            const pt = getPtToken(vc, active.PT)
             res.push([
                 <TokenSymbol key="token" t={pt} />,
                 displayBalance(active.redeemable, undefined, pt.decimals),
@@ -56,7 +56,7 @@ function PT({ vc }: { vc: BVault2Config }) {
         }
         const matures = groups['mature']
         if (matures && matures.length) {
-            const pt = getPtToken(vc, chainId, active.PT)
+            const pt = getPtToken(vc, active.PT)
             const sum = matures.reduce((sum, item) => sum + item.redeemable, 0n)
             res.push([
                 <TokenSymbol key="token" t={pt} />,
@@ -70,33 +70,12 @@ function PT({ vc }: { vc: BVault2Config }) {
                         tx="Claim"
                         className="w-28 font-semibold h-7"
                         onTxSuccess={() => reFet(redeems.key)}
-                        txs={matures.filter(item => item.redeemable > 0n).map(item => ({ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [item.PT, item.redeemable] }))}
+                        txs={matures.filter(item => item.redeemable > 0n).map(item => ({ abi: abiBVault2, functionName: 'redeemByMaturedPT', address: vc.vault, args: [item.PT, item.redeemable] }))}
                     />
                 </div>
             ])
         }
         return res;
-        // return redeems.result.map(item => {
-        //     const epochActive = (item.startTime + item.duration) * 1000n > BigInt(now())
-        //     const pt = getPtToken(vc, chainId, item.PT)
-        //     return [
-        //         <TokenSymbol key="token" t={pt} />,
-        //         displayBalance(item.redeemable, undefined, pt.decimals),
-        //         epochActive ? 'Active' : 'Mature',
-        //         <div key='redeemable'>
-        //             {!epochActive && <MCoinAmount token={getTokenBy(vc.bt)} amount={item.redeemable} />}
-        //         </div>,
-        //         <div key='calim'>
-        //             {!epochActive && <ApproveAndTx
-        //                 key="claim"
-        //                 tx="Claim"
-        //                 className="w-28 font-semibold h-7"
-        //                 onTxSuccess={() => reFet(redeems.key)}
-        //                 disabled={item.redeemable <= 0n}
-        //                 config={{ abi: abiMaturityPool, functionName: 'redeem', address: vc.maturitypool, args: [pt.address, item.redeemable] }} />}
-        //         </div>
-        //     ]
-        // })
     }, [redeems.result])
     const header = ['PT', 'Value', 'Status', 'Redeemable', '']
     return <div className="card !p-4 bg-white">
@@ -133,7 +112,7 @@ function YT({ vc }: { vc: BVault2Config }) {
         const active = groups['active']?.[0]
         const matures = groups['mature']
         if (active) {
-            const yt = getYtToken(vc, chainId, active.YT)
+            const yt = getYtToken(vc, active.YT)
             const disableClaim = !active.rewrads.find(item => item[1] > 0n)
             res.push([
                 <TokenSymbol key="token" t={yt} />,
@@ -177,20 +156,6 @@ function YT({ vc }: { vc: BVault2Config }) {
             ])
         }
         return res;
-        // return rewards.result.map(item => {
-        //     const epochActive = (item.startTime + item.duration) * 1000n > BigInt(now())
-        //     const yt = getYtToken(vc, chainId, item.YT)
-        //     return [
-        //         <TokenSymbol key="token" t={yt} />,
-        //         <TokenBalance t={yt} key='ytBalance' />,
-        //         epochActive ? 'Active' : 'Rewards for mature YT',
-        //         <div key="token2">
-        //             {item.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token)} key={`rewards_${token}`} amount={amount} />)}
-        //         </div>,
-        //         '',
-        //         <ApproveAndTx onTxSuccess={() => reFet(rewards.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: yt.address, args: [address!] }} />,
-        //     ]
-        // })
     }, [rewards.result])
     const header = ['YT', 'Value', 'Status', 'Yield', 'Airdrops', '']
     return <div className="card !p-4 bg-white">
@@ -211,7 +176,6 @@ function LPBT({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const data = useMemo(() => {
         if (!rewards.result.length) return []
-
         return rewards.result.map(item => [
             <TokenSymbol key="token" t={item.token} />, <TokenBalance t={item.token} key={'tokenBalance'} />, '', <div key="token2">
                 {item.rewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token, chainId)!} key={`rewards_${token}`} amount={amount} />)}

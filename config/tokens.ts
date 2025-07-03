@@ -32,7 +32,10 @@ export const TOKENS: Token[] = [
   { address: '0x66B4CB07229EcCC6f48161DfcC229Ac06af25457', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
   { address: '0x67B7B0B3fA057703E077D1Df6b50065a1229D41A', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
 
-
+  { address: '0x7ab9c3a00073bc564f05feed4eb0a65a5073f88d', symbol: 'YTK', decimals: 18, chain: [sepolia.id] },
+  { address: '0x796defcd1c393c1620551b4cfb5a43944e86fb3f', symbol: 'BT-INFRA', decimals: 18, chain: [sepolia.id] },
+  // { address: '0xfd031434e2b4d6df10f1608d5adf218d71097a88', symbol: 'BT-VPT-INFRA-1', decimals: 18, chain: [sepolia.id] },
+  // { address: '0xfc84818ea8715332c3d49064701c1cdef70efa88', symbol: 'BT-VPT-INFRA-2', decimals: 18, chain: [sepolia.id] },
 ]
 
 export const TOKENS_MAP: { [k: `${number}_${Address}`]: Token } = TOKENS.reduce((map, item) => {

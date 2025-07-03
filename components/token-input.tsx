@@ -139,3 +139,18 @@ export function TokenInput({
     </div>
   )
 }
+
+
+export function useTokenInputHelper(tokens: Token[]) {
+  const [_currentToken, setCurrentToken] = useState(tokens[0])
+  const currentToken = tokens.includes(_currentToken) ? _currentToken : tokens[0]
+  const [inputAsset, setInputAsset] = useState('')
+  const inputAssetBn = parseEthers(inputAsset, currentToken.decimals)
+  return {
+    currentToken,
+    inputAsset,
+    inputAssetBn,
+    setCurrentToken,
+    setInputAsset,
+  }
+}

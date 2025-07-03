@@ -1,7 +1,7 @@
 import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
-import { useCurrentChainId } from "@/hooks/useCurrentChainId"
+import { getTokenBy } from "@/config/tokens"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
 import { useAccount, useWalletClient } from "wagmi"
+import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { ApproveAndTx } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { CoinAmount } from "../coin-amount"
@@ -20,16 +21,13 @@ import { SwapDown } from "../ui/bbtn"
 import { reFetWithBvault2 } from "./fetKeys"
 import { getLpToken, usePtToken, useYtToken } from "./getToken"
 import { useLogs, useLPApy, useLpShare } from "./useDatas"
-import { useBalance, useTotalSupply } from "../../hooks/useToken"
-import { getTokenBy } from "@/config/tokens"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
-    const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)!
+    const asset = getTokenBy(vc.asset, vc.chain)!
 
-    const lp = getLpToken(vc, chainId)
+    const lp = getLpToken(vc)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
@@ -39,7 +37,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const [keep, toggleKeep] = useToggle(false)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
-    const input = getTokenBy(vc.bt, chainId)!
+    const input = getTokenBy(vc.bt, vc.chain)!
     const inputBalance = useBalance(input)
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
@@ -86,17 +84,16 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPAdd:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
-                reFetWithBvault2(chainId, vc, ptc.key, ytc.key, lpc.key, inputBalance.key)
+                reFetWithBvault2(vc, ptc.key, ytc.key, lpc.key, inputBalance.key)
             }}
         />
     </div>
 }
 function LPRemove({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
-    const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)!
-    const bt = getTokenBy(vc.bt, chainId)!
-    const lp = getLpToken(vc, chainId)
+    const asset = getTokenBy(vc.asset, vc.chain)!
+    const bt = getTokenBy(vc.bt, vc.chain)!
+    const lp = getLpToken(vc)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
@@ -152,15 +149,14 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPRemove:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
-                reFetWithBvault2(chainId, vc, ptc.key, ytc.key, lpc.key, inputBalance.key)
+                reFetWithBvault2(vc, ptc.key, ytc.key, lpc.key, inputBalance.key)
             }}
         />
     </div>
 }
 export function LP({ vc }: { vc: BVault2Config }) {
-    const chainId = useCurrentChainId()
-    const bt = getTokenBy(vc.bt, chainId)!
-    const lp = getLpToken(vc, chainId)
+    const bt = getTokenBy(vc.bt, vc.chain)!
+    const lp = getLpToken(vc)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!

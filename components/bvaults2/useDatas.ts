@@ -14,10 +14,12 @@ import { useBvualt2Data } from './useFets'
 import { getTokenBy } from '@/config/tokens'
 
 export function useLogs(vc: BVault2Config) {
-  const chainId = useCurrentChainId()
   return useFet({
-    key: FetKEYS.Logs(chainId, vc),
-    fetfn: async () => getPC(chainId).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.protocal, vc.bt] }).catch(() => undefined),
+    key: FetKEYS.Logs(vc),
+    fetfn: async () =>
+      getPC(vc.chain)
+        .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] })
+        .catch(() => undefined),
   })
 }
 export function useBT2PTPrice(vc: BVault2Config) {
@@ -167,8 +169,7 @@ export function useLPApy(vc: BVault2Config) {
 }
 
 export function useLpShare(vc: BVault2Config, lpUserChange: bigint) {
-  const chainId = useCurrentChainId()
-  const lp = getLpToken(vc, chainId)
+  const lp = getLpToken(vc)
   const lpc = useTotalSupply(lp)
   const lpBalance = useBalance(lp)
   const poolShare = lpc.result > 0 ? _.round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0
