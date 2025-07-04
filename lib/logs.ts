@@ -26,19 +26,21 @@ export async function logUserAction(vc: BVault2Config, user: Address, action: st
   if (isPROD) return
   retry(
     async () => {
-      const pc = getPC()
-      const [log, Share] = await Promise.all([
-        pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] }),
-        pc.readContract({ abi: erc20Abi, address: vc.hook, functionName: 'balanceOf', args: [user] }),
-      ])
-      const data = mapValues(log, (item) => fmtBn(item, 18))
-      saveLogs(
-        {
-          action,
-          status: { ...data, Share: fmtBn(Share, 18) },
-        },
-        `${user.toLocaleLowerCase()}_logs`,
-      )
+      if (vc.logs) {
+        const pc = getPC()
+        const [log, Share] = await Promise.all([
+          pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] }),
+          pc.readContract({ abi: erc20Abi, address: vc.hook, functionName: 'balanceOf', args: [user] }),
+        ])
+        const data = mapValues(log, (item) => fmtBn(item, 18))
+        saveLogs(
+          {
+            action,
+            status: { ...data, Share: fmtBn(Share, 18) },
+          },
+          `${user.toLocaleLowerCase()}_logs`,
+        )
+      }
     },
     3,
     1000,

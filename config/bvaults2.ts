@@ -15,6 +15,7 @@ export type BVault2Config = {
   mockInfraredVault?: Address
   onEnv: TypeENV[]
   chain: number
+  logs?: boolean
 }
 
 export const BVAULTS2CONIG: BVault2Config[] = [
@@ -45,6 +46,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     mockInfraredVault: '0x03a0a0e615ce0de08706ed88785233d2548e6470',
     onEnv: ['test'],
     chain: sepolia.id,
+    logs: true
   },
   // {
   //   tit: 'YTK Vault',
