@@ -1,7 +1,6 @@
 import { abiBT, abiBVault2 } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
 import { getTokenBy, Token } from "@/config/tokens"
-import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
@@ -10,6 +9,7 @@ import { useQuery } from "@tanstack/react-query"
 import _ from "lodash"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
+import { isAddressEqual } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { TX, Txs, withTokenApprove } from "../approve-and-tx"
@@ -18,13 +18,12 @@ import { Fees } from "../fees"
 import { GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
+import { TokenInput } from "../token-input"
 import { Swap, SwapDown } from "../ui/bbtn"
+import { unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, usePTApy } from "./useDatas"
-import { unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
-import { TokenInput } from "../token-input"
-import { isAddressEqual } from "viem"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
@@ -77,7 +76,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
-                    functionName: 'swapExactPTForBT',
+                    functionName: 'swapExactPTforBT',
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })
@@ -104,7 +103,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
-                    functionName: 'swapExactBTForPT',
+                    functionName: 'swapExactBTforPT',
                     args: [wrapBt.sharesBn, 0n, genDeadline()],
                 }
             })
@@ -121,7 +120,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             <div className="font-bold">Receive</div>
             <GetvIP address={bt.address} />
         </div>
-        <TokenInput tokens={outputs} onTokenChange={outputSetCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
+        <TokenInput tokens={outputs} checkBalance={false} balance={false} onTokenChange={outputSetCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
             <div>Price Impact: {formatPercent(priceimpcat)}</div>
@@ -155,16 +154,16 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const ptBalance = useBalance(pt)
     const ytBalance = useBalance(yt)
     const [inputAsset, setInputAsset] = useState('')
-    const inputAssetBn = parseEthers(inputAsset)
+    const inputAssetBn = parseEthers(inputAsset, input.decimals)
     const [calcKey, setCalcKey] = useState<any[]>(['calcPTYTMintOut'])
     useDebounce(() => setCalcKey(['calcPTYTMintOut', inputAssetBn, input]), 300, [inputAssetBn, input])
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
         queryKey: calcKey,
         initialData: 0n,
-        queryFn: async () => {
-            if (inputAssetBn <= 0n || setCalcKey.length == 1) return 0n
+        queryFn: async (params) => {
+            if (inputAssetBn <= 0n || params.queryKey.length == 1) return 0n
             const pc = getPC(vc.chain)
-            const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] })
+            const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : (await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] }))
             return btAmount
         }
     })
@@ -272,8 +271,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
 }
 
 export function PT({ vc }: { vc: BVault2Config }) {
-    const chainId = useCurrentChainId()
-    const asset = getTokenBy(vc.asset, chainId)!
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const pt = usePtToken(vc)!
     const ptc = useTotalSupply(pt)
     const { data: walletClient } = useWalletClient()

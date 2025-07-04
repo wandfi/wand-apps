@@ -23,10 +23,10 @@ export const abiBVault2 = parseAbi([
 
   'function addLiquidity(uint256 amountBT, uint256 deadline) external returns (uint256 amountShares, uint256 amountPT, uint256 amountYT)',
   'function removeLiquidity(uint256 shares, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT, uint256 amountPT, uint256 amountYT)',
-  'function swapExactBTForPT(uint256 amountBT, uint256 minAmountPT, uint256 deadline) external returns (uint256 amountPT)',
-  'function swapExactPTForBT(uint256 amountPT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT)',
-  'function swapExactBTForYT(uint256 amountBT, uint256 amountBT1, uint256 minRefundBT, uint256 deadline) external returns (uint256 amountYT, uint256 refundBT)',
-  'function swapExactYTForBT(uint256 amountYT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT)',
+  'function swapExactBTforPT(uint256 amountBT, uint256 minAmountPT, uint256 deadline) external',
+  'function swapExactPTforBT(uint256 amountPT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT)',
+  'function swapExactBTforYT(uint256 amountBT, uint256 amountBT1, uint256 minRefundBT, uint256 deadline) external returns (uint256 amountYT, uint256 refundBT)',
+  'function swapExactYTforBT(uint256 amountYT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT)',
 
   'function initialize(uint256 _bootstrapStartTime, uint256 _bootstrapDuration, uint256 _bootstrapThreshold) external',
   'function updateThreshold(uint256 _threshold) external',
@@ -34,7 +34,7 @@ export const abiBVault2 = parseAbi([
   'function unpause() external',
 
   // **************** version 2 ******************************
-  // read 
+  // read
   'function maturedPTs() external view returns (address[] memory)',
   'function quoteExactBTforPT(uint256 amountBT) external view returns (uint256 amountPT)',
   'function quoteExactPTforBT(uint256 amountPT) external view returns (uint256 amountBT)',
@@ -74,8 +74,8 @@ export const abiBvault2Query = parseAbi([
   'function calcBT1ForSwapBTForYT(address hook,uint256 amountBT,uint256 tolerance) external view returns (uint256 bestAmountBT1, uint256 count)',
   'struct LogData { uint256 BTtp;uint256 BTnet;uint256 Anet;uint256 PTc;uint256 YTc;uint256 vPT;uint256 pt;uint256 Feerate;uint256 ShareTotal;uint256 rateScalar;uint256 rateAnchor;}',
   'function getLog(address vault) external view returns(LogData memory log)',
-  'function calcRemoveLP(address protocol,address hook,address BT,uint256 shares) external view returns(uint256 amountBT, uint256 amountPT, uint256 amountYT)',
-  'function calcAddLP(address protocol,address hook,address BT,uint256 amountBT) external view returns(uint256 amountPT, uint256 amountYT, uint256 amountShares)',
+  'function calcRemoveLP(address vault,uint256 shares) external view returns(uint256 amountBT, uint256 amountPT, uint256 amountYT)',
+  'function calcAddLP(address vault,uint256 amountBT) external view returns(uint256 amountPT, uint256 amountYT, uint256 amountShares)',
   'function earned(address irm, address user) external view returns(Earned[] memory)',
   'struct Earned { address token; uint256 value;}',
 ])

@@ -5,7 +5,7 @@ import { parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
 import clsx from 'clsx'
 import _ from 'lodash'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMeasure } from 'react-use'
 import { formatUnits } from 'viem'
 import { useBalance } from '../hooks/useToken'
@@ -62,13 +62,20 @@ export function TokenInput({
       show: <TokenSymbol token={item} />,
       data: item,
     })))
-  }, [tokens])
+  }, [JSON.stringify(tokens)])
   const [token, setToken] = useState<Token>(tokens[0])
-  const tokenBalance = useBalance(checkBalance ? token : undefined)
+  useEffect(() => {
+    if (!tokens.includes(token)) {
+      setToken(tokens[0])
+      onTokenChange?.(tokens[0])
+    }
+  }, [token, tokens])
+  const mShowBalance = showBalance && !disable
+  const mCheckBalance = checkBalance && !disable
+  const tokenBalance = useBalance(mCheckBalance ? token : undefined)
   const balance = tokenBalance.result;
   const inputRef = useRef<HTMLInputElement>(null)
-  const balanceInsufficient =
-    checkBalance && typeof balance !== 'undefined' && parseEthers(typeof amount == 'number' ? amount + '' : amount || '', token.decimals) > (typeof balance == 'bigint' ? balance : 0n)
+  const balanceInsufficient = mCheckBalance && parseEthers(`${amount ?? '0'}`, token.decimals) > balance
   const isError = Boolean(error) || balanceInsufficient
   const [coinSymbolRef, { width: coinSymbolWidth }] = useMeasure<HTMLDivElement>()
   if (tokens.length == 0) return null
@@ -85,7 +92,10 @@ export function TokenInput({
           {exchange && <div className='text-slate-500 dark:text-slate-50/70 text-xs max-w-full overflow-hidden'>~${exchange}</div>}
         </div>
         <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2 z-50' ref={coinSymbolRef}>
-          {tokens.length > 1 ? <SimpleSelect className='border-none' options={options} onChange={(n) => { setToken(n.data); onTokenChange?.(n.data) }} /> : <TokenSymbol token={token} />}
+          {tokens.length > 1 ? <SimpleSelect className='border-none' options={options} onChange={(n) => {
+            console.info('tokenChange:', n)
+            setToken(n.data); onTokenChange?.(n.data)
+          }} /> : <TokenSymbol token={token} />}
         </div>
         <input
           value={loading ? '' : amount}
@@ -118,7 +128,7 @@ export function TokenInput({
       </div>
 
       <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
-        {showBalance && <div className={balanceClassName}>
+        {mShowBalance && <div className={balanceClassName}>
           <span>
             {balanceTit}: {displayBalance(balance, undefined, token.decimals)}
           </span>

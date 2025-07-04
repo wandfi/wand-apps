@@ -159,9 +159,10 @@ export type TX = SimulateContractParameters | (() => Promise<SimulateContractPar
 
 
 export function Txs({
-  className, tx, txs, disabled, busyShowTxet = true, toast = true, onTxSuccess }:
+  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, onTxSuccess }:
   {
-    className?: string, tx: string, disabled?: boolean, txs: TX[] | (() => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean
+    className?: string, tx: string, disabled?: boolean, txs: TX[] | (() => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
+    disableSendCalls?: boolean
     onTxSuccess?: () => void
   }) {
   const { data: wc } = useWalletClient()
@@ -174,6 +175,9 @@ export function Txs({
       const calls = await promiseT(txs).then(items => Promise.all(items.map(promiseT)))
       console.info('calls:', wc.account.address, calls)
       try {
+        if (disableSendCalls) {
+          throw new Error('disable wallet_sendCalls')
+        }
         const { id } = await wc.sendCalls({
           account: wc.account.address,
           calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),

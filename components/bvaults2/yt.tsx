@@ -72,15 +72,15 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                     .catch(() => [0n, 0n] as [bigint, bigint])
                 console.info('calcBT1:', formatEther(bestBT1), count)
                 if (bestBT1 == 0n) return [0n, 0n, 0n]
-                const [outAmount, refoundBt] = await Promise.all([
+                const [amountBtUsed, refoundBt] = await Promise.all([
                     pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteBTforExactYT', args: [inputBtAmount, bestBT1] }),
                     pc.readContract({ abi: abiHook, address: vc.hook, functionName: 'getAmountOutVPTToBT', args: [bestBT1] })
                 ])
-                return [outAmount, bestBT1, refoundBt]
+                return [bestBT1, bestBT1, refoundBt]
             }
         }
     })
-    const errorInput = !isFetchingOut && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
+    const errorInput = !isFetchingOut && calcYtSwapKey.includes(inputAssetBn) && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
     const [roi, roito, priceimpact] = useYTRoi(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
     const [apy, apyTo] = usePTApy(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
     const getTxs = async () => {
@@ -92,7 +92,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
-                    functionName: 'swapExactYTForBT',
+                    functionName: 'swapExactYTforBT',
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })
@@ -114,14 +114,14 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 user: address!
             })
             const txsApproves = await withTokenApprove({
-                approves: [{ spender: vc.vault, token: input.address, amount: sharesBn }],
+                approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }],
                 pc: getPC(vc.chain),
                 user: address!,
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: 'swapBTforExactYT',
-                    args: [sharesBn, 0n, genDeadline()],
+                    args: [sharesBn, bt1Amount, genDeadline()],
                 }
             })
             return [...txs, ...txsApproves]
@@ -137,7 +137,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             <div className="font-bold">Receive</div>
             <GetvIP address={vc.asset} />
         </div>
-        <TokenInput tokens={outputs} onTokenChange={outputSetCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut} />
+        <TokenInput tokens={outputs} onTokenChange={outputSetCT} checkBalance={false} balance={false} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut} />
         <div className="flex justify-between items-center text-xs font-medium">
             <div>Price: {swapPrice}</div>
             <div>Price Impact: {formatPercent(priceimpact)}</div>

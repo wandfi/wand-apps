@@ -230,7 +230,7 @@ export async function retry<T>(fn: () => Promise<T>, count: number = 3, wait: nu
 
 export const tabToSearchParams = (tab: string) => tab.toLowerCase().replaceAll(' ', '_')
 
-export function genDeadline(duration: bigint = 60n * 5n) {
+export function genDeadline(duration: bigint = 60n * 60n) {
   return BigInt(round(now() / 1000)) + duration
 }
 

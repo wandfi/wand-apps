@@ -46,7 +46,7 @@ export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
         initResult: [vc.asset],
         fetfn: async () => getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'getTokensIn' })
     })
-    return useMemo(() => [...data.result, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt, data.result])
+    return useMemo(() => [...data.result, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt, JSON.stringify(data.result)])
 }
 
 export function BT({ vc }: { vc: BVault2Config }) {
@@ -78,7 +78,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async () => {
             if (calcOutAmountKey.length <= 1) return 0n
-            return getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [input.address, inputAssetBn] })
+            return getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [input.address, inputAssetBn] }).catch(() => inputAssetBn)
         }
     })
     const onSwitch = () => {

@@ -11,7 +11,7 @@ import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
-import { ApproveAndTx } from "../approve-and-tx"
+import { ApproveAndTx, Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { CoinAmount } from "../coin-amount"
 import { GetvIP } from "../get-lp"
@@ -44,9 +44,9 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
         queryKey: calcOutsKey,
         initialData: [0n, 0n, 0n],
-        queryFn: async () => {
-            if (inputAssetBn <= 0n || calcOutsKey.length <= 1) return [0n, 0n, 0n]
-            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
+        queryFn: async (params) => {
+            if (inputAssetBn <= 0n || params.queryKey.length <= 1) return [0n, 0n, 0n]
+            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.vault, inputAssetBn] })
         }
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
@@ -67,20 +67,21 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
         <div className="text-center opacity-60 text-xs font-medium">And</div>
         <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
-        <ApproveAndTx
+        <Txs
             className='mx-auto mt-4'
             tx='Add'
             disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
-            spender={vc.vault}
-            approves={{
-                [input.address]: inputAssetBn,
-            }}
-            config={{
-                abi: abiBVault2,
-                address: vc.vault,
-                functionName: 'addLiquidity',
-                args: [inputAssetBn, genDeadline()],
-            }}
+            txs={() => withTokenApprove({
+                approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
+                user: address!,
+                pc: getPC(vc.chain),
+                tx: {
+                    abi: abiBVault2,
+                    address: vc.vault,
+                    functionName: 'addLiquidity',
+                    args: [inputAssetBn, genDeadline()],
+                }
+            })}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPAdd:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')
@@ -112,7 +113,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         initialData: [0n, 0n, 0n],
         queryFn: async () => {
             if (inputAssetBn <= 0n || calcOutsKey.length <= 1) return [0n, 0n, 0n]
-            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.protocal, vc.hook, vc.bt, inputAssetBn] })
+            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.vault, inputAssetBn] })
         }
     })
     const outAmount = ptc.result >= ytc.result ? ytAmount : ptAmount
@@ -132,20 +133,21 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         <div className="text-center opacity-60 text-xs font-medium">And</div>
         <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
-        <ApproveAndTx
+        <Txs
             className='mx-auto mt-4'
             tx='Remove'
             disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
-            spender={vc.vault}
-            approves={{
-                [input.address]: inputAssetBn,
-            }}
-            config={{
-                abi: abiBVault2,
-                address: vc.vault,
-                functionName: 'removeLiquidity',
-                args: [inputAssetBn, 0n, genDeadline()],
-            }}
+            txs={() => withTokenApprove({
+                approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
+                user: address!,
+                pc: getPC(vc.chain),
+                tx: {
+                    abi: abiBVault2,
+                    address: vc.vault,
+                    functionName: 'removeLiquidity',
+                    args: [inputAssetBn, 0n, genDeadline()],
+                }
+            })}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `LPRemove:(${fmtBn(inputAssetBn)})`);
                 setInputAsset('')

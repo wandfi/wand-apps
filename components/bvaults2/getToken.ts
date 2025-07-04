@@ -4,7 +4,7 @@ import { Address } from 'viem'
 import { useBvualt2Data } from './useFets'
 
 export function getPtToken(vc: BVault2Config, pt: Address) {
-  const asset = getTokenBy(vc.asset)!
+  const asset = getTokenBy(vc.asset, vc.chain)!
   return { address: pt, chain: [vc.chain], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
 }
 export function usePtToken(vc: BVault2Config) {
