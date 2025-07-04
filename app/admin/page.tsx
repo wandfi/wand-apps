@@ -380,7 +380,7 @@ export default function AdminPage() {
           }
           {current?.type == 'B-Vault2' && (<>
             <UpdateVaultParams vault={current.data.vault} paramList={BVault2Params} protocoSettingAddress={current.data.protocalSettings} />
-            {['initialize', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
+            {['setAutoStartNewEpoch', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
               <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
             ))}
             <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
@@ -389,7 +389,6 @@ export default function AdminPage() {
             {chain?.testnet && <>
               <GeneralAction tit={`mint (${getTokenBy(current.data.asset, chainId)!.symbol})`} abi={abiMockERC20} functionName='mint' address={current.data.asset} />
               <GeneralAction tit={`setTester (${getTokenBy(current.data.asset, chainId)!.symbol})`} abi={abiMockERC20} functionName='setTester' address={current.data.asset} />
-
             </>}
 
             {current.data.mockInfraredVault && <GeneralAction tit={`MockInfraredVault addReward ${current.data.mockInfraredVault}`} abi={abiMockInfraredVault} functionName='addReward' address={current.data.mockInfraredVault} />}
