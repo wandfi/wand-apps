@@ -11,13 +11,14 @@ import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
-import { ApproveAndTx, Txs, withTokenApprove } from "../approve-and-tx"
+import { Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { CoinAmount } from "../coin-amount"
 import { GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
+import { Switch2 } from "../ui/switch"
 import { reFetWithBvault2 } from "./fetKeys"
 import { getLpToken, usePtToken, useYtToken } from "./getToken"
 import { useLogs, useLPApy, useLpShare } from "./useDatas"
@@ -34,43 +35,52 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const ptc = useTotalSupply(pt)
     const ytc = useTotalSupply(yt)
     const out = ptc.result >= ytc.result ? pt : yt
-    const [keep, toggleKeep] = useToggle(false)
+    const [instantmode, toggleInstantmode] = useToggle(false)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const input = getTokenBy(vc.bt, vc.chain)!
     const inputBalance = useBalance(input)
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
-    useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn]), 300, [inputAssetBn])
-    const { data: [ptAmount, ytAmount, lpAmount], isFetching: isFetchingOut } = useQuery({
+    useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn, instantmode]), 300, [inputAssetBn, instantmode])
+    const { data: { ptAmount, ytAmount, lpAmount, bestBt1 }, isFetching: isFetchingOut } = useQuery({
         queryKey: calcOutsKey,
-        initialData: [0n, 0n, 0n],
+        initialData: { ptAmount: 0n, ytAmount: 0n, lpAmount: 0n, bestBt1: 0n },
         queryFn: async (params) => {
-            if (inputAssetBn <= 0n || params.queryKey.length <= 1) return [0n, 0n, 0n]
-            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.vault, inputAssetBn] })
+            let ptAmount = 0n, ytAmount = 0n, lpAmount = 0n, bestBt1 = 0n
+            if (inputAssetBn > 0n && params.queryKey.length > 1) {
+                [ptAmount, ytAmount, lpAmount] = await getPC(vc.chain).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.vault, inputAssetBn] })
+                if (instantmode) {
+                    bestBt1 = await getPC(vc.chain).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calculateAddLiquidityInstantAmountBT1', args: [vc.vault, inputAssetBn, parseEthers('0.02')] })
+                }
+            }
+            return { ptAmount, ytAmount, lpAmount, bestBt1 }
         }
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
-
     const [poolShare, poolShareTo] = useLpShare(vc, lpAmount)
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
         <SwapDown />
-        {/* <div className="flex justify-between items-center text-xs font-medium w-1/2">
-            <span>Keep PT/YT mode</span>
-            <Switch2 checked={keep} onChange={toggleKeep} className="translate-x-1/2" />
-        </div> */}
+        <div className="flex gap-5 items-center text-xs font-medium">
+            <span>Instant mode</span>
+            <Switch2 checked={instantmode} onChange={toggleInstantmode} />
+        </div>
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
             <GetvIP address={asset.address} />
         </div>
         <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
-        <div className="text-center opacity-60 text-xs font-medium">And</div>
-        <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
+        {
+            !instantmode && <>
+                <div className="text-center opacity-60 text-xs font-medium">And</div>
+                <AssetInput asset={out.symbol} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
+            </>
+        }
         <div className="font-medium text-xs opacity-60">Pool Share Change: {formatPercent(poolShare)} → {formatPercent(poolShareTo)}</div>
         <Txs
             className='mx-auto mt-4'
             tx='Add'
-            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
+            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || (instantmode && bestBt1 == 0n)}
             txs={() => withTokenApprove({
                 approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
                 user: address!,
@@ -78,8 +88,8 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
-                    functionName: 'addLiquidity',
-                    args: [inputAssetBn, genDeadline()],
+                    functionName: instantmode ? 'addLiquidityInstant' : 'addLiquidity',
+                    args: instantmode ? [inputAssetBn, bestBt1, genDeadline()] : [inputAssetBn, genDeadline()],
                 }
             })}
             onTxSuccess={() => {
