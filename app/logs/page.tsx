@@ -42,14 +42,14 @@ export default function Logs() {
     }
 
     return <PageWrap>
-        <div className="w-full h-[calc(100vh_-_90px)] p-5 text-base flex gap-5 overflow-hidden">
-            <div className="flex flex-col w-60 gap-1 h-full overflow-y-auto">
+        <div className="w-full p-5 text-base flex gap-5 relative h-auto">
+            <div className="flex flex-col w-60 gap-1 h-full overflow-y-auto sticky top-5">
                 {infos.map(([time,], i) => <div className={cn("w-full px-4 py-2 rounded-lg bg-white cursor-pointer", { 'bg-primary/30': i === active })} key={time} onClick={() => {
                     setActive(i)
                     onClickItem(time)
                 }}>{time}</div>)}
             </div>
-            <div className="flex flex-col gap-2 h-full overflow-y-auto flex-1 pr-3 whitespace-pre-wrap">
+            <div className="flex flex-col gap-2 h-auto flex-1 pr-3 whitespace-pre-wrap">
                 {infos.map(([time, item], i) => <div className={cn("w-full px-4 py-2 rounded-lg bg-white", { 'bg-primary/30': i === active })} key={time} id={time}>{JSON.stringify(item, undefined, 2)}</div>)}
             </div>
         </div>
