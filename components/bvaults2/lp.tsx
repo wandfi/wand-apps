@@ -36,7 +36,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const ptc = useTotalSupply(pt)
     const ytc = useTotalSupply(yt)
     const out = ptc.result >= ytc.result ? pt : yt
-    const [instantmode, toggleInstantmode] = useToggle(false)
+    const [instantmode, toggleInstantmode] = useToggle(true)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const input = getTokenBy(vc.bt, vc.chain)!
