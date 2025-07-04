@@ -48,8 +48,8 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
         queryKey: calcPtSwapKey,
         initialData: 0n,
-        queryFn: async () => {
-            if (inputAssetBn <= 0n || calcPtSwapKey.length == 1) return 0n
+        queryFn: async (params) => {
+            if (inputAssetBn <= 0n || params.queryKey.length == 1) return 0n
             const pc = getPC(vc.chain)
             if (isToggled) {
                 const btAmount = await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactPTforBT', args: [inputAssetBn] })
@@ -278,6 +278,7 @@ export function PT({ vc }: { vc: BVault2Config }) {
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: pt }).catch(handleError)
     }
+    console.info('PT:')
     const [apy] = usePTApy(vc)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>

@@ -63,13 +63,14 @@ export function TokenInput({
       data: item,
     })))
   }, [JSON.stringify(tokens)])
-  const [token, setToken] = useState<Token>(tokens[0])
+  const [token, setToken] = useState<Token>(options[0].data)
   useEffect(() => {
-    if (!tokens.includes(token)) {
-      setToken(tokens[0])
-      onTokenChange?.(tokens[0])
+    if (!options.some(item => item.data == token)) {
+      console.info('tokenChange:')
+      setToken(options[0].data)
+      onTokenChange?.(options[0].data)
     }
-  }, [token, tokens])
+  }, [token, options])
   const mShowBalance = showBalance && !disable
   const mCheckBalance = checkBalance && !disable
   const tokenBalance = useBalance(mCheckBalance ? token : undefined)
@@ -78,7 +79,7 @@ export function TokenInput({
   const balanceInsufficient = mCheckBalance && parseEthers(`${amount ?? '0'}`, token.decimals) > balance
   const isError = Boolean(error) || balanceInsufficient
   const [coinSymbolRef, { width: coinSymbolWidth }] = useMeasure<HTMLDivElement>()
-  if (tokens.length == 0) return null
+  if (options.length == 0) return null
   return (
     <div
       className='relative w-full'

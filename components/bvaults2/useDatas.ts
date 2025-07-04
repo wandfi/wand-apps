@@ -12,6 +12,7 @@ import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
 import { getTokenBy } from '@/config/tokens'
+import { useMemo, useRef } from 'react'
 
 export function useLogs(vc: BVault2Config) {
   return useFet({
@@ -24,7 +25,7 @@ export function useLogs(vc: BVault2Config) {
 }
 export function useBT2PTPrice(vc: BVault2Config) {
   const data = useLogs(vc)
-  return { ...data, result: calcBt2PtPrice(data.result, 0n, 0n) }
+  return useMemo(() => ({ ...data, result: calcBt2PtPrice(data.result, 0n, 0n) }), [data.result])
 }
 
 export function calcBt2PtPrice(logs: ReturnType<typeof useLogs>['result'], ptChange: bigint, btChange: bigint) {
@@ -42,10 +43,18 @@ export function calcYt2BtPrice(bt2PtPrice: number) {
   return bt2PtPrice <= 1 ? 0 : (bt2PtPrice - 1) / bt2PtPrice
 }
 
+export function useNowUnix(time: number = 100) {
+  const ref = useRef(nowUnix())
+  if (nowUnix() - ref.current > time) ref.current = nowUnix()
+  // console.info('useNowUnix:', ref.current)
+  return ref.current
+}
 export function useEpochRemain(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
   const epoch = vd.result?.current
-  const remain = parseInt((epoch && epoch.startTime + epoch.duration > nowUnix() ? epoch.startTime + epoch.duration - nowUnix() : 0n).toString())
+  const now = useNowUnix()
+  const remain = parseInt((epoch && epoch.startTime + epoch.duration > now ? epoch.startTime + epoch.duration - now : 0n).toString())
+  // console.info('useEpochRemain:', remain, now)
   return { ...vd, result: remain }
 }
 
