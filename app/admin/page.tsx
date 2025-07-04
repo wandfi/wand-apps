@@ -4,8 +4,8 @@ import { ApproveAndTx } from '@/components/approve-and-tx'
 import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/components/general-action'
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiLntVault, abiMockERC20, abiMockERC721, abiMockPriceFeed, abiPlainVault, abiProtocolSettings, abiPtyPool, abiVault, abiWandProtocol, abiZooProtocol } from '@/config/abi'
-import { abiBVault2, abiMockInfraredVault, abiRewardManager } from '@/config/abi/BVault2'
-import { getCurrentChain, SUPPORT_CHAINS } from '@/config/network'
+import { abiBVault2, abiMockInfraredVault } from '@/config/abi/BVault2'
+import { getCurrentChain } from '@/config/network'
 import { PROTOCOL_SETTINGS_ADDRESS, VaultConfig, WAND_PROTOCOL_ADDRESS } from '@/config/swap'
 import { getTokenBy } from '@/config/tokens'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
@@ -16,8 +16,7 @@ import { cn, parseEthers } from '@/lib/utils'
 import { useMemo } from 'react'
 import Select from 'react-select'
 import { useMeasure, useSetState } from 'react-use'
-import { Address, erc20Abi, erc721Abi, formatEther, formatUnits, isAddress, parseUnits, stringToBytes, stringToHex } from 'viem'
-import { useAccount, useReadContracts } from 'wagmi'
+import { Address, erc20Abi, formatEther, formatUnits, isAddress, parseUnits, stringToHex } from 'viem'
 
 type ParamItem = { label: string; value: string; units?: number /** def 10 */ }
 
@@ -384,7 +383,8 @@ export default function AdminPage() {
               <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
             ))}
             <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
-            <GeneralAction tit='transferOwnership' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
+            <GeneralAction tit='protocal (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
+            <GeneralAction tit='vault (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.vault} />
             <GeneralAction tit='upsertParamConfig' abi={abiProtocolSettings} functionName='upsertParamConfig' address={current.data.protocalSettings} />
             {chain?.testnet && <>
               <GeneralAction tit={`mint (${getTokenBy(current.data.asset, chainId)!.symbol})`} abi={abiMockERC20} functionName='mint' address={current.data.asset} />
