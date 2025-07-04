@@ -3,12 +3,13 @@ import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { getTokenBy } from "@/config/tokens"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, handleError, multipBn, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
+import { parseUnits } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
@@ -46,12 +47,15 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
         queryKey: calcOutsKey,
         initialData: { ptAmount: 0n, ytAmount: 0n, lpAmount: 0n, bestBt1: 0n },
         queryFn: async (params) => {
-            let ptAmount = 0n, ytAmount = 0n, lpAmount = 0n, bestBt1 = 0n
+            let ptAmount = 0n, ytAmount = 0n, lpAmount = 0n, bestBt1 = inputAssetBn;
+            const pc = getPC(vc.chain)
             if (inputAssetBn > 0n && params.queryKey.length > 1) {
-                [ptAmount, ytAmount, lpAmount] = await getPC(vc.chain).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.vault, inputAssetBn] })
                 if (instantmode) {
-                    bestBt1 = await getPC(vc.chain).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calculateAddLiquidityInstantAmountBT1', args: [vc.vault, inputAssetBn, parseEthers('0.02')] })
+                    [bestBt1, lpAmount] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'quoteAddLPInstant', args: [vc.vault, inputAssetBn, 5n] })
+                } else {
+                    [ptAmount, ytAmount, lpAmount] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcAddLP', args: [vc.vault, inputAssetBn] })
                 }
+                console.info('calcLPAddOut', instantmode, fmtBn(ptAmount, 18), fmtBn(ytAmount, 18), fmtBn(lpAmount, 18), fmtBn(bestBt1, 18))
             }
             return { ptAmount, ytAmount, lpAmount, bestBt1 }
         }

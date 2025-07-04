@@ -178,7 +178,7 @@ export const fmtDuration = (duration: number | bigint, type: FMT_DURATION_TYPE |
 export const decimalBn = (decimals: bigint | number = 10n) => 10n ** BigInt(decimals || 10n)
 
 // src * multip
-export const multipBn = (src: bigint, multip: bigint, multipDecimal?: bigint | number) => (src * multip) / decimalBn(multipDecimal || 10n)
+export const multipBn = (src: bigint, multip: bigint, multipDecimal: bigint | number = 10) => (src * multip) / decimalBn(multipDecimal || 10n)
 // src * (1 - multip)
 export const multipOtherBn = (src: bigint, multip: bigint, multipDecimal?: bigint | number) =>
   decimalBn(multipDecimal || 10n) - multip > 0n ? (src * (decimalBn(multipDecimal || 10n) - multip)) / decimalBn(multipDecimal || 10n) : 0n
