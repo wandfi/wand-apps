@@ -77,7 +77,7 @@ export function GeneralAction({
   functionName: string
   tit?: string
   infos?: ReactNode
-  argsDef?: string[] | (() => Promise<string[]>)
+  argsDef?: string[]
   convertArg?: (arg: string, i: number, param: AbiParameter) => any
   onArgs?: (args: string[]) => void
   txProps?: Omit<Parameters<typeof ApproveAndTx>[0], 'tx' | 'config' | 'className'>
@@ -86,20 +86,13 @@ export function GeneralAction({
   const inputsLength = abiItem?.inputs?.length || 0
   const [{ args, value }, setState] = useSetState({
     value: '',
-    args: typeof argsDef !== 'function' && argsDef?.length == inputsLength && inputsLength > 0 ? argsDef : new Array(inputsLength).fill('')
+    args: new Array(inputsLength).fill('') as string[]
   })
-  // const margs = useMemo()
+  const margs = useMemo(() => args.map((arg, i) => arg || argsDef?.[i] || ''), [argsDef, args])
   const valueBn = parseEthers(value)
   useEffect(() => {
     onArgs && onArgs(args)
   }, [args])
-  const idRef = useRef(0)
-  useEffect(() => {
-    idRef.current++
-    const id = idRef.current;
-    Promise.resolve(argsDef).then((data) => typeof data == 'function' ? data() : data || [])
-      .then((data) => id == idRef.current && setState({ args: args.map((arg, index) => arg || data[index] || '') }))
-  }, [argsDef])
   if (!abiItem) return
   const disableExpand = !abiItem.inputs || abiItem.inputs.length == 0
 
@@ -113,7 +106,7 @@ export function GeneralAction({
           <div className='opacity-60 absolute top-1/2 left-2 -translate-y-1/2 text-xs'>{item.name}</div>
           <input
             type='text'
-            value={args[index]}
+            value={margs[index]}
             onChange={(e) => setState({ args: args.map((arg, argIndex) => (index == argIndex ? e.target.value : arg)) })}
             className={cn(inputClassname)}
           />
@@ -138,7 +131,7 @@ export function GeneralAction({
             abi,
             address,
             functionName,
-            ...(args.length ? { args: convertArgs(args, abiItem.inputs, convertArg) } : {}),
+            ...(margs.length ? { args: convertArgs(margs, abiItem.inputs, convertArg) } : {}),
             value: valueBn
           } as any
         }
