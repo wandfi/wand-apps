@@ -88,4 +88,6 @@ export const abiRewardManager = parseAbi([
   'function updateUserRewards(address user) external',
 ])
 
+export const abiProtocol = parseAbi(['function addPremiumHook(address BT, address hook) external'])
+
 export const abiMockInfraredVault = parseAbi(['function addReward(address _rewardsToken, uint256 reward, uint256 rewardsDuration) external payable'])

@@ -1,4 +1,4 @@
-import { abiBVault2, abiBvault2Query } from '@/config/abi/BVault2'
+import { abiBVault2, abiBvault2Query, abiRewardManager } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
@@ -134,6 +134,9 @@ export function useBvault2LPBTRewards(vc: BVault2Config) {
       const lp = getLpToken(vc)
       const bt = getTokenBy(vc.bt, vc.chain)!
       const pc = getPC(vc.chain)
+      pc.readContract({ abi: abiRewardManager, functionName: 'getUserRewards', address: lp.address, args: [address!] }).then((data) => {
+        console.info('userRewards:', data)
+      })
       const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, address!, pc), getRewardsBy(bt.address, address!, pc)])
       return [
         { token: lp, rewards: lpRewards },

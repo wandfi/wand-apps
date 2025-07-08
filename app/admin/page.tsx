@@ -4,7 +4,7 @@ import { ApproveAndTx } from '@/components/approve-and-tx'
 import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/components/general-action'
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiLntVault, abiMockERC20, abiMockERC721, abiMockPriceFeed, abiPlainVault, abiProtocolSettings, abiPtyPool, abiVault, abiWandProtocol, abiZooProtocol } from '@/config/abi'
-import { abiBVault2, abiMockInfraredVault } from '@/config/abi/BVault2'
+import { abiBVault2, abiMockInfraredVault, abiProtocol } from '@/config/abi/BVault2'
 import { getCurrentChain } from '@/config/network'
 import { PROTOCOL_SETTINGS_ADDRESS, VaultConfig, WAND_PROTOCOL_ADDRESS } from '@/config/swap'
 import { getTokenBy } from '@/config/tokens'
@@ -382,6 +382,7 @@ export default function AdminPage() {
             {['setAutoStartNewEpoch', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
               <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
             ))}
+            <GeneralAction  abi={abiProtocol} functionName='addPremiumHook' address={current.data.protocal} />
             <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
             <GeneralAction tit='protocal (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
             <GeneralAction tit='vault (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.vault} />
