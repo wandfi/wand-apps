@@ -382,7 +382,7 @@ export default function AdminPage() {
             {['setAutoStartNewEpoch', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
               <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
             ))}
-            <GeneralAction  abi={abiProtocol} functionName='addPremiumHook' address={current.data.protocal} />
+            <GeneralAction abi={abiProtocol} functionName='addPremiumHook' argsDef={[current.data.bt, current.data.hook]} address={current.data.protocal} />
             <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
             <GeneralAction tit='protocal (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
             <GeneralAction tit='vault (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.vault} />
