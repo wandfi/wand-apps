@@ -56,7 +56,7 @@ function PT({ vc }: { vc: BVault2Config }) {
         }
         const matures = groups['mature']
         if (matures && matures.length) {
-            const pt = getPtToken(vc, active.PT)
+            const pt = getPtToken(vc, active?.PT ?? matures[0].PT)
             const sum = matures.reduce((sum, item) => sum + item.redeemable, 0n)
             res.push([
                 <TokenSymbol key="token" t={pt} />,

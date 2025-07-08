@@ -1,5 +1,5 @@
 import { cn, parseEthers } from '@/lib/utils'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Collapse } from 'react-collapse'
 import { FiArrowDown, FiArrowUp } from 'react-icons/fi'
 import Select from 'react-select'
@@ -88,6 +88,7 @@ export function GeneralAction({
     value: '',
     args: typeof argsDef !== 'function' && argsDef?.length == inputsLength && inputsLength > 0 ? argsDef : new Array(inputsLength).fill('')
   })
+  // const margs = useMemo()
   const valueBn = parseEthers(value)
   useEffect(() => {
     onArgs && onArgs(args)
