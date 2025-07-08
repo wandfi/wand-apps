@@ -76,7 +76,7 @@ export const abiBvault2Query = parseAbi([
   'function getLog(address vault) external view returns(LogData memory log)',
   'function calcRemoveLP(address vault,uint256 shares) external view returns(uint256 amountBT, uint256 amountPT, uint256 amountYT)',
   'function calcAddLP(address vault,uint256 amountBT) external view returns(uint256 amountPT, uint256 amountYT, uint256 amountShares)',
-  'function earned(address irm, address user) external view returns(Earned[] memory)',
+  'function earned(address irm, address user, uint256 scale) external view returns(Earned[] memory)',
   'struct Earned { address token; uint256 value;}',
 ])
 

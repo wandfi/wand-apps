@@ -7,7 +7,7 @@ import { useFet } from '@/hooks/useFet'
 import { aarToNumber, bnRange, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
-import { Address, erc20Abi, PublicClient } from 'viem'
+import { Address, erc20Abi, parseUnits, PublicClient } from 'viem'
 import { useAccount } from 'wagmi'
 import { FetKEYS } from './fetKeys'
 import { getLpToken } from './getToken'
@@ -105,7 +105,7 @@ export function useBvualt2PTRedeems(vc: BVault2Config) {
 
 export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient = getPC()) {
   return pc
-    .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'earned', args: [rewradManager, user] })
+    .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'earned', args: [rewradManager, user, parseUnits('1', 28)] })
     .then((item) => item.map((r) => [r.token, r.value] as [Address, bigint]))
 }
 export function useBvault2YTRewards(vc: BVault2Config) {
