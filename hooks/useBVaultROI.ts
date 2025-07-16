@@ -40,6 +40,11 @@ export const ipAssetsTit: { [k: Address]: string } = {
   '0x8c40Ef7408D6036Dca0b69E67D960dd48014cB16': 'Sofamon',
   '0x00e23f81e489E43484B0B8Bc109faD6C1F4c28E7': 'Benjamin',
   '0x42A351E005De1330DeDe69Ca4Ae1B06715a2f4fA': 'WTF',
+  '0xf12b7b0858268F9c726f9eea315eDfec161DA552': 'Drip Drip',
+  '0xE8b4b3828EA3678F9BA975CBccB5D9f0c3c0cA8b': 'Nub Cat',
+  '0x4D31d2417b64597Bf346f278728f3A1C7065907e': 'DaVinci',
+  '0xCE11dD7008494B6b4F9DF01213F77B87A4dab579': 'Terra',
+  '0x9B438f52a0A94d3D7D1325C80711FF4709571054': 'Oaisis',
 }
 // 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
 export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
