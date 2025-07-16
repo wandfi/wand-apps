@@ -1,10 +1,11 @@
 import { toBVault } from '@/app/routes'
-import PandaLine from '@/components/icons/PandaLine'
 import { abiAdhocBribesPool, abiBVault, abiRedeemPool, abiStakingBribesPool } from '@/config/abi'
 import { BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { DECIMAL } from '@/constants'
+import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleError, parseEthers, shortStr } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useStore } from '@/providers/useBoundStore'
@@ -18,6 +19,7 @@ import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useMeasure, useToggle } from 'react-use'
 import { List, ListRowProps } from 'react-virtualized'
+import { toast } from 'sonner'
 import { zeroAddress } from 'viem'
 import { useWalletClient } from 'wagmi'
 import { ApproveAndTx } from './approve-and-tx'
@@ -27,14 +29,10 @@ import { GetvIP } from './get-lp'
 import { CoinIcon } from './icons/coinicon'
 import STable from './simple-table'
 import { SimpleTabs } from './simple-tabs'
+import { BBtn } from './ui/bbtn'
 import { Switch } from './ui/switch'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
-import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
-import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
-import { toast } from 'sonner'
-import { WriteConfirmations } from '@/config/lntvaults'
-import { BBtn } from './ui/bbtn'
 
 function TupleTxt(p: { tit: string; sub: ReactNode; subClassname?: string }) {
   return (
@@ -93,12 +91,12 @@ export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
     mutationKey: ['readeemAll', pTokenBalance, claimable, ids],
     mutationFn: async () => {
       if (!wc) throw 'Error';
-      const pc = getPC()
+      const pc = getPC(bvc.chain)
       if (pTokenBalance > 10n) {
-        await wc.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'redeem', args: [pTokenBalance] }).then(tx => pc.waitForTransactionReceipt({ hash: tx, confirmations: WriteConfirmations }))
+        await wc.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'redeem', args: [pTokenBalance] }).then(tx => pc.waitForTransactionReceipt({ hash: tx, confirmations: 3 }))
       }
       if (claimable > 10n) {
-        await wc.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'batchClaimRedeemAssets', args: [ids] }).then(tx => pc.waitForTransactionReceipt({ hash: tx, confirmations: WriteConfirmations }))
+        await wc.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'batchClaimRedeemAssets', args: [ids] }).then(tx => pc.waitForTransactionReceipt({ hash: tx, confirmations: 3 }))
       }
       toast.success('Transaction success')
     },
@@ -351,7 +349,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   useDebounce(() => setCalcSwapKey(['calcSwap', bvc.vault, inputAssetBn, chainId]), 300, ['calcSwap', bvc.vault, inputAssetBn, chainId])
   const { data: result, isFetching: isFetchingSwap } = useQuery({
     queryKey: calcSwapKey,
-    queryFn: () => getPC().readContract({ abi: abiBVault, address: bvc.vault, functionName: 'calcSwap', args: [inputAssetBn] }),
+    queryFn: () => getPC(bvc.chain).readContract({ abi: abiBVault, address: bvc.vault, functionName: 'calcSwap', args: [inputAssetBn] }),
   })
 
   const [priceSwap, togglePriceSwap] = useToggle(false)

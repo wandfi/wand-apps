@@ -7,7 +7,7 @@ import { useMemo, useRef, useState } from "react"
 import { FiX } from "react-icons/fi"
 import { useClickAway } from "react-use"
 import { Chain } from "viem"
-import { useAccount, useChainId, useSwitchChain } from "wagmi"
+import { useAccount, useSwitchChain } from "wagmi"
 
 
 type ItemType = { name: string, icon: string, chain?: Chain, toUrl?: string }

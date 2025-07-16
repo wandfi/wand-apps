@@ -1,6 +1,5 @@
 import { abiAdhocBribesPool, abiBVault } from '@/config/abi'
 import { BVaultConfig } from '@/config/bvaults'
-import { getCurrentChainId } from '@/config/network'
 import { DECIMAL, YEAR_SECONDS } from '@/constants'
 import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
@@ -8,13 +7,13 @@ import { useQuery } from '@tanstack/react-query'
 import _ from 'lodash'
 import { Address, formatEther, parseAbi, parseEther, zeroAddress } from 'viem'
 
-export function useBVaultIPAssets(vault?: Address) {
+export function useBVaultIPAssets(vc: BVaultConfig) {
   return useQuery({
     initialData: [],
-    queryKey: ['bvualtipassets', vault],
-    enabled: Boolean(vault),
+    queryKey: ['bvualtipassets', vc.vault],
+    enabled: vc.assetSymbol === 'vIP',
     queryFn: async () => {
-      const ipAssets = await getPC().readContract({ abi: abiBVault, address: vault!, functionName: 'ipAssets' })
+      const ipAssets = await getPC(vc.chain).readContract({ abi: abiBVault, address: vc.vault, functionName: 'ipAssets' })
       console.info('ipAssets:', ipAssets)
       return ipAssets
     },
@@ -49,14 +48,14 @@ export const ipAssetsTit: { [k: Address]: string } = {
 // 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
 export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
   const vault = vc.vault
-  const { data: ipAssets } = useBVaultIPAssets(vc.assetSymbol === 'vIP' ? vault : undefined)
+  const { data: ipAssets } = useBVaultIPAssets(vc)
   return useQuery({
     initialData: { avrageApy: 0n, items: [] },
     queryKey: ['bvualtunderlyingapy', vault, ipAssets],
     enabled: Boolean(vault) && ipAssets.length > 0 && vc.assetSymbol == 'vIP',
     gcTime: 60 * 60 * 1000,
     queryFn: async () => {
-      const pc = getPC(getCurrentChainId(), 1)
+      const pc = getPC(vc.chain, 1)
       const multiplier = 4n
       const ratio = await pc.readContract({ abi: abiIPA, address: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27', functionName: 'calculateIPWithdrawal', args: [parseEther('1')] })
       const blockTime = parseEther('2.367')
@@ -122,15 +121,15 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
   })
 }
 
-export function useYTPoints(vault: Address) {
-  const bvd = useBVault(vault)
+export function useYTPoints(vc: BVaultConfig) {
+  const bvd = useBVault(vc.vault)
   return useQuery({
     initialData: 0n,
     gcTime: 60 * 60 * 1000,
-    queryKey: ['ytPoints', vault, bvd.current.adhocBribesPool],
-    enabled: Boolean(vault) && Boolean(bvd.current.adhocBribesPool),
+    queryKey: ['ytPoints', vc.vault, bvd.current.adhocBribesPool],
+    enabled: Boolean(bvd.current.adhocBribesPool),
     queryFn: async () => {
-      const pc = getPC()
+      const pc = getPC(vc.chain)
       if (bvd.current.adhocBribesPool === zeroAddress) return 0n
       return pc.readContract({ abi: abiAdhocBribesPool, address: bvd.current.adhocBribesPool, functionName: 'totalSupply' })
     },
@@ -182,7 +181,7 @@ export function useBvaultROI(vc: BVaultConfig, ytchange: bigint = 0n, afterYtPri
   const restakingChangedApy = ytchange > 0n ? calcRestakingApy(avrageApy, ptTotal, remainTime, ytAmount + ytchange, ytPriceChanged) : 0n
 
   // aditional airdrops
-  const { data: ytPoints } = useYTPoints(vault)
+  const { data: ytPoints } = useYTPoints(vc)
   const additionalRoi = vc.pTokenV2 ? calcAdditionalApy2(bvd.ytPointsMaxTotalSupply, remainTime, ytAssetPriceBn) : calcAdditionalApy(ytPoints, ytAmount, remainTime, ytAssetPriceBn)
   const additionalRoiChanged =
     ytchange > 0n

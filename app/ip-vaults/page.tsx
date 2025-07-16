@@ -1,15 +1,24 @@
 'use client'
 
-import { BVaultB, BVaultCard, BVaultCardComming, BVaultP, BVaultRedeemAll } from '@/components/b-vault'
+import { BVaultB, BVaultCard, BVaultP, BVaultRedeemAll } from '@/components/b-vault'
 import * as BVaultN from '@/components/b-vault-new'
 import { BVaultAddReward } from '@/components/bvault-add-reward'
+import BvaultEpochYtPrices from '@/components/bvault-epoch-ytprices'
+import { BVault2Card, BVault2Info, BVault2Swaps } from '@/components/bvaults2'
+import { MyPositions } from '@/components/bvaults2/positions'
+import { useBvualt2Data } from '@/components/bvaults2/useFets'
+import { BVault2Chart } from '@/components/bvaut2-chart'
 import { Noti } from '@/components/noti'
 import { PageWrap } from '@/components/page-wrap'
 import { SimpleTabs } from '@/components/simple-tabs'
+import { Spinner } from '@/components/spinner'
+import { ConfigChainsProvider } from '@/components/support-chains'
+import { SimpleSelect } from '@/components/ui/select'
 import { abiBVault } from '@/config/abi'
-import { BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
+import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
+import { BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
 import { ENV } from '@/constants'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { isError, isLoading, isSuccess } from '@/hooks/useFet'
 import { useLoadBVaults } from '@/hooks/useLoads'
 import { tabToSearchParams } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
@@ -18,13 +27,12 @@ import { useBVault, useBVaultEpoches } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
 import { Grid } from '@tremor/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ReactNode, useMemo, useState } from 'react'
-import { isAddressEqual } from 'viem'
+import { Fragment, ReactNode, useMemo, useState } from 'react'
+import { FaSpinner } from 'react-icons/fa6'
+import { Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
-import BvaultEpochYtPrices from '@/components/bvault-epoch-ytprices'
-import { SimpleSelect } from '@/components/ui/select'
-import { FaSpinner } from 'react-icons/fa6'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
@@ -57,7 +65,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
     queryKey: ['checkIsBriber', address, bvc],
     queryFn: async () => {
       if (!address) return false
-      const pc = getPC()
+      const pc = getPC(bvc.chain)
       const passes = await Promise.all([
         pc.readContract({ abi: abiBVault, address: bvc.vault, functionName: 'isBriber', args: [address] }),
         pc.readContract({ abi: abiBVault, address: bvc.vault, functionName: 'owner' }).then((owner) => owner == address),
@@ -122,15 +130,40 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
   )
 }
 
+
+function Bvualt2Page({ vc }: { vc: BVault2Config }) {
+  const vd = useBvualt2Data(vc)
+  return <Fragment>
+    {isError(vd) && 'Opps! Network Error!'}
+    {isLoading(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
+    {isSuccess(vd) && vd.result?.current && <Fragment>
+      <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
+        <BVault2Info vc={vc} />
+        <div className="row-span-2">
+          <BVault2Swaps vc={vc} />
+        </div>
+        <BVault2Chart vc={vc} />
+      </div>
+      <MyPositions vc={vc} />
+    </Fragment>}
+  </Fragment>
+}
+
 const vaultsFilters = ['Active', 'All', 'Closed'] as const
+
+type VCItem = (BVault2Config & { type: 'BVault2' }) | (BVaultConfig & { type: 'BVault' })
 export default function Vaults() {
   const chainId = useCurrentChainId()
-  const bvcs = useMemo(() => BVAULTS_CONFIG[chainId].filter((vc) => vc.onEnv && vc.onEnv.includes(ENV)), [chainId, ENV])
+  const vcs = useMemo(() => {
+    const olds = BvcsByEnv.filter(item => item.chain === chainId).map(vc => ({ ...vc, type: 'BVault' }) as VCItem)
+    const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
+    return [...olds, ...v2vc]
+  }, [ENV, chainId])
   const params = useSearchParams()
-  const paramsVault = params.get('vault')
+  const paramsVault = params.get('vault') as Address
   const paramsTab = params.get('tab')
   const currentTab = SupportTabs.includes(paramsTab as any) ? (paramsTab as (typeof SupportTabs)[number]) : ''
-  const currentVc = bvcs.findLast((item) => item.vault == paramsVault)
+  const currentVc = vcs.findLast((item) => item.vault.toLowerCase() == (paramsVault ?? '').toLowerCase())
   // useUpdateBVaultsData(bvcs)
   const { loading } = useLoadBVaults()
   const [currentFilter, setFilter] = useState(vaultsFilters.find(item => item === sessionStorage.getItem('bvualts-filter')) ?? vaultsFilters[0])
@@ -138,13 +171,14 @@ export default function Vaults() {
     setFilter(nf)
     sessionStorage.setItem("bvualts-filter", nf)
   }
+  // const bvd2 = useFets(...BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ key: FetKEYS.Bvault2Data(vc), fetfn: async () => getBvaut2Data(vc) })))
+  const mloading = loading
   const bvaults = useStore(s => s.sliceBVaultsStore.bvaults, ['sliceBVaultsStore.bvaults'])
   const fVcs = useMemo(() => {
-    if (loading) return bvcs
-    if (currentFilter == 'All') return bvcs
-    if (currentFilter == 'Active') return bvcs.filter(vc => !Boolean(bvaults[vc.vault]?.closed))
-    return bvcs.filter(vc => Boolean(bvaults[vc.vault]?.closed))
-  }, [loading, bvaults, currentFilter, bvcs])
+    if (currentFilter == 'All') return vcs
+    if (currentFilter == 'Active') return vcs.filter(vc => ((!Boolean(bvaults[vc.vault]?.closed) && (vc.type === 'BVault')) || (vc.type == 'BVault2')))
+    return vcs.filter(vc => (Boolean(bvaults[vc.vault]?.closed) && vc.type === 'BVault') || (vc.type == 'BVault2'))
+  }, [mloading, bvaults, currentFilter, vcs])
 
   return (
     <PageWrap>
@@ -156,36 +190,31 @@ export default function Vaults() {
               <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
               <SimpleSelect value={currentFilter} options={vaultsFilters} onChange={wrapSetFilter} />
             </div>
-            {loading ? <div className='w-full flex items-center justify-center pt-40'>
+            {mloading ? <div className='w-full flex items-center justify-center pt-40'>
               <FaSpinner className='animate-spin text-4xl opacity-80' />
             </div> :
               <Grid numItems={1} numItemsMd={2} numItemsLg={3} className='gap-5 mt-4'>
                 {fVcs.map((item, index) => (
-                  item.newUI ? <BVaultN.BVaultCard key={`group_vault_item_${index}`} vc={item} /> : <BVaultCard key={`group_vault_item_${index}`} vc={item} />
+                  <ConfigChainsProvider chains={[item.chain]} key={`vault_item_${index}`}>
+                    {
+                      item.type === 'BVault' && <>
+                        {item.newUI ? <BVaultN.BVaultCard vc={item} /> : <BVaultCard vc={item} />}
+                      </>
+                    }
+                    {
+                      item.type === 'BVault2' &&
+                      <BVault2Card vc={item} />
+                    }
+                  </ConfigChainsProvider>
                 ))}
-                {bvcs.length == 0 && (
-                  <>
-                    <BVaultCardComming />
-                    <BVaultCardComming />
-                    <BVaultCardComming />
-                  </>
-                )}
-                {bvcs.length == 1 && (
-                  <>
-                    <BVaultCardComming />
-                    <BVaultCardComming />
-                  </>
-                )}
-                {bvcs.length == 2 && (
-                  <>
-                    <BVaultCardComming />
-                  </>
-                )}
               </Grid>
             }
           </>
         ) : (
-          <BVaultPage bvc={currentVc} currentTab={currentTab} />
+          <ConfigChainsProvider chains={[currentVc.chain]}>
+            {currentVc.type === 'BVault' && <BVaultPage bvc={currentVc} currentTab={currentTab} />}
+            {currentVc.type === 'BVault2' && <Bvualt2Page vc={currentVc} />}
+          </ConfigChainsProvider>
         )}
       </div>
     </PageWrap>

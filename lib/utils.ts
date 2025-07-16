@@ -3,7 +3,6 @@ import { twMerge } from 'tailwind-merge'
 import { formatUnits, parseUnits, parseEther as _parseEther, etherUnits, Address } from 'viem'
 import _, { get, now, round } from 'lodash'
 import { toast } from 'sonner'
-import { NATIVE_TOKEN_ADDRESS } from '@/config/swap'
 import dayjs from 'dayjs'
 import { DECIMAL } from '@/constants'
 import { getCurrentChainId } from '@/config/network'
@@ -104,11 +103,6 @@ export function bnMin(bns: bigint[]): bigint {
 export function bnMax(bns: bigint[]): bigint {
   if (bns.length <= 0) return 0n
   return bns.reduce((max, item) => (item > max ? item : max), bns[0])
-}
-
-export function swapThrusterLink(token: Address, token2: Address) {
-  if (token == NATIVE_TOKEN_ADDRESS) token = '0x0000000000000000000000000000000000000000'
-  return `https://app.thruster.finance/?token1=${token}&token2=${token2}`
 }
 
 export function proxyGetDef<T extends object>(obj: Partial<T>, def: any | ((k: string) => any)) {

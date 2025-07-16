@@ -132,14 +132,15 @@ export function useBVaultApy(vc: BVaultConfig): [string, bigint] {
 
 export function useUpBVaultForUserAction(bvc: BVaultConfig, onUserAction?: () => void) {
   const { address } = useAccount()
+  const chainId = useCurrentChainId()
   return () => {
     retry(
       async () => {
         onUserAction?.()
         if (!address) return
         await Promise.all([
-          useBoundStore.getState().sliceTokenStore.updateTokensBalance([bvc.asset, bvc.pToken], address),
-          useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply([bvc.asset, bvc.pToken]),
+          useBoundStore.getState().sliceTokenStore.updateTokensBalance(chainId, [bvc.asset, bvc.pToken], address),
+          useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(chainId, [bvc.asset, bvc.pToken]),
           useBoundStore.getState().sliceBVaultsStore.updateBvaults([bvc]),
           useBoundStore.getState().sliceBVaultsStore.updateYTokenSythetic([bvc]),
         ])

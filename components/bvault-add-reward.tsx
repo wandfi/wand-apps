@@ -1,6 +1,5 @@
 import { abiBVault } from '@/config/abi'
 import { BVaultConfig } from '@/config/bvaults'
-import { NATIVE_TOKEN_ADDRESS } from '@/config/swap'
 import { cn, handleError, parseEthers } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { TokenItem } from '@/providers/sliceTokenStore'
@@ -27,32 +26,32 @@ const defTokens: TokenItem[] = [
   { symbol: 'WIP', name: 'Wrapped IP', address: '0x1514000000000000000000000000000000000000', decimals: 18, },
 ]
 
-function TokenSelect({ tokens, onSelect, hiddenNative }: { tokens?: TokenItem[]; hiddenNative?: boolean; onSelect?: (item: TokenItem) => void }) {
+function TokenSelect({ tokens, onSelect, hiddenNative, chainId }: { chainId: number, tokens?: TokenItem[]; hiddenNative?: boolean; onSelect?: (item: TokenItem) => void }) {
   const defTokenList = useStore((s) => s.sliceTokenStore.defTokenList)
   const originTokens = useMemo(() => {
     const list = !_.isEmpty(tokens) ? tokens! : !_.isEmpty(defTokenList) ? defTokenList! : defTokens
-    if (hiddenNative) return list.filter((item) => item.address !== zeroAddress && item.address !== NATIVE_TOKEN_ADDRESS)
+    if (hiddenNative) return list.filter((item) => item.address !== zeroAddress)
     return list
   }, [tokens, defTokenList, hiddenNative])
 
   const [input, setInput] = useState('')
   const balances = useBalances()
   const { address: user } = useAccount()
-  const [queryKey, updateQueryKey] = useState(['searchTokens', input, originTokens])
-  useDebounce(() => updateQueryKey(['searchTokens', input, originTokens]), 300, [input, originTokens])
+  const [queryKey, updateQueryKey] = useState(['searchTokens', input, originTokens, chainId])
+  useDebounce(() => updateQueryKey(['searchTokens', input, originTokens, chainId]), 300, [input, originTokens, chainId])
   const { data: searchdTokens, isFetching } = useQuery({
     initialData: originTokens,
     queryFn: async () => {
       if (isAddress(input)) {
         const t = originTokens.find((item) => item.address == input)
         if (t) return [t]
-        const pc = getPC()
+        const pc = getPC(chainId)
         const address = input as Address
-        const [symbol,decimals] = await Promise.all([
+        const [symbol, decimals] = await Promise.all([
           pc.readContract({ abi: erc20Abi, address, functionName: 'symbol' }),
           pc.readContract({ abi: erc20Abi, address, functionName: 'decimals' }),
         ])
-        user && useBoundStore.getState().sliceTokenStore.updateTokensBalance([address], user)
+        user && useBoundStore.getState().sliceTokenStore.updateTokensBalance(chainId, [address], user)
         return [{ symbol, address, decimals }] as TokenItem[]
       } else {
         if (!input) return originTokens
@@ -72,7 +71,7 @@ function TokenSelect({ tokens, onSelect, hiddenNative }: { tokens?: TokenItem[];
     queryKey: ['updateBalancesForUnknowToken', originTokens],
     enabled: !!user,
     queryFn: () =>
-      useBoundStore.getState().sliceTokenStore.updateTokensBalance(
+      useBoundStore.getState().sliceTokenStore.updateTokensBalance(chainId,
         originTokens.map((item) => item.address),
         user!,
       ),
@@ -135,8 +134,8 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       if (disableAdd) return
-      const pc = getPC()
-      if(bvc.isOld){
+      const pc = getPC(bvc.chain)
+      if (bvc.isOld) {
         const tokens = await pc.readContract({ abi: abiBVault, address: bvc.vault, functionName: 'bribeTokens', args: [bvd.epochCount] })
         console.info('tokens:', tokens, stoken.address)
         if (!tokens.find((item) => item.toLowerCase() == stoken.address.toLowerCase())) {
@@ -159,7 +158,7 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
         const hash = await wc.data.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'addAdhocBribes', args: [stoken.address, inputBn] })
         await pc.waitForTransactionReceipt({ hash, confirmations: 3 })
       }
-      useBoundStore.getState().sliceTokenStore.updateTokensBalance([stoken.address], address)
+      useBoundStore.getState().sliceTokenStore.updateTokensBalance(bvc.chain, [stoken.address], address)
       setInput('')
       toast.success('Transaction success')
     },
@@ -180,6 +179,7 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
           }
         >
           <TokenSelect
+            chainId={bvc.chain}
             hiddenNative
             onSelect={(t) => {
               setStoken(t)

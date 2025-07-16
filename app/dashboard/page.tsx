@@ -2,25 +2,21 @@
 import { CoinIcon } from '@/components/icons/coinicon'
 import { PageWrap } from '@/components/page-wrap'
 import STable from '@/components/simple-table'
-import { BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
+import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
-import { USBSymbol, VAULTS_CONFIG } from '@/config/swap'
-import { DECIMAL, ENV } from '@/constants'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
-import { useLoadBVaults, useLoadLVaults } from '@/hooks/useLoads'
+import { DECIMAL } from '@/constants'
+import { useLoadBVaults } from '@/hooks/useLoads'
 import { useTVL } from '@/hooks/useTVL'
-import { fmtAAR, fmtPercent, getBigint } from '@/lib/utils'
-import { FetcherContext } from '@/providers/fetcher'
+import { fmtPercent, getBigint } from '@/lib/utils'
 import { useStore } from '@/providers/useBoundStore'
-import { calcBVaultBoost } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { TableCell as _TableCell } from '@tremor/react'
 
 import { BVaultApy } from '@/components/b-vault'
-import { ReactNode, useContext, useMemo } from 'react'
-import { Address } from 'viem'
-import { useBvaultROI } from '@/hooks/useBVaultROI'
 import { getTokenBy } from '@/config/tokens'
+import { useBvaultROI } from '@/hooks/useBVaultROI'
+import { ReactNode, useMemo } from 'react'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 
 const TableCell = (p: React.TdHTMLAttributes<HTMLTableCellElement> & React.RefAttributes<HTMLTableCellElement>) => {
   return <_TableCell {...p} className={`!p-3 w-max ${p.className}`} />
@@ -66,55 +62,19 @@ function TVLItem() {
   }, [tvl.tvlItems])
   return <DashItem title='Total Value Locked' sub={`$${displayBalance(tvl.tvl)}`} tHeader={['Asset', 'NAV', 'Amount', 'Total']} tData={data} />
 }
-function LVaultsItem() {
-  const lvaults = useStore((s) => s.sliceLVaultsStore.lvaults, ['sliceLVaultsStore.lvaults'])
-  const chainId = useCurrentChainId()
-  const lvcs = VAULTS_CONFIG[chainId] || []
-  const { prices } = useContext(FetcherContext)
-  const data: ReactNode[][] = useMemo(() => {
-    return lvcs.map((lvc) => [
-      <div key='icon' className='flex gap-2 items-center'>
-        {<CoinIcon symbol={lvc.assetTokenSymbol} size={20} />}
-        <span>{lvc.assetTokenSymbol}</span>
-      </div>,
-      <div key='total'>
-        <div key='icon' className='flex gap-2 items-center'>
-          {<CoinIcon symbol={lvc.assetTokenSymbol} size={14} />}
-          <span>{displayBalance(lvaults[lvc.vault]?.assetBalance || 0n)}</span>
-        </div>
-        <div className='opacity-60'>~{displayBalance((getBigint(lvaults[lvc.vault], 'assetBalance') * prices[lvc.assetTokenAddress]) / DECIMAL)}</div>
-      </div>,
-      <div key='debt' className='flex gap-2 items-center'>
-        {<CoinIcon symbol={USBSymbol} size={14} />}
-        <span>{displayBalance(getBigint(lvaults[lvc.vault], 'usbTotalSupply'))}</span>
-      </div>,
-      fmtAAR(getBigint(lvaults[lvc.vault], 'aar'), 10n),
-      <div key='status' className='flex gap-2 items-center'>
-        {(lvaults[lvc.vault]?.vaultMode || 0) <= 1 ? greenPoint : redPoint}
-        <span>{(lvaults[lvc.vault]?.vaultMode || 0) <= 1 ? 'Stability' : 'Adjustment'}</span>
-      </div>,
-      <div key='discount' className='flex gap-2 items-center'>
-        {lvaults[lvc.vault]?.discountEnable ? redPoint : greenPoint}
-        <span>{lvaults[lvc.vault]?.discountEnable ? 'YES' : 'NO'}</span>
-      </div>,
-    ])
-  }, [lvaults, lvcs, prices])
-  return <DashItem title='L-Vault' tHeader={['Vaults', 'Total Deposit', `${USBSymbol} Debt`, 'AAR', 'Status', 'Discount Offer']} tData={data} />
-}
-
 function BVaultROI({ vc }: { vc: BVaultConfig }) {
   const { roi } = useBvaultROI(vc)
   return <>{fmtPercent(roi, 18, 2)}</>
 }
 function BVaultsItem() {
   const chainId = useCurrentChainId()
-  const bvcs = useMemo(() => BVAULTS_CONFIG[chainId].filter((item) => (item.onEnv || []).includes(ENV)), [chainId])
+  const bvcs = BvcsByEnv.filter(item => item.chain === chainId)
   const bvaults = useStore((s) => s.sliceBVaultsStore.bvaults, ['sliceBVaultsStore.bvaults'])
   const prices = useStore((s) => s.sliceTokenStore.prices, ['sliceTokenStore.prices'])
 
   const data: ReactNode[][] = useMemo(() => {
     const datas = bvcs.map((bvc) => {
-      const decimals = getTokenBy(bvc.asset, chainId)!.decimals
+      const decimals = getTokenBy(bvc.asset, bvc.chain)!.decimals
       const totalDeposit = getBigint(bvaults, [bvc.vault, 'lockedAssetTotal'])
 
       let totalDepositUsd = (totalDeposit * getBigint(prices, [bvc.asset])) / (10n ** BigInt(decimals))
@@ -168,9 +128,7 @@ function BVaultsItem() {
   return <DashItem title='B-Vault' tHeader={['Vaults', 'Total Deposit', 'Status', 'PT APY', 'YT ROI']} tData={data} />
 }
 export default function Dashboard() {
-  useLoadLVaults()
   useLoadBVaults()
-  const chainId = useCurrentChainId()
   return (
     <PageWrap>
       <div className='w-full max-w-[1200px] px-4 mx-auto flex flex-col gap-5 md:pb-8'>

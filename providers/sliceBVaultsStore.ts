@@ -95,19 +95,20 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
   const updateBvaults = async (bvcs: BVaultConfig[]) => {
     const start = _.now()
     console.info('timeStart:updateBvaults', start)
-    const pc = getPC()
     const [datas, lpdatas, ptRates] = await Promise.all([
       Promise.all(
         bvcs.map((bvc) =>
-          pc
+          getPC(bvc.chain, 1)
             .readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery2, code: codeBQuery2, functionName: 'queryBVault', args: [bvc.vault] })
             .then((item) => ({ vault: bvc.vault, item })),
         ),
       ),
-      story.id == getCurrentChainId() ? Promise.all(bvcs.map((bvc) => (LP_TOKENS[bvc.asset]?.poolId ? getBvaultLpData(pc, bvc) : Promise.resolve(null)))) : Promise.resolve(null),
+      Promise.all(bvcs.map((bvc) => (LP_TOKENS[bvc.asset]?.poolId ? getBvaultLpData(getPC(bvc.chain, 1), bvc) : Promise.resolve(null)))),
       Promise.all(
         bvcs.map((vc) =>
-          vc.pTokenV2 ? pc.readContract({ abi: [parseAbiItem('function rebaseRate() view returns (uint256)')], address: vc.pToken, functionName: 'rebaseRate' }) : 0n,
+          vc.pTokenV2
+            ? getPC(vc.chain, 1).readContract({ abi: [parseAbiItem('function rebaseRate() view returns (uint256)')], address: vc.pToken, functionName: 'rebaseRate' })
+            : 0n,
         ),
       ),
     ])
@@ -131,7 +132,7 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
     const ytPointsMaxTotalSupplys = await Promise.all(
       bvcs.map((vc) =>
         vc.pTokenV2 && map[vc.vault]!.current.adhocBribesPool !== zeroAddress
-          ? pc.readContract({
+          ? getPC(vc.chain, 1).readContract({
               abi: [parseAbiItem('function maxTotalSupply() external view returns (uint256)')],
               address: map[vc.vault]!.current.adhocBribesPool,
               functionName: 'maxTotalSupply',
@@ -149,7 +150,7 @@ export const sliceBVaultsStore: SliceFun<BVaultsStore> = (set, get, init = {}) =
   const updateEpoches = async (bvc: BVaultConfig, ids?: bigint[]) => {
     const mIds = ids || _.range(1, parseInt(((get().bvaults[bvc.vault]?.epochCount || 0n) + 1n).toString())).map((num) => BigInt(num))
     if (mIds.length == 0) return {}
-    const pc = getPC()
+    const pc = getPC(bvc.chain, 1)
     const datas = await Promise.all(
       mIds.map((epochId) =>
         pc.readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery, address: bvc.bQueryAddres, functionName: 'queryBVaultEpoch', args: [bvc.vault, epochId] }),

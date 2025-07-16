@@ -1,11 +1,12 @@
 import { useConfigChains } from '@/components/support-chains'
-import { getCurrentChainId, setCurrentChainId, SUPPORT_CHAINS } from '@/config/network'
+import { SUPPORT_CHAINS } from '@/config/network'
 import { useChainId } from 'wagmi'
 
 export function useCurrentChainId() {
   const chainId = useChainId()
-  setCurrentChainId(chainId)
-  return getCurrentChainId()
+  const { chains, def } = useConfigChains()
+  const isSupported = chains.find((item) => item.id === chainId)
+  return isSupported ? chainId : def
 }
 
 export function useNetworkWrong() {

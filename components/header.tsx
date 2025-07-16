@@ -1,24 +1,21 @@
 'use client'
 
-import { SUPPORT_CHAINS } from '@/config/network'
-import { DISCORD_LINK, DOC_LINK, ENV, isLNT, isLOCL, isTEST, TWITTER_LINK } from '@/constants'
+import { DISCORD_LINK, DOC_LINK, isLOCL, isTEST, TWITTER_LINK } from '@/constants'
 
-import { abiMockPriceFeed, abiVault } from '@/config/abi'
-import { BVAULTS_CONFIG } from '@/config/bvaults'
-import { LNTVAULTS_CONFIG } from '@/config/lntvaults'
-import { VAULTS_CONFIG } from '@/config/swap'
+import { abiVault } from '@/config/abi'
+import { BvcsByEnv } from '@/config/bvaults'
 import { DomainRef } from '@/hooks/useConfigDomain'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
-import { useWandContractRead } from '@/hooks/useWand'
+import { getPC } from '@/providers/publicClient'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { useChainModal } from '@rainbow-me/rainbowkit'
+import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
-import { LuBox, LuLineChart, LuSettings, LuSettings2, LuUserCircle } from 'react-icons/lu'
+import { LuBox, LuLineChart, LuSettings, LuUserCircle } from 'react-icons/lu'
 import { TbBook2, TbBrandDiscordFilled, TbBrandX, TbChevronDown } from 'react-icons/tb'
 import { useWindowSize } from 'react-use'
+import { isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import ConnectBtn from './connet-btn'
 import { CoinIcon } from './icons/coinicon'
@@ -27,58 +24,34 @@ import { ThemeMode } from './theme-mode'
 import { Tip } from './ui/tip'
 
 export function useShowAdmin() {
-  const chainId = useCurrentChainId()
   const { address } = useAccount()
-  const { data: owner } = useWandContractRead({
-    abi: abiVault,
-    address: isLNT ? LNTVAULTS_CONFIG[chainId]?.[0]?.vault : BVAULTS_CONFIG[chainId]?.[0]?.vault,
-    functionName: 'owner',
-    query: { enabled: !!address },
+  const { data: owners } = useQuery({
+    queryKey: [BvcsByEnv],
+    enabled: !!address,
+    initialData: [],
+    queryFn: async () => Promise.all(BvcsByEnv.map((vc) => getPC(vc.chain).readContract({ abi: abiVault, address: vc.vault, functionName: 'owner' })))
   })
-  return !!address && address == owner
+  return !!address && !!owners.find(item => isAddressEqual(item, address))
 }
 
-export function useShowTester() {
-  const chainId = useCurrentChainId()
-  const { address } = useAccount()
-  const { data: isTester } = useWandContractRead({
-    abi: abiMockPriceFeed,
-    address: VAULTS_CONFIG[chainId]?.[1]?.assetTokenFeed,
-    functionName: 'isTester',
-    args: [address as any],
-    query: { enabled: !!address },
-  })
-  return !!isTester
-}
 
 export function Header() {
   const pathname = usePathname()
   const { width } = useWindowSize(window.innerWidth, window.innerHeight)
   const hiddenTitle = pathname !== '/' && width < 1024
-  // const modal = useModal()
-  const chainId = useCurrentChainId()
-  const { openChainModal } = useChainModal()
   const showAdmin = useShowAdmin()
-  const showTester = useShowTester()
   const links = useMemo(() => {
     const links = [
-      ...(ENV.includes("lnt") ? [
-        { href: '/lnt-vaults', label: 'LNT-Vaults', icon: LuBox },
-      ] : [
-        ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuBox, disable: false }] : []),
-        { href: '/ip-vaults', label: 'IP-Vaults', icon: LuBox, disable: false },
-        // { href: '/l-vaults', label: 'L-Vaults', icon: LuBox, disable: true },
-        { href: '/portfolio', label: 'Portfolio', icon: LuUserCircle },
-        { href: '/dashboard', label: 'Dashboard', icon: LuLineChart },
-      ]),
+      ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuBox, disable: false }] : []),
+      { href: '/ip-vaults', label: 'IP-Vaults', icon: LuBox, disable: false },
+      // { href: '/l-vaults', label: 'L-Vaults', icon: LuBox, disable: true },
+      { href: '/portfolio', label: 'Portfolio', icon: LuUserCircle },
+      { href: '/dashboard', label: 'Dashboard', icon: LuLineChart },
     ]
     showAdmin && links.push({ href: '/admin', label: 'Admin', icon: LuSettings })
-      ; (showTester || showAdmin) && links.push({ href: '/tester', label: 'Tester', icon: LuSettings2 })
-    return links
-  }, [showAdmin, showTester])
 
-  const { chain, address } = useAccount()
-  const showDefNet = !chain || SUPPORT_CHAINS.findIndex((item) => item.id == chain.id) == -1 || SUPPORT_CHAINS.length <= 1
+    return links
+  }, [showAdmin])
   const social_networks = useMemo(
     () => [
       { name: 'doc', url: DOC_LINK(), icon: TbBook2 },

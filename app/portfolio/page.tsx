@@ -1,34 +1,22 @@
 'use client'
+import { BVaultApy } from '@/components/b-vault'
+import { CoinIcon } from '@/components/icons/coinicon'
 import { PageWrap } from '@/components/page-wrap'
 import STable, { TableProps } from '@/components/simple-table'
-import { useLoadBVaults, useLoadLVaults, useLoadUserBVaults, useLoadUserLVaults } from '@/hooks/useLoads'
-import BeraLine from '@/components/icons/BeraLine'
-import BullLine from '@/components/icons/BullLine'
-import { CoinIcon } from '@/components/icons/coinicon'
-import PandaLine from '@/components/icons/PandaLine'
-import VenomLine from '@/components/icons/VenomLine'
-import { Tip } from '@/components/ui/tip'
-import { USB_ADDRESS, USBSymbol, VaultConfig, VAULTS_CONFIG } from '@/config/swap'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
-import { fmtPercent, fmtDate } from '@/lib/utils'
-import { defLVault, useUSBApr } from '@/providers/useLVaultsData'
-import { useBalances } from '@/providers/useTokenStore'
-import { displayBalance } from '@/utils/display'
-import { Address } from 'viem'
-import { useBoundStore } from '@/providers/useBoundStore'
-import { BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
-import { DECIMAL, ENV } from '@/constants'
+import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
-import { calcBVaultPTApy } from '@/providers/useBVaultsData'
-import { UserBVaultsStore } from '@/providers/sliceUserBVaults'
-import { ReactNode, useMemo } from 'react'
-import _ from 'lodash'
-import { useRouter } from 'next/navigation'
-import { FiShare } from 'react-icons/fi'
-import { MdArrowOutward } from 'react-icons/md'
-import { toBVault } from '../routes'
-import { BVaultApy } from '@/components/b-vault'
 import { getTokenBy } from '@/config/tokens'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { useLoadBVaults, useLoadUserBVaults } from '@/hooks/useLoads'
+import { fmtDate } from '@/lib/utils'
+import { useBoundStore } from '@/providers/useBoundStore'
+import { calcBVaultPTApy } from '@/providers/useBVaultsData'
+import { displayBalance } from '@/utils/display'
+import { useRouter } from 'next/navigation'
+import { ReactNode, useMemo } from 'react'
+import { MdArrowOutward } from 'react-icons/md'
+import { Address } from 'viem'
+import { toBVault } from '../routes'
 
 function PortfolioItem({
   title,
@@ -74,73 +62,11 @@ function CoinText(p: { symbol: string; txt?: string; size?: number }) {
     </div>
   )
 }
-function InterestItem() {
-  const { apr, aprDecimals } = useUSBApr()
-  const chainId = useCurrentChainId()
-  const balances = useBalances()
-  const usbBalance = balances[USB_ADDRESS[chainId]]
-  const yieldDay = (usbBalance * apr) / 365n / 10n ** BigInt(aprDecimals)
-  return (
-    <PortfolioItem
-      title={<IconTitle tit='Interest Bear' icon='BeraLine' />}
-      tHeader={['', 'Balance', 'APY', 'Est. Yield/day']}
-      tData={[[<CoinText key='icon' symbol={USBSymbol} />, displayBalance(usbBalance), fmtPercent(apr, aprDecimals), displayBalance(yieldDay)]]}
-    />
-  )
-}
-function LeverageItem() {
-  const chainId = useCurrentChainId()
-  const lvcs = VAULTS_CONFIG[chainId] || []
-  const balances = useBalances()
-
-  const data: ReactNode[][] = useMemo(() => {
-    const calcMyOpenPosition = (vc: VaultConfig) => {
-      const s = useBoundStore.getState()
-      const vs = s.sliceLVaultsStore.lvaults[vc.vault] || defLVault
-      const totalBn = vs.isStable ? vs.M_USDC : vs.M_ETH
-      const xTotalBn = vs.isStable ? vs.M_USDCx : vs.M_ETHx
-      // const mUsbBn = vs.isStable ? vs.M_USB_USDC : vs.M_USB_ETH
-      const myOpenPosition = xTotalBn > 0n ? (balances[vc.xTokenAddress] * totalBn) / xTotalBn : 0n
-      return myOpenPosition
-    }
-    const calcMyMarginLoan = (vc: VaultConfig) => {
-      const s = useBoundStore.getState()
-      const vs = s.sliceLVaultsStore.lvaults[vc.vault] || defLVault
-      // const totalBn = vs.isStable ? vs.M_USDC : vs.M_ETH
-      const xTotalBn = vs.isStable ? vs.M_USDCx : vs.M_ETHx
-      const mUsbBn = vs.isStable ? vs.M_USB_USDC : vs.M_USB_ETH
-      const myMarginLoan = xTotalBn > 0n ? -(balances[vc.xTokenAddress] * mUsbBn) / xTotalBn : 0n
-      return myMarginLoan
-    }
-    return lvcs.map((lvc) => [
-      <CoinText key='coin' symbol={lvc.xTokenSymbol} />,
-      displayBalance(balances[lvc.xTokenAddress]),
-      <CoinText key='openposit' symbol={lvc.assetTokenSymbol} txt={displayBalance(calcMyOpenPosition(lvc))} />,
-      <CoinText key='marginloan' symbol={USBSymbol} txt={displayBalance(calcMyMarginLoan(lvc))} />,
-    ])
-  }, [balances, lvcs])
-  return (
-    <PortfolioItem
-      title={<IconTitle tit='Leverage Bull' icon='BullLine' />}
-      tHeader={[
-        '',
-        'Balance',
-        'Open Position',
-        <div key={'marginloan'}>
-          Margin Loan
-          <Tip>Repay your margin loan to redeem asset corresponding to your open position.</Tip>
-        </div>,
-      ]}
-      tData={data}
-    />
-  )
-}
 
 function PrincipalItem() {
   const r = useRouter()
   const chainId = useCurrentChainId()
-  const bvcs = useMemo(() => BVAULTS_CONFIG[chainId].filter((bvc) => (bvc.onEnv || []).includes(ENV)), [chainId])
-
+  const bvcs = BvcsByEnv.filter(item => item.chain === chainId)
   const data: ReactNode[][] = useMemo(() => {
     const s = useBoundStore.getState()
     const inRedeem = (bvc: BVaultConfig) => {
@@ -208,7 +134,7 @@ function PrincipalItem() {
 function BoostItem() {
   const r = useRouter()
   const chainId = useCurrentChainId()
-  const bvcs = useMemo(() => BVAULTS_CONFIG[chainId].filter((bvc) => (bvc.onEnv || []).includes(ENV)), [chainId])
+  const bvcs = BvcsByEnv.filter(item => item.chain === chainId)
   const data: ReactNode[][] = useMemo(() => {
     const s = useBoundStore.getState()
     const epochInfo = (vault: Address, id: number) => s.sliceBVaultsStore.epoches[`${vault}_${id}`]
@@ -286,35 +212,9 @@ function BoostItem() {
     />
   )
 }
-function StakedPoolsItem() {
-  const chainId = useCurrentChainId()
-  const lvcs = VAULTS_CONFIG[chainId] || []
-  const lStore = useBoundStore.getState().sliceLVaultsStore
-  const datas: ReactNode[][] = useMemo(() => {
-    const totalStakedUsb = lvcs.map((lvc) => lStore.user[lvc.vault]?.buyPool_userStakingBalance || 0n).reduce((sum, item) => sum + item, 0n)
-    const usb = [
-      <div key={'usb'} className='flex gap-6 items-center'>
-        <CoinText symbol={USBSymbol} />
-        <span>{displayBalance(totalStakedUsb)}</span>
-      </div>,
-    ]
-    const assets = lvcs.map((lvc) => (
-      <div key={lvc.assetTokenSymbol} className='flex gap-6 items-center'>
-        <CoinText symbol={lvc.assetTokenSymbol} />
-        <span>{displayBalance(lStore.user[lvc.vault]?.sellPool_userStakingBalance || 0n)}</span>
-      </div>
-    ))
-    const res = _.chunk([...usb, ...assets], 3).map((items) => (items.length == 3 ? items : _.fill(items, '', 3 - items.length)))
-    return res
-  }, [lvcs, lStore])
-  return <PortfolioItem title='Staked in BuyLow/Sell High' tHeader={['', '', '']} tData={datas} />
-}
 export default function Dashboard() {
-  useLoadLVaults()
   useLoadBVaults()
-  useLoadUserLVaults()
   useLoadUserBVaults()
-  const chainId = useCurrentChainId()
   return (
     <PageWrap>
       <div className='w-full max-w-[1200px] px-4 mx-auto flex flex-col gap-5 md:pb-8'>

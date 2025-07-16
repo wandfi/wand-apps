@@ -13,7 +13,7 @@ export function useVerioStakeApy() {
     queryKey: ['VerioStakeApy', verioStakePool],
     enabled: Boolean(verioStakePool),
     queryFn: async () => {
-      const pc = getPC()
+      const pc = getPC(chainId)
       // const [stakePoolAmount, totalStake] = await Promise.all([
       //   pc.readContract({ abi: abiVerioStakePool, address: verioStakePool, functionName: 'getStakePoolAmount' }),
       //   pc.readContract({ abi: abiVerioStakePool, address: verioStakePool, functionName: 'getTotalStake' }),

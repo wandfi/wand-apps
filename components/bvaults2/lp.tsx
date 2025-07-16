@@ -127,7 +127,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         initialData: [0n, 0n, 0n],
         queryFn: async () => {
             if (inputAssetBn <= 0n || calcOutsKey.length <= 1) return [0n, 0n, 0n]
-            return getPC().readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.vault, inputAssetBn] })
+            return getPC(vc.chain).readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcRemoveLP', args: [vc.vault, inputAssetBn] })
         }
     })
     const outAmount = ptc.result >= ytc.result ? ytAmount : ptAmount

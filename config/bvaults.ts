@@ -1,9 +1,10 @@
 import { Address } from 'viem'
-import { story, storyTestnet } from './network'
 import { TypeENV } from './env'
-import { proxyGetDef } from '@/lib/utils'
+import { story, storyTestnet } from './network'
+import { ENV } from '@/constants'
 
 export type BVaultConfig = {
+  chain: number
   vault: Address
   asset: Address
   assetSymbol: string
@@ -18,7 +19,7 @@ export type BVaultConfig = {
   bQueryAddres: Address
   lpPoolIdx?: number
   isOld?: boolean
-  onEnv?: TypeENV[]
+  onEnv: TypeENV[]
   newUI?: boolean
   ipAssetStaking: Address
   compney: string
@@ -55,82 +56,81 @@ export const VerioStakePool: { [k: number]: Address } = {
   [story.id]: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27',
 }
 
-export const BVAULTS_CONFIG: { [key: number]: BVaultConfig[] } = proxyGetDef(
+export const BVAULTS_CONFIG: BVaultConfig[] = [
   {
-    [storyTestnet.id]: [],
-    [story.id]: [
-      {
-        vault: '0x868454427252E0Dc69ebCdB07dE07818B9599a7a',
-        asset: '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42',
-        moreAssets: ['0xF1815bd50389c46847f0Bda824eC8da914045D14'],
-        pToken: '0x67B7B0B3fA057703E077D1Df6b50065a1229D41A',
-        assetSymbol: 'AIDaUSDC',
-        pTokenSymbol: 'pAIDaUSDC',
-        yTokenSymbol: 'yAIDaUSDC',
-        protocolAddress: '0xE092612505661721053fA22b2D40fD6ae1eA87c2',
-        protocolSettingsAddress: '0xf2B9B6489AB734ddA51Ca0311d335684874D24b4',
-        bQueryAddres: BQueryAddress[story.id],
-        onEnv: ['test', 'prod'],
-        ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
-        newUI: true,
-        rewardSymbol: 'Spice Points',
-        icon: 'GAIB',
-        compney: 'GAIB',
-        tit: 'GAIB AID Alpha',
-        sub: 'Pre-deposit Campaign',
-        des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
-      },
-      // {
-      //   vault: '0xB0C47C03a689a070387294E27105488dE5A57da8',
-      //   asset: '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42',
-      //   moreAssets: ['0xF1815bd50389c46847f0Bda824eC8da914045D14'],
-      //   pToken: '0x66B4CB07229EcCC6f48161DfcC229Ac06af25457',
-      //   assetSymbol: 'AIDaUSDC',
-      //   pTokenSymbol: 'pAIDaUSDC',
-      //   yTokenSymbol: 'yAIDaUSDC',
-      //   protocolAddress: '0x89B382b51d39254F2e55fF4A09f0E19b1538cCB0',
-      //   protocolSettingsAddress: '0x48Bdd4bee89249DBc3A8A4Ae854350679bFBb76b',
-      //   bQueryAddres: BQueryAddress[story.id],
-      //   onEnv: ['test'],
-      //   ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
-      //   newUI: true,
-      //   rewardSymbol: 'Spice Points',
-      //   icon: 'GAIB',
-      //   compney: 'GAIB',
-      //   tit: 'GAIB AID Alpha',
-      //   sub: 'Pre-deposit Campaign',
-      //   des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
-      // },
-      {
-        compney: 'Verio',
-        vault: '0x29038303100931fA3Cd421ceb1632F1Bb22950Ac',
-        asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
-        pToken: '0x5e00cF234f4BD45542164EaF09A1D1D92C471Ed3',
-        pTokenV2: true,
-        assetSymbol: 'vIP',
-        pTokenSymbol: 'pvIP',
-        yTokenSymbol: 'yvIP',
-        protocolAddress: '0xB5eD29BCf541aebcb3ee179cb590d92D3d9F9445',
-        protocolSettingsAddress: '0x0b50513145a6cE1A8A93132881e6B29B3C04eEDe',
-        bQueryAddres: BQueryAddress[story.id],
-        onEnv: ['test', 'prod'],
-        ipAssetStaking: '0x1ADd58A4bf810Bd706FE01458B610466F6e7f8cD',
-      },
-      {
-        compney: 'Verio',
-        vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
-        asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
-        pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d4',
-        assetSymbol: 'vIP',
-        pTokenSymbol: 'pvIP',
-        yTokenSymbol: 'yvIP',
-        protocolAddress: ZooProtocolAddress[story.id],
-        protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
-        bQueryAddres: BQueryAddress[story.id],
-        onEnv: ['test', 'prod'],
-        ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
-      },
-    ],
+    chain: story.id,
+    vault: '0x868454427252E0Dc69ebCdB07dE07818B9599a7a',
+    asset: '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42',
+    moreAssets: ['0xF1815bd50389c46847f0Bda824eC8da914045D14'],
+    pToken: '0x67B7B0B3fA057703E077D1Df6b50065a1229D41A',
+    assetSymbol: 'AIDaUSDC',
+    pTokenSymbol: 'pAIDaUSDC',
+    yTokenSymbol: 'yAIDaUSDC',
+    protocolAddress: '0xE092612505661721053fA22b2D40fD6ae1eA87c2',
+    protocolSettingsAddress: '0xf2B9B6489AB734ddA51Ca0311d335684874D24b4',
+    bQueryAddres: BQueryAddress[story.id],
+    onEnv: ['test', 'prod'],
+    ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
+    newUI: true,
+    rewardSymbol: 'Spice Points',
+    icon: 'GAIB',
+    compney: 'GAIB',
+    tit: 'GAIB AID Alpha',
+    sub: 'Pre-deposit Campaign',
+    des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
   },
-  [],
-)
+  // {
+  //   vault: '0xB0C47C03a689a070387294E27105488dE5A57da8',
+  //   asset: '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42',
+  //   moreAssets: ['0xF1815bd50389c46847f0Bda824eC8da914045D14'],
+  //   pToken: '0x66B4CB07229EcCC6f48161DfcC229Ac06af25457',
+  //   assetSymbol: 'AIDaUSDC',
+  //   pTokenSymbol: 'pAIDaUSDC',
+  //   yTokenSymbol: 'yAIDaUSDC',
+  //   protocolAddress: '0x89B382b51d39254F2e55fF4A09f0E19b1538cCB0',
+  //   protocolSettingsAddress: '0x48Bdd4bee89249DBc3A8A4Ae854350679bFBb76b',
+  //   bQueryAddres: BQueryAddress[story.id],
+  //   onEnv: ['test'],
+  //   ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
+  //   newUI: true,
+  //   rewardSymbol: 'Spice Points',
+  //   icon: 'GAIB',
+  //   compney: 'GAIB',
+  //   tit: 'GAIB AID Alpha',
+  //   sub: 'Pre-deposit Campaign',
+  //   des: 'AID Alpha is the initial launch phase of GAIB’s AI synthetic dollar, AID. During the campaign, users receive AID Alpha tokens which will later be redeemable 1:1 for mainnet AID tokens. AIDaUSDC is a receipt token from GAIB by depositing USDC into the AID Alpha pre-deposit campaign. ',
+  // },
+  {
+    chain: story.id,
+    compney: 'Verio',
+    vault: '0x29038303100931fA3Cd421ceb1632F1Bb22950Ac',
+    asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
+    pToken: '0x5e00cF234f4BD45542164EaF09A1D1D92C471Ed3',
+    pTokenV2: true,
+    assetSymbol: 'vIP',
+    pTokenSymbol: 'pvIP',
+    yTokenSymbol: 'yvIP',
+    protocolAddress: '0xB5eD29BCf541aebcb3ee179cb590d92D3d9F9445',
+    protocolSettingsAddress: '0x0b50513145a6cE1A8A93132881e6B29B3C04eEDe',
+    bQueryAddres: BQueryAddress[story.id],
+    onEnv: ['test', 'prod'],
+    ipAssetStaking: '0x1ADd58A4bf810Bd706FE01458B610466F6e7f8cD',
+  },
+  {
+    chain: story.id,
+    compney: 'Verio',
+    vault: '0x72b3f85D0f1d05af9ea733DB3AD15d0ba9cB47b5',
+    asset: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD',
+    pToken: '0xADb174564F9065ce497a2Ff8BEC62b21e8b575d4',
+    assetSymbol: 'vIP',
+    pTokenSymbol: 'pvIP',
+    yTokenSymbol: 'yvIP',
+    protocolAddress: ZooProtocolAddress[story.id],
+    protocolSettingsAddress: ZooProtocolSettingsAddress[story.id],
+    bQueryAddres: BQueryAddress[story.id],
+    onEnv: ['test', 'prod'],
+    ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
+  },
+]
+
+export const BvcsByEnv = BVAULTS_CONFIG.filter((vc) => vc.onEnv.includes(ENV))

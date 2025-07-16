@@ -30,13 +30,13 @@ export const sliceUserBVaults: SliceFun<UserBVaultsStore> = (set, get, init) => 
   const updateEpoches = async (bvc: BVaultConfig, user: Address, _epoches: BVaultEpochDTO[]) => {
     const epoches = _epoches.filter((e) => e.epochId > 0n)
     if (epoches.length == 0) return {}
-    const pc = getPC()
+    const pc = getPC(bvc.chain)
     const endEpoches = await Promise.all(
       epoches.map((e) =>
         pc.readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery, address: bvc.bQueryAddres, functionName: 'queryBVaultEpochUser', args: [bvc.vault, e.epochId, user] }),
       ),
     )
-    console.info("sliceUserBVaults", user, endEpoches)
+    console.info('sliceUserBVaults', user, endEpoches)
     set({ epoches: { ...get().epoches, [bvc.vault]: endEpoches } })
     return endEpoches
   }

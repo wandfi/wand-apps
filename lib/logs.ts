@@ -27,7 +27,7 @@ export async function logUserAction(vc: BVault2Config, user: Address, action: st
   retry(
     async () => {
       if (vc.logs) {
-        const pc = getPC()
+        const pc = getPC(vc.chain)
         const [log, Share] = await Promise.all([
           pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] }),
           pc.readContract({ abi: erc20Abi, address: vc.hook, functionName: 'balanceOf', args: [user] }),

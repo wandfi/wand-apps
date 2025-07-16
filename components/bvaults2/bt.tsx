@@ -78,7 +78,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async () => {
             if (calcOutAmountKey.length <= 1) return 0n
-            return getPC().readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [input.address, inputAssetBn] }).catch(() => inputAssetBn)
+            return getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [input.address, inputAssetBn] }).catch(() => inputAssetBn)
         }
     })
     const onSwitch = () => {

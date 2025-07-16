@@ -30,6 +30,13 @@ export type FetStat<FET extends Fet<any>> = {
   lastUpDate: number
   error?: Error
 }
+export type FetsStat<FETS extends [...Fet<any>[]]> = {
+  key: string[]
+  status: FetStatus
+  result: FetRes<FETS[number]>[]
+  lastUpDate: number
+  error?: Error
+}
 
 export type MergeFetStat<RES extends {}> = Omit<FetStat<Fet<RES>>, 'key'> & { key: string[] }
 export type AllFetStat<RES extends {}> = FetStat<Fet<RES>> | MergeFetStat<RES>
@@ -51,6 +58,15 @@ function initFS<FET extends Fet<any>>(fet: FET): FetStat<FET> {
     key: fet.key,
     status: 'idle',
     result: (fet as FetWithInit<any>).initResult,
+    lastUpDate: 0,
+  }
+}
+
+function initFSS<FET extends Fet<any>>(..._fet: FET[]): FetsStat<FET[]> {
+  return {
+    key: _fet.map((f) => f.key),
+    status: 'idle',
+    result: _fet.map((f) => (f as FetWithInit<any>).initResult),
     lastUpDate: 0,
   }
 }
@@ -168,6 +184,56 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
   return fetStat
 }
 
+export function useFets<FET extends Fet<any>>(..._fets: FET[]) {
+  const update = useUpdate()
+  const fetsStat = initFSS(..._fets)
+  let successCount = 0
+  let index = 0
+  for (const fet of _fets) {
+    let fetStat = fets[fet.key]?.fs || initFS(fet)
+    const needRunFet = Boolean(fet.key) && (!fetStat || fetStat.status == 'idle')
+    if (needRunFet) {
+      fetStat = runFet(fet)
+    }
+    if (fetStat.status == 'error') {
+      fetsStat.status = 'error'
+      fetsStat.error = fetStat.error
+    }
+    if (fetsStat.status == 'idle' && fetStat.status === 'fetching' && fetStat.lastUpDate === 0) {
+      fetsStat.status = 'fetching'
+    }
+    if (fetStat.lastUpDate > fetsStat.lastUpDate) {
+      fetsStat.lastUpDate = fetStat.lastUpDate
+    }
+    fetStat.status == 'success' && successCount++
+    fetsStat.result[index] = fetStat.result
+    index++
+  }
+  if (successCount === _fets.length) {
+    fetsStat.status == 'success'
+  }
+  useEffect(() => {
+    if (isLOCL) {
+      ;(window as any).fets = fets
+    }
+    const onUpdate = () => {
+      const fss = _fets.map((item) => fets[item.key].fs)
+      if (isError(...fss) || isSuccess(...fss)) update()
+    }
+    const unsubs: (() => void)[] = []
+    for (const fet of _fets) {
+      unsubs.push(sub(fet, onUpdate))
+      // check need fresh
+      if (isOldFetStat(fet)) {
+        runFet(fet)
+        onUpdate()
+      }
+    }
+    return () => unsubs.forEach((unsub) => unsub())
+  }, [_fets.map((item) => item.key).join(',')])
+  return fetsStat
+}
+
 export function isFetching(...status: AllFetStat<any>[]) {
   if (status.length == 0) return false
   if (status.find((item) => item.status === 'fetching')) return true
@@ -196,33 +262,6 @@ export function reFet(...keyOrFets: (string | Fet<any>)[]) {
     if (fet) runFet(fet, true)
   }
 }
-
-// export type MergeFS<T extends FetStat<Fet<{}>>[]> =
-
-// export function useMerge<RES extends {}>(...status: AllFetStat<{}>[]) {
-//   const mStatus = status.filter((item) => Boolean(item))
-//   const ref = useRef<MergeFetStat<RES>>({ key: [], status: 'idle', result: undefined, lastUpDate: 0 })
-//   ref.current.key = mStatus.flatMap((item) => item.key)
-//   let SuccessCount = 0
-//   for (const item of mStatus) {
-//     if (item.status === 'fetching') {
-//       ref.current.status = 'fetching'
-//     } else if (item.status == 'error' && ref.current.status !== 'fetching') {
-//       ref.current.status = 'error'
-//     } else if (item.status == 'success') {
-//       SuccessCount++
-//     }
-//     if (item.result !== undefined) {
-//       ref.current.result = Object.assign(ref.current.result || {}, item.result) as any
-//     }
-//   }
-//   if (SuccessCount > 0 && SuccessCount == mStatus.length) {
-//     ref.current.status = 'success'
-//   }
-//   ref.current.error = mStatus.find((item) => item.error)?.error
-//   ref.current.lastUpDate = Math.min(...mStatus.map((item) => item.lastUpDate))
-//   return ref.current
-// }
 export function setMocks(_mocks: { [key: string]: (() => any) | any }) {
   Object.keys(_mocks).forEach((key) => {
     mocks[key] = _mocks[key]

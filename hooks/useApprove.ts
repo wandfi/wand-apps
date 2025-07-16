@@ -1,10 +1,9 @@
-import { NATIVE_TOKEN_ADDRESS } from '@/config/swap'
 import { getBigint, getErrorMsg } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Address, erc20Abi, erc721Abi } from 'viem'
+import { Address, erc20Abi, erc721Abi, zeroAddress } from 'viem'
 import { useAccount, useWalletClient } from 'wagmi'
 
 const cacheAllowance: { [k: Address]: { [k: Address]: bigint } } = {}
@@ -13,7 +12,7 @@ export const useApproves = (needAllownce: { [k: Address]: bigint }, spender: Add
   const { address, chainId } = useAccount()
   const { data: walletClient } = useWalletClient()
   const [isSuccess, setSuccess] = useState(false)
-  const tokens = useMemo(() => Object.keys(needAllownce).filter((item) => item !== NATIVE_TOKEN_ADDRESS) as Address[], [needAllownce])
+  const tokens = useMemo(() => Object.keys(needAllownce).filter((item) => item !== zeroAddress) as Address[], [needAllownce])
   const [allowance, setAllownce] = useState<{ [k: Address]: bigint }>(spender ? cacheAllowance[spender] || {} : {})
   const updateAllownce = (token: Address, value: bigint) => {
     if (!spender) return
@@ -25,7 +24,7 @@ export const useApproves = (needAllownce: { [k: Address]: bigint }, spender: Add
       return
     }
     tokens.forEach((t) => {
-      getPC()
+      getPC(chainId)
         .readContract({ abi: erc20Abi, address: t, functionName: 'allowance', args: [address, spender] })
         .then((value) => updateAllownce(t, value || 0n))
         .catch(console.error)
@@ -50,7 +49,7 @@ export const useApproves = (needAllownce: { [k: Address]: bigint }, spender: Add
           functionName: 'approve',
           args: [spender, allowanceValue],
         })
-        txHash && (await getPC().waitForTransactionReceipt({ hash: txHash }))
+        txHash && (await getPC(chainId).waitForTransactionReceipt({ hash: txHash }))
         updateAllownce(token, allowanceValue)
       }
       toast.success('Approve success')
@@ -82,7 +81,7 @@ export const useNftApproves = (needAllownce: { [k: Address]: true }, spender: Ad
       return
     }
     tokens.forEach((t) => {
-      getPC()
+      getPC(chainId)
         .readContract({ abi: erc721Abi, address: t, functionName: 'isApprovedForAll', args: [address, spender] })
         .then((value) => value !== allowance[t] && updateAllownce(t, value))
         .catch(console.error)
@@ -108,7 +107,7 @@ export const useNftApproves = (needAllownce: { [k: Address]: true }, spender: Ad
           functionName: 'setApprovalForAll',
           args: [spender, true],
         })
-        txHash && (await getPC().waitForTransactionReceipt({ hash: txHash }))
+        txHash && (await getPC(chainId).waitForTransactionReceipt({ hash: txHash }))
         updateAllownce(token, true)
       }
       toast.success('Approve success')

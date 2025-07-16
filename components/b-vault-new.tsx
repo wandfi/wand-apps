@@ -344,7 +344,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
   useDebounce(() => setCalcSwapKey(['calcSwap', vc.vault, inputAssetBn, chainId]), 300, ['calcSwap', vc.vault, inputAssetBn, chainId])
   const { data: result, isFetching: isFetchingSwap } = useQuery({
     queryKey: calcSwapKey,
-    queryFn: () => getPC().readContract({ abi: abiBVault, address: vc.vault, functionName: 'calcSwap', args: [inputAssetBn] }),
+    queryFn: () => getPC(vc.chain).readContract({ abi: abiBVault, address: vc.vault, functionName: 'calcSwap', args: [inputAssetBn] }),
   })
   const oneYTYieldOfAsset = vd.current.yTokenAmountForSwapYT > 0n ? (vd.lockedAssetTotal * (10n ** BigInt(asset.decimals))) / vd.current.yTokenAmountForSwapYT : 0n
   const [priceSwap, togglePriceSwap] = useToggle(false)
