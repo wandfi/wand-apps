@@ -1,4 +1,4 @@
-import { animate, createSpring, stagger } from 'animejs'
+import { animate, createSpring, stagger, waapi } from 'animejs'
 import { useEffect, useRef } from 'react'
 
 export function useInitAnimRoot(classname: string = 'animitem') {
@@ -17,8 +17,11 @@ export function useInitAnimRoot(classname: string = 'animitem') {
         lastTargets = [...nTargets]
         if (targets.length) {
           animate(targets, {
-            opacity: { from: 0 }, // Animate from .5 opacity to 1 opacity
-            translateY: { from: 100 }, // From 16rem to 0rem
+            opacity: { from: 0 },
+            translateY: { from: 100 },
+            scale: { from: 0.8 },
+            // rotate: { from: 30 },
+            // skewX: { from: 30 },
             delay: stagger(100),
             ease: createSpring({ stiffness: 70 }),
             duration: stagger(100, { start: 500 }),
