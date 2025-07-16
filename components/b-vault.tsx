@@ -105,7 +105,7 @@ export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
   })
   const disableRedeemAll = !Boolean(wc) || (pTokenBalance + claimable) <= 100n
   return (
-    <div className={cn('flex justify-between items-center gap-5 flex-wrap')}>
+    <div className={cn('animitem flex justify-between items-center gap-5 flex-wrap')}>
       <div className='flex items-center gap-2 flex-nowrap'>
         <CoinIcon symbol={bvc.assetSymbol} size={30} /> {bvc.assetSymbol}
       </div>
@@ -243,7 +243,7 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
   const currentTab = data.find((item) => item.tab.toLowerCase() == subtab)?.tab
   return (
     <div className={cn('flex flex-col gap-5', maxClassname, 'max-w-xl')}>
-      <div className='card !p-0 overflow-hidden w-full'>
+      <div className='animitem card !p-0 overflow-hidden w-full'>
         <div className='flex p-5 bg-[#10B98126] gap-5'>
           <CoinIcon size={54} symbol='PToken' />
           <div className='flex flex-col gap-2'>
@@ -261,7 +261,7 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
           </button>
         </div>
       </div>
-      <div className='md:col-span-2 card !p-4'>
+      <div className='animitem md:col-span-2 card !p-4'>
         <SimpleTabs currentTab={currentTab} data={data} onTabChange={(tab) => toBVault(r, bvc.vault, 'principal_panda', tab)} />
       </div>
     </div>
@@ -290,7 +290,7 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
 
   const { roi, restakingIncomesApy, additionalRoi } = useBvaultROI(bvc)
   return (
-    <div className='card !p-0 overflow-hidden flex flex-col'>
+    <div className='animitem card !p-0 overflow-hidden flex flex-col'>
       <div className='flex p-5 bg-[#6366F126] gap-5'>
         <CoinIcon size={54} symbol='YToken' />
         <div className='flex flex-col gap-2'>
@@ -368,7 +368,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const upForUserAction = useUpBVaultForUserAction(bvc)
   const { roi, roiChange } = useBvaultROI(bvc, outputYTokenForInput, afterYtAssetPrice)
   return (
-    <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
+    <div className='animitem card !p-4 flex flex-col h-[24.25rem] gap-1'>
       <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
       <GetvIP address={bvc.asset} />
       <div className='text-base font-bold my-2'>Receive</div>
@@ -455,7 +455,7 @@ function BVaultPoolsOld({ bvc }: { bvc: BVaultConfig }) {
     )
   }
   return (
-    <div className='md:h-[24.25rem] card !p-4'>
+    <div className='animitem md:h-[24.25rem] card !p-4'>
       <div className='font-bold text-base'>Harvest</div>
       <div className={cn('flex flex-col md:flex-row gap-4 mt-2')}>
         <div className='flex flex-col gap-4 shrink-0 w-full md:w-[14.375rem]' ref={mesRef}>
@@ -564,7 +564,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
     )
   }
   return (
-    <div className='md:h-[24.25rem] card !p-4'>
+    <div className='animitem md:h-[24.25rem] card !p-4'>
       <div className='font-bold text-base'>Harvest</div>
       <div className={cn('flex flex-col md:flex-row gap-4 mt-2')}>
         <div className='flex flex-col gap-4 shrink-0 w-full md:w-[14.375rem]' ref={mesRef}>

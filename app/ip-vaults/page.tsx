@@ -118,6 +118,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
     <SimpleTabs
       currentTab={currentTab}
       onTabChange={(tab) => toBVault(r, bvc.vault, tab)}
+      className='animitem'
       listClassName='flex-wrap p-0 mb-5 md:gap-14'
       triggerClassName='text-lg sm:text-xl md:text-2xl py-0 data-[state="active"]:border-b border-b-black dark:border-b-white leading-[0.8] rounded-none whitespace-nowrap'
       contentClassName='gap-5'
@@ -136,7 +137,7 @@ function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: strin
       <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
         <BVault2Info vc={vc} />
         <div className="animitem row-span-2">
-          <BVault2Swaps vc={vc} currentTab={currentTab}/>
+          <BVault2Swaps vc={vc} currentTab={currentTab} />
         </div>
         <BVault2Chart vc={vc} />
       </div>
@@ -181,7 +182,7 @@ export default function Vaults() {
         {!currentVc ? (
           <>
             <div className='animitem page-title'>IP-Vaults</div>
-            <div className='animitem flex items-center gap-8 justify-between'>
+            <div className='animitem flex items-center gap-8 justify-between relative z-50'>
               <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
               <SimpleSelect value={currentFilter} options={vaultsFilters} onChange={wrapSetFilter} />
             </div>
@@ -208,7 +209,7 @@ export default function Vaults() {
         ) : (
           <ConfigChainsProvider chains={[currentVc.chain]}>
             {currentVc.type === 'BVault' && <BVaultPage bvc={currentVc} currentTab={currentTab} />}
-            {currentVc.type === 'BVault2' && <Bvualt2Page vc={currentVc} currentTab={currentTab}/>}
+            {currentVc.type === 'BVault2' && <Bvualt2Page vc={currentVc} currentTab={currentTab} />}
           </ConfigChainsProvider>
         )}
       </div>

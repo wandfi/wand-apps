@@ -167,7 +167,7 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
   })
   const disableAdd = !wc.data || !address || inputBn == 0n || inputBn > balance || isPending || bvd.epochCount == 0n
   return (
-    <div className='max-w-4xl mx-auto mt-8 card'>
+    <div className='animitem max-w-4xl mx-auto mt-8 card'>
       <div className='relative'>
         <AssetInput decimals={stoken.decimals} asset={stoken.symbol} assetURL={stoken.url} balance={balances[stoken.address]} amount={input} setAmount={setInput} />
         <SimpleDialog
