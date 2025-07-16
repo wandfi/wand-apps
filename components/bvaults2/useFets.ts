@@ -103,7 +103,7 @@ export function useBvualt2PTRedeems(vc: BVault2Config) {
   return redeems
 }
 
-export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient = getPC()) {
+export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient) {
   return pc
     .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'earned', args: [rewradManager, user, parseUnits('1', 28)] })
     .then((item) => item.map((r) => [r.token, r.value] as [Address, bigint]))

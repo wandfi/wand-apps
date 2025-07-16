@@ -37,7 +37,7 @@ function createPCS(chainId: number) {
   })
   return pcs
 }
-export function getPC(chainId: number = getCurrentChainId(), index?: number) {
+export function getPC(chainId: number, index?: number) {
   if (!pcMaps[chainId]) {
     pcMaps[chainId] = { pcs: createPCS(chainId), current: 0 }
   }

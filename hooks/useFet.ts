@@ -246,8 +246,8 @@ export function isLoading(...status: AllFetStat<any>[]) {
 }
 export function isSuccess(...status: AllFetStat<any>[]) {
   if (status.length == 0) return false
-  if (status.find((item) => item.lastUpDate == 0)) return false
-  return true
+  if (status.find((item) => item.lastUpDate !== 0 || item.status == 'success')) return true
+  return false
 }
 
 export function isError(...status: AllFetStat<any>[]) {
