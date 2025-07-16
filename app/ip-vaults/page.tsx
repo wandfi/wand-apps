@@ -157,8 +157,7 @@ export default function Vaults() {
   }, [ENV, chainId])
   const params = useSearchParams()
   const paramsVault = params.get('vault') as Address
-  const paramsTab = params.get('tab')
-  const currentTab = params.get('tab')
+  const currentTab = params.get('tab') as string
   const currentVc = vcs.findLast((item) => item.vault.toLowerCase() == (paramsVault ?? '').toLowerCase())
   // useUpdateBVaultsData(bvcs)
   const { loading } = useLoadBVaults()
