@@ -120,6 +120,7 @@ function YT({ vc }: { vc: BVault2Config }) {
                 'Active',
                 <div key="token2">
                     {active.rewrads.map(([token, amount]) => <MCoinAmount token={getTokenBy(token, chainId)!} key={`rewards_${token}`} amount={amount} />)}
+                    {vc.points && <TokenSymbol size={16} t={{ symbol: vc.points } as any} />}
                 </div>,
                 '',
                 <ApproveAndTx disabled={disableClaim} onTxSuccess={() => reFet(rewards.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: yt.address, args: [address!] }} />,
@@ -182,6 +183,7 @@ function LPBT({ vc }: { vc: BVault2Config }) {
             '',
             <div key="token2">
                 {item.rewards.map(([token, amount]) => <MCoinAmount token={getTokenBy(token, chainId)!} key={`rewards_${token}`} amount={amount} />)}
+                {vc.points && <TokenSymbol size={16} t={{ symbol: vc.points } as any} />}
             </div>,
             // <MCoinAmount key="amount" token={getTokenBy('0x5267F7eE069CEB3D8F1c760c215569b79d0685aD', chainId)!} />,
             '',

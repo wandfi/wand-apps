@@ -15,7 +15,7 @@ import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
 import { Fees } from "../fees"
-import { GetvIP } from "../get-lp"
+import { GetByStoryHunt } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
@@ -30,6 +30,7 @@ import { usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const yt = useYtToken(vc)!
     const ytBalance = useBalance(yt)
     const [inputAsset, setInputAsset] = useState('')
@@ -135,7 +136,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={vc.asset} />
+            <GetByStoryHunt t={asset} />
         </div>
         <TokenInput tokens={outputs} onTokenChange={outputSetCT} checkBalance={false} balance={false} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut} />
         <div className="flex justify-between items-center text-xs font-medium">
@@ -147,7 +148,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 Est. ROI Change:   {formatPercent(roi)} → {formatPercent(roito)}<br />
                 Implied APY Change: {formatPercent(apy)} → {formatPercent(apyTo)}
             </div>
-            <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
+            <Fees fees={'0.3%'} />
         </div>
         <Txs
             className='mx-auto mt-4'

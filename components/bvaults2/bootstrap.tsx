@@ -11,13 +11,14 @@ import { useState } from "react";
 import { BsFire } from "react-icons/bs";
 import { useAccount } from "wagmi";
 import { Txs, withTokenApprove } from "../approve-and-tx";
-import { GetvIP } from "../get-lp";
+import { GetByStoryHunt, GetvIP } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
 import { useWrapBtTokens, wrapToBT } from "./bt";
 import { getLpToken } from "./getToken";
 import { getBvualt2BootTimes, useBvualt2Data } from "./useFets";
+import { getTokenBy } from "@/config/tokens";
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const tokens = useWrapBtTokens(vc)
@@ -26,6 +27,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const inputBalance = useBalance(input)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const inited = vd?.initialized ?? false
@@ -58,7 +60,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
             <div className="flex-1 w-full lg:w-0 h-full flex flex-col pt-5">
                 {/* <AssetInput asset={bt.symbol} amount={inputAsset} setAmount={setInputAsset} balance={inputBalance.result} /> */}
                 <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCT} />
-                <GetvIP address={vc.asset} />
+                <GetByStoryHunt t={asset}/>
                 <Txs
                     className={cn('mx-auto mt-auto', { 'bg-red-300 disabled:hover:bg-red-300 text-black': bootFinished })}
                     tx={bootFinished ? 'Finished' : 'Deposit'}

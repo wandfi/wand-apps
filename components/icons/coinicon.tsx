@@ -63,7 +63,13 @@ const SupportICONS: { [k: string]: string } = {
   AIDaUSDC: 'AIDaUSDC.svg',
   pAIDaUSDC: 'pAIDaUSDC.svg',
   yAIDaUSDC: 'yAIDaUSDC.svg',
-  'Spice Points': 'GAIB.svg'
+  'Spice Points': 'GAIB.svg',
+  APL: 'APL.svg',
+  pAPL: 'pAPL.svg',
+  yAPL: 'yAPL.svg',
+  LPAPL: 'LPAPL.svg',
+  bAPL: 'bAPL.svg',
+  StoryHunt: 'StoryHunt.svg'
 }
 
 export function CoinIcon({ symbol, size = 48, url, ...p }: { symbol: string; className?: string; style?: CSSProperties; size?: number; url?: string }) {

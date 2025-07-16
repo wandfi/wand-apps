@@ -1,18 +1,18 @@
 import { abiBvault2Query, abiHook } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
+import { getTokenBy } from '@/config/tokens'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet } from '@/hooks/useFet'
 import { aarToNumber, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import _ from 'lodash'
+import { useMemo, useRef } from 'react'
 import { formatEther, parseUnits } from 'viem'
 import { useBalance, useTotalSupply } from '../../hooks/useToken'
 import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
-import { getTokenBy } from '@/config/tokens'
-import { useMemo, useRef } from 'react'
 
 export function useLogs(vc: BVault2Config) {
   return useFet({
@@ -59,13 +59,14 @@ export function useEpochRemain(vc: BVault2Config) {
 }
 
 const YearSeconds = 365 * 24 * 60 * 60
+const apyMax = 1000
 export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: bigint = 0n) {
   const { result: bt2ptPrice } = useBT2PTPrice(vc)
   const { result: logs } = useLogs(vc)
   const { result: remain } = useEpochRemain(vc)
   // rmain time by year
   const t = remain / YearSeconds
-  const apy = t > 0 && bt2ptPrice > 0 ? _.round(Math.pow(bt2ptPrice, 1 / t) - 1, 5) : 0
+  const apy = Math.min(apyMax, t > 0 && bt2ptPrice > 0 ? _.round(Math.pow(bt2ptPrice, 1 / t) - 1, 5) : 0)
   console.info('ptapy:', bt2ptPrice, t, apy)
   let apyto = apy
   let priceimpact = 0

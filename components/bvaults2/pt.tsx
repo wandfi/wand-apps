@@ -15,7 +15,7 @@ import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { TX, Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { Fees } from "../fees"
-import { GetvIP } from "../get-lp"
+import { GetByStoryHunt, GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
@@ -27,6 +27,7 @@ import { useBT2PTPrice, usePTApy } from "./useDatas"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const bt = getTokenBy(vc.bt, vc.chain)!
     const pt = usePtToken(vc)!
     const [inputAsset, setInputAsset] = useState('')
@@ -118,7 +119,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={bt.address} />
+            <GetByStoryHunt t={asset} />
         </div>
         <TokenInput tokens={outputs} checkBalance={false} balance={false} onTokenChange={outputSetCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="flex justify-between items-center text-xs font-medium">
@@ -127,7 +128,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         </div>
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
             <div>Implied APY Change: {formatPercent(apy)} → {formatPercent(apyto)}</div>
-            <Fees fees={[{ name: 'Transaction Fees', value: 1.2 }, { name: 'Unstake Fees(Verio)', value: 1.2 }]} />
+            <Fees fees={'0.3%'} />
         </div>
         <Txs
             className='mx-auto mt-4'
@@ -144,6 +145,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
 }
 export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const pt = usePtToken(vc)!
     const yt = useYtToken(vc)!
     const bt = getTokenBy(vc.bt, vc.chain)!
@@ -188,7 +190,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
         <SwapDown />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={vc.asset} />
+            <GetByStoryHunt t={asset} />
         </div>
         <AssetInput asset={pt.symbol} disable amount={fmtBn(outAmount, bt.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
@@ -208,6 +210,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
 }
 export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
+    const asset = getTokenBy(vc.asset, vc.chain)!
     const tokens = useWrapBtTokens(vc)
     const [ct, setCT] = useState(tokens[0])
     const out = ct
@@ -253,7 +256,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
         <SwapDown />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={vc.asset} />
+            <GetByStoryHunt t={asset} />
         </div>
         <TokenInput tokens={tokens} onTokenChange={setCT} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputBn > 0n} />
         <Txs

@@ -3,19 +3,18 @@ import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { getTokenBy } from "@/config/tokens"
 import { logUserAction } from "@/lib/logs"
-import { fmtBn, formatPercent, genDeadline, handleError, multipBn, parseEthers } from "@/lib/utils"
+import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
-import { parseUnits } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { CoinAmount } from "../coin-amount"
-import { GetvIP } from "../get-lp"
+import { GetByStoryHunt, GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
@@ -71,7 +70,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
         </div>
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={asset.address} />
+            <GetByStoryHunt t={asset} />
         </div>
         <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         {
@@ -141,7 +140,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         </div> */}
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetvIP address={asset.address} />
+             <GetByStoryHunt t={asset} />
         </div>
         <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>

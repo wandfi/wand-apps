@@ -13,6 +13,7 @@ export type BVault2Config = {
   mockInfraredVault?: Address
   onEnv: TypeENV[]
   chain: number
+  points?: string
   logs?: boolean
 }
 

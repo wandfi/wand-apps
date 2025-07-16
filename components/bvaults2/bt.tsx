@@ -13,7 +13,7 @@ import { Address, isAddressEqual, SimulateContractParameters } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
 import { TX, Txs, withTokenApprove } from "../approve-and-tx";
-import { GetvIP } from "../get-lp";
+import { GetByStoryHunt, GetvIP } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Swap } from "../ui/bbtn";
@@ -133,7 +133,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
             <Swap onClick={onSwitch} />
             <div className="flex justify-between items-center">
                 <div className="font-bold">Receive</div>
-                <GetvIP address={asset.address} />
+                <GetByStoryHunt t={asset}/>
             </div>
             <TokenInput disable tokens={isToggled ? tokens : [bt]} loading={isFetchingCalc && inputAssetBn > 0n} amount={fmtBn(outAmount, output.decimals)} onTokenChange={outputSetCT} />
             <Txs
