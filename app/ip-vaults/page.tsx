@@ -18,9 +18,9 @@ import { abiBVault } from '@/config/abi'
 import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
 import { BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
 import { ENV } from '@/constants'
+import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { isError, isLoading, isSuccess } from '@/hooks/useFet'
 import { useLoadBVaults } from '@/hooks/useLoads'
-import { tabToSearchParams } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useBoundStore, useStore } from '@/providers/useBoundStore'
 import { useBVault, useBVaultEpoches } from '@/providers/useBVaultsData'
@@ -32,12 +32,9 @@ import { FaSpinner } from 'react-icons/fa6'
 import { Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
-
-const SupportTabs = ['pt', 'yt'] as const
 
 function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: string }) {
   const { address } = useAccount()
@@ -116,11 +113,10 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
         },
       ]
       : odata
-  const ctab = data.find((item) => tabToSearchParams(item.tab) == currentTab)?.tab
 
   return (
     <SimpleTabs
-      currentTab={ctab}
+      currentTab={currentTab}
       onTabChange={(tab) => toBVault(r, bvc.vault, tab)}
       listClassName='flex-wrap p-0 mb-5 md:gap-14'
       triggerClassName='text-lg sm:text-xl md:text-2xl py-0 data-[state="active"]:border-b border-b-black dark:border-b-white leading-[0.8] rounded-none whitespace-nowrap'
@@ -131,7 +127,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
 }
 
 
-function Bvualt2Page({ vc }: { vc: BVault2Config }) {
+function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: string }) {
   const vd = useBvualt2Data(vc)
   return <Fragment>
     {isError(vd) && 'Opps! Network Error!'}
@@ -140,7 +136,7 @@ function Bvualt2Page({ vc }: { vc: BVault2Config }) {
       <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
         <BVault2Info vc={vc} />
         <div className="row-span-2">
-          <BVault2Swaps vc={vc} />
+          <BVault2Swaps vc={vc} currentTab={currentTab}/>
         </div>
         <BVault2Chart vc={vc} />
       </div>
@@ -162,7 +158,7 @@ export default function Vaults() {
   const params = useSearchParams()
   const paramsVault = params.get('vault') as Address
   const paramsTab = params.get('tab')
-  const currentTab = SupportTabs.includes(paramsTab as any) ? (paramsTab as (typeof SupportTabs)[number]) : ''
+  const currentTab = params.get('tab')
   const currentVc = vcs.findLast((item) => item.vault.toLowerCase() == (paramsVault ?? '').toLowerCase())
   // useUpdateBVaultsData(bvcs)
   const { loading } = useLoadBVaults()
@@ -213,7 +209,7 @@ export default function Vaults() {
         ) : (
           <ConfigChainsProvider chains={[currentVc.chain]}>
             {currentVc.type === 'BVault' && <BVaultPage bvc={currentVc} currentTab={currentTab} />}
-            {currentVc.type === 'BVault2' && <Bvualt2Page vc={currentVc} />}
+            {currentVc.type === 'BVault2' && <Bvualt2Page vc={currentVc} currentTab={currentTab}/>}
           </ConfigChainsProvider>
         )}
       </div>

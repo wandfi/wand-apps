@@ -46,11 +46,14 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
 }
 
 
-export function BVault2Swaps({ vc }: { vc: BVault2Config }) {
+export function BVault2Swaps({ vc, currentTab }: { vc: BVault2Config, currentTab?: string }) {
+    const r = useRouter()
     return <div className="card bg-white h-full min-h-[49.25rem]">
         <SimpleTabs
             listClassName="p-0 gap-8 mb-4 w-full"
+            currentTab={currentTab}
             triggerClassName={(i) => `text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2 ${i == 3 ? 'ml-auto' : ''}`}
+            onTabChange={(tab) => toBVault(r, vc.vault, tab)}
             data={[
                 { tab: 'PT', content: <PT vc={vc} /> },
                 { tab: 'YT', content: <YT vc={vc} /> },
@@ -70,7 +73,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const [apy] = usePTApy(vc)
     const [roi] = useYTRoi(vc)
     if (!asset) return null
-    return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} onClick={() => toBVault(r, vc.vault)}>
+    return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} >
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
             <CoinIcon symbol={asset.symbol} size={44} />
             <div>
@@ -104,14 +107,14 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
             'YToken',
             'Yield Token',
             formatPercent(roi), // `${fmtBoost}x`,
-            // (e) => {
-            //     e.stopPropagation()
-            //     //   toBVault(r, vc.vault, 'principal_token')
-            // },
-            // (e) => {
-            //     e.stopPropagation()
-            //     //   toBVault(r, vc.vault, 'yield_token')
-            // },
+            (e) => {
+                e.stopPropagation()
+                toBVault(r, vc.vault, 'pt')
+            },
+            (e) => {
+                e.stopPropagation()
+                toBVault(r, vc.vault, 'yt')
+            },
         )}
     </div>
 }

@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils'
+import { cn, tabToSearchParams } from '@/lib/utils'
 import * as Tabs from '@radix-ui/react-tabs'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export function SimpleTabs({
   currentTab,
@@ -21,15 +21,12 @@ export function SimpleTabs({
   data: { tab: string; content: React.ReactNode }[]
   onTabChange?: (tab: string) => void
 }) {
-  const [tab, setTab] = useState(currentTab || data[0].tab)
-  useEffect(() => {
-    if (!data.find((item) => item.tab == tab)) {
-      setTab(data[0].tab)
-    }
-  }, [tab, data])
+  const [_tab, setTab] = useState(currentTab || data[0].tab)
+  const mtab = currentTab ?? _tab
+  const tab = data.find(item => tabToSearchParams(item.tab) == tabToSearchParams(mtab))?.tab ?? data[0].tab
   return (
     <Tabs.Root
-      value={currentTab || tab}
+      value={tab}
       className={cn('w-full', className)}
       onValueChange={(e) => {
         setTab(e)

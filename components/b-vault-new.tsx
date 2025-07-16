@@ -433,11 +433,10 @@ function YT({ vc }: { vc: BVaultConfig }) {
 }
 export function PTYT({ vc, currentTab }: { vc: BVaultConfig, currentTab?: string }) {
   const r = useRouter()
-  const tab = ['PT', 'YT'].find(item => item == toUpper(currentTab ?? 'PT')) ?? 'PT'
   return <div className='card bg-white h-full'>
     <SimpleTabs
       listClassName="p-0 gap-8 mb-4 w-full"
-      currentTab={tab}
+      currentTab={currentTab}
       onTabChange={(tab) => toBVault(r, vc.vault, tab)}
       triggerClassName={(i) => `text-2xl font-semibold leading-none data-[state="active"]:underline underline-offset-2`}
       data={[

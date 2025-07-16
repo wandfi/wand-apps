@@ -3,7 +3,7 @@ import { BVault2Config } from "@/config/bvaults2";
 import { DECIMAL } from "@/constants";
 import { reFet } from "@/hooks/useFet";
 import { useBalance } from "@/hooks/useToken";
-import { aarToNumber, FMT, fmtDate, genDeadline, parseEthers } from "@/lib/utils";
+import { aarToNumber, cn, FMT, fmtDate, genDeadline, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@tremor/react";
@@ -35,7 +35,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const progressNum = Math.round(aarToNumber(targetAmount > 0n ? currentAmount >= targetAmount ? DECIMAL : currentAmount * DECIMAL / targetAmount : 0n, 16))
     const lp = getLpToken(vc)
     const lpBalance = useBalance(lp)
-
+    const bootFinished = currentAmount > 0n && currentAmount >= targetAmount;
     const { address } = useAccount()
     const getTxs = async () => {
         const { txs, sharesBn } = await wrapToBT({ chainId: vc.chain, bt: vc.bt, token: ct.address, inputBn: inputAssetBn, user: address! })
@@ -60,9 +60,9 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                 <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCT} />
                 <GetvIP address={vc.asset} />
                 <Txs
-                    className='mx-auto mt-auto'
-                    tx='Deposit'
-                    disabled={!inited || inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
+                    className={cn('mx-auto mt-auto', { 'bg-red-300 disabled:hover:bg-red-300 text-black': bootFinished })}
+                    tx={bootFinished ? 'Finished' : 'Deposit'}
+                    disabled={!inited || bootFinished || inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
                     txs={getTxs}
                     onTxSuccess={() => {
                         setInputAsset('')

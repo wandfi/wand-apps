@@ -17,7 +17,7 @@ export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()
   const chainId = useCurrentChainId()
   return <BBtn
-    className={twMerge('flex items-center justify-center gap-4 whitespace-nowrap w-fit min-w-[200px]', className)}
+    className={twMerge('flex items-center justify-center gap-4 whitespace-nowrap min-w-[200px]', className)}
     onClick={() => sc.switchChainAsync({ chainId }).catch(console.error)}
     busy={sc.isPending}
     disabled={sc.isPending}>
@@ -210,7 +210,7 @@ export function Txs({
     onError: toast ? handleError : () => { }
   })
   const txDisabled = disabled || isPending || (typeof txs !== 'function' && txs.length == 0) || !wc
-  if (isNetwrong) return <SwitchNet />
+  if (isNetwrong) return <SwitchNet className={className}/>
   return <BBtn className={twMerge('flex items-center justify-center gap-4', className)} onClick={() => mutate()} busy={isPending} busyShowContent={busyShowTxet} disabled={txDisabled}>
     {tx}
   </BBtn>
