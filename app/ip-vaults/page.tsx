@@ -76,7 +76,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
     return <>
       <div className='grid lg:grid-cols-[1.6fr_1fr] gap-4 xl:gap-5'>
         <BVaultN.Info vc={bvc} />
-        <div className='row-span-2'>
+        <div className='animitem row-span-2'>
           <BVaultN.PTYT vc={bvc} currentTab={currentTab} />
         </div>
         <BvaultEpochYtPrices bvc={bvc} epochId={bvd.epochCount} />
@@ -135,7 +135,7 @@ function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: strin
     {isSuccess(vd) && vd.result?.current && <Fragment>
       <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
         <BVault2Info vc={vc} />
-        <div className="row-span-2">
+        <div className="animitem row-span-2">
           <BVault2Swaps vc={vc} currentTab={currentTab}/>
         </div>
         <BVault2Chart vc={vc} />
@@ -180,12 +180,12 @@ export default function Vaults() {
       <div className='w-full max-w-[1232px] px-4 mx-auto md:pb-8'>
         {!currentVc ? (
           <>
-            <div className='page-title'>IP-Vaults</div>
-            <div className='flex items-center gap-8 justify-between'>
+            <div className='animitem page-title'>IP-Vaults</div>
+            <div className='animitem flex items-center gap-8 justify-between'>
               <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
               <SimpleSelect value={currentFilter} options={vaultsFilters} onChange={wrapSetFilter} />
             </div>
-            {mloading ? <div className='w-full flex items-center justify-center pt-40'>
+            {mloading ? <div className='animitem w-full flex items-center justify-center pt-40'>
               <FaSpinner className='animate-spin text-4xl opacity-80' />
             </div> :
               <Grid numItems={1} numItemsMd={2} numItemsLg={3} className='gap-5 mt-4'>

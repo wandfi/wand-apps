@@ -95,7 +95,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc)
   const { roi } = useBvaultROI(vc)
   return (
-    <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden', {})}>
+    <div className={cn('animitem card !p-0 grid grid-cols-2 overflow-hidden', {})}>
       <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
         <CoinIcon symbol={vc.icon ?? vc.assetSymbol} size={44} />
         <div>
@@ -199,7 +199,7 @@ export function Info({ vc }: { vc: BVaultConfig }) {
   }
   return <div style={{
     backdropFilter: 'blur(20px)'
-  }} className="card bg-white flex flex-col h-full gap-10" >
+  }} className="animitem card bg-white flex flex-col h-full gap-10" >
     <div className="flex flex-wrap gap-5 items-center">
       {/* <NodeLicenseImage icon={nlImages[data.name] ? <img {...nlImages[data.name]} className="invert" /> : null} /> */}
       <CoinIcon symbol={vc.icon ?? vc.assetSymbol} size={35} />
@@ -482,7 +482,7 @@ function PositonPT({ vc }: { vc: BVaultConfig }) {
   }
   const disableRedeemAll = !Boolean(wc) || bvd.closed !== true || (pTokenBalance + claimable) <= 100n
   const header = ['PT', 'Value', 'Status', 'Redeemable', '']
-  return <div className="card !p-4 bg-white overflow-x-auto">
+  return <div className="animitem card !p-4 bg-white overflow-x-auto">
     <STable
       className='min-w-[750px] w-full'
       headerClassName='text-left font-semibold border-b-0'
@@ -585,7 +585,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
   }, [epochesData, vd])
 
   const header = ['YT', 'Value', 'Status', 'Yield', 'Airdrops', '']
-  return <div className="card !p-4 bg-white overflow-x-auto">
+  return <div className="animitem card !p-4 bg-white overflow-x-auto">
     <STable
       className='min-w-[750px] w-full'
       headerClassName='text-left font-semibold border-b-0'
@@ -600,7 +600,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
 }
 export function MyPositions({ vc }: { vc: BVaultConfig }) {
   return <div className='mt-4 lg:mt-6 flex flex-col gap-4'>
-    <div className='text-left w-full font-semibold text-2xl'>My Positions</div>
+    <div className='animitem text-left w-full font-semibold text-2xl'>My Positions</div>
     <PositonPT vc={vc} />
     <PositonYT vc={vc} />
   </div>

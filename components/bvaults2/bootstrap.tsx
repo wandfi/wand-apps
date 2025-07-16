@@ -47,7 +47,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
         })
         return [...txs, ...txsApprove]
     }
-    return <div className="card bg-white">
+    return <div className="card bg-white animitem">
         <div className="flex items-center gap-2 text-xl font-medium">
             <BsFire className='text-[#ff0000]' />
             {vc.tit}

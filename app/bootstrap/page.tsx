@@ -12,8 +12,8 @@ export default function BootstrapPage() {
     return (
         <PageWrap>
             <div className='w-full max-w-[1368px] p-4 flex flex-col gap-5 mx-auto md:pb-8'>
-                <div className='page-title'>Bootstrap</div>
-                <Noti data='Deposit underlying assets to earn rewards. The Vault will launch once the target value is reached.' />
+                <div className='page-title animitem'>Bootstrap</div>
+                <Noti className="animitem" data='Deposit underlying assets to earn rewards. The Vault will launch once the target value is reached.' />
                 {vcs.map((item, index) => (
                     <ConfigChainsProvider key={`b_vault2_item_${index}`} chains={[item.chain]}>
                         <BVault2Bootstrap vc={item} />

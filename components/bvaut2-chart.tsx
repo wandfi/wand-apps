@@ -44,7 +44,7 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
             ],
         }
     }, [])
-    return <div className='card flex flex-col gap-5 w-full min-w-0 bg-white'>
+    return <div className='animitem card flex flex-col gap-5 w-full min-w-0 bg-white'>
         <div className='flex justify-between gap-2 items-center'>
             <span className='text-base font-bold'>Chart</span>
             <SimpleSelect className="text-sm" options={["PT APY", 'PT Price', 'YT APY', 'YT Price']} />

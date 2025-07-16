@@ -32,7 +32,7 @@ function PortfolioItem({
   tableProps?: Omit<TableProps, 'header' | 'data'>
 }) {
   return (
-    <div className='card whitespace-nowrap'>
+    <div className='animitem card whitespace-nowrap'>
       {typeof title == 'string' ? <div className='text-2xl leading-none font-semibold'>{title}</div> : title}
       {typeof sub == 'string' ? <div className='text-[2rem] text-primary leading-none font-semibold mt-2'>{sub}</div> : sub}
       <div className='my-4 h-[1px] bg-border/60 dark:bg-border'></div>

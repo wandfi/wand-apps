@@ -78,7 +78,7 @@ function PT({ vc }: { vc: BVault2Config }) {
         return res;
     }, [redeems.result])
     const header = ['PT', 'Value', 'Status', 'Redeemable', '']
-    return <div className="card !p-4 bg-white">
+    return <div className="animitem card !p-4 bg-white">
         <STable
             headerClassName='text-left font-semibold border-b-0'
             headerItemClassName='py-1 px-0 text-base'
@@ -159,7 +159,7 @@ function YT({ vc }: { vc: BVault2Config }) {
         return res;
     }, [rewards.result])
     const header = ['YT', 'Value', 'Status', 'Yield', 'Airdrops', '']
-    return <div className="card !p-4 bg-white">
+    return <div className="animitem card !p-4 bg-white">
         <STable
             headerClassName='text-left font-semibold border-b-0'
             headerItemClassName='py-1 px-0 text-base'
@@ -191,7 +191,7 @@ function LPBT({ vc }: { vc: BVault2Config }) {
         ])
     }, [rewards.result])
     const header = ['YT', 'Value', '', 'Yield', 'Airdrops', '']
-    return <div className="card !p-4 bg-white">
+    return <div className="animitem card !p-4 bg-white">
         <STable
             headerClassName='text-left font-semibold border-b-0'
             headerItemClassName='py-1 px-0 text-base'
@@ -206,7 +206,7 @@ function LPBT({ vc }: { vc: BVault2Config }) {
 
 export function MyPositions({ vc }: { vc: BVault2Config }) {
     return <div className="flex flex-col gap-5">
-        <div className="font-semibold text-2xl leading-none">My Positions</div>
+        <div className="animitem font-semibold text-2xl leading-none">My Positions</div>
         <PT vc={vc} />
         <YT vc={vc} />
         <LPBT vc={vc} />

@@ -20,7 +20,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { startTime, endTime, reamin, progress } = getBvault2EpochTimes(vd)
-    return <div className="card bg-white flex flex-col gap-10">
+    return <div className="animitem card bg-white flex flex-col gap-10">
         <div className="flex items-center gap-4">
             <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol="vIP" />vIP-Verio Vault</div>
             <div className="flex flex-col gap-2 mt-2">
@@ -73,7 +73,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const [apy] = usePTApy(vc)
     const [roi] = useYTRoi(vc)
     if (!asset) return null
-    return <div className={cn('card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} >
+    return <div className={cn('animitem card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} >
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
             <CoinIcon symbol={asset.symbol} size={44} />
             <div>
