@@ -11,6 +11,7 @@ import { Toaster } from 'sonner'
 import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import { useInitAnimRoot } from '@/hooks/useAnim';
+import { useIsClient } from '@/hooks/useIsClient';
 // background: linear-gradient(105.67deg, #02050E 14.41%, #1D2F23 98.84%);
 
 function PageLoading() {
@@ -26,15 +27,20 @@ function BetaFlag() {
 export default function PageLayout({ children }: { children: ReactNode }) {
   useConfigDomain()
   const root = useInitAnimRoot()
+  const isClient = useIsClient()
   return (
     <div ref={root}>
-      <Providers>
-        <Header />
-        {children}
-      </Providers>
-      <Toaster position='top-right' offset={70} />
-      {/* <BetaFlag /> */}
-      <PageLoading />
+      {
+        isClient && <>
+          <Providers>
+            <Header />
+            {children}
+          </Providers>
+          <Toaster position='top-right' offset={70} />
+          {/* <BetaFlag /> */}
+          <PageLoading />
+        </>
+      }
     </div>
   )
 }
