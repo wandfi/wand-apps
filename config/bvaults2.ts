@@ -63,6 +63,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     // mockInfraredVault: '0x2aba549ac8b3e79225b45bb2e94e99e42fe8ffeb',
     onEnv: ['test'],
     chain: story.id,
+    logs: true,
     desc: `$APL is an IPRWA (Intellectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
   },
 ]
