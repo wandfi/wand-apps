@@ -43,7 +43,7 @@ export function Header() {
   const links = useMemo(() => {
     const links = [
       ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuBox, disable: false }] : []),
-      { href: '/ip-vaults', label: 'IP-Vaults', icon: LuBox, disable: false },
+      { href: '/yield-vault', label: 'Yield-Vault', icon: LuBox, disable: false },
       // { href: '/l-vaults', label: 'L-Vaults', icon: LuBox, disable: true },
       { href: '/portfolio', label: 'Portfolio', icon: LuUserCircle },
       { href: '/dashboard', label: 'Dashboard', icon: LuLineChart },

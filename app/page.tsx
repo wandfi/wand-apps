@@ -3,22 +3,22 @@
     return this.toString()
   }
 
-import BeraLine from '@/components/icons/BeraLine'
-import BullLine from '@/components/icons/BullLine'
-import PandaLine from '@/components/icons/PandaLine'
-import VenomLine from '@/components/icons/VenomLine'
-import { CoinIcon } from '@/components/icons/coinicon'
-import { IconProps } from '@/components/icons/types'
-import { PageWrap } from '@/components/page-wrap'
-import { BBtn } from '@/components/ui/bbtn'
-import { ENV, isLNT } from '@/constants'
-import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
-import React from 'react'
-import { useHover } from 'react-use'
-import { toBVault, toLntVault, toLVault } from './routes'
+import BeraLine from '@/components/icons/BeraLine';
+import BullLine from '@/components/icons/BullLine';
+import PandaLine from '@/components/icons/PandaLine';
+import VenomLine from '@/components/icons/VenomLine';
+import { CoinIcon } from '@/components/icons/coinicon';
+import { IconProps } from '@/components/icons/types';
+import { PageWrap } from '@/components/page-wrap';
+import { BBtn } from '@/components/ui/bbtn';
+import { isLNT } from '@/constants';
+import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useHover } from 'react-use';
+import { toBVault, toLntVault } from './routes';
 // import LntPage from './lnt-vaults/page'
-import BvaultPage from './ip-vaults/page'
+import BvaultPage from './yield-vault/page';
 
 
 

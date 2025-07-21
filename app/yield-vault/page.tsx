@@ -181,7 +181,7 @@ export default function Vaults() {
       <div className='w-full max-w-[1232px] px-4 mx-auto md:pb-8'>
         {!currentVc ? (
           <>
-            <div className='animitem page-title'>IP-Vaults</div>
+            <div className='animitem page-title'>Yield-Vault</div>
             <div className='animitem flex items-center gap-8 justify-between relative z-50'>
               <Noti data='A Pendle-like Yield Tokenization Protocol Tailored for IP Assets' />
               <SimpleSelect value={currentFilter} options={vaultsFilters} onChange={wrapSetFilter} />

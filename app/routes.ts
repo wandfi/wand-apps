@@ -3,8 +3,8 @@ import { useRouter } from 'next/navigation'
 import { Address } from 'viem'
 
 export function toBVault(r: ReturnType<typeof useRouter>, vault?: Address, tab?: string, subTab?: string) {
-  if (!vault) return r.push('/ip-vaults')
-  let path = `/ip-vaults?vault=${vault}`
+  if (!vault) return r.push('/yield-vault')
+  let path = `/yield-vault?vault=${vault}`
   tab && (path += `&tab=${tabToSearchParams(tab)}`)
   subTab && (path += `&subtab=${tabToSearchParams(subTab)}`)
   r.push(path)
