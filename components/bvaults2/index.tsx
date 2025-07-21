@@ -99,12 +99,27 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
             </div>
             ,
         )}
-        {renderStat('Reward', asset.symbol, asset.symbol, true)}
+        {/* {renderStat('Reward', asset.symbol, asset.symbol, true)} */}
+        <div className={cn(itemClassname, 'border-b pb-10', { 'border-l': true })}>
+            <div>
+                <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold leading-[12px] whitespace-nowrap text-center'>{'Reward'}</div>
+                <div className='flex mt-2 items-center gap-2 text-sm font-medium'>
+                    <CoinIcon symbol={asset.symbol} size={14} />
+                    {asset.symbol}
+                </div>
+                {/* {
+                    vc.points && <div className='flex mt-2 items-center gap-2 text-sm font-medium'>
+                        <CoinIcon symbol={vc.points} size={14} />
+                        {vc.points}
+                    </div>
+                } */}
+            </div>
+        </div>
         {renderChoseSide(
-            'PToken',
+            vc.PIcon,
             'Principal Token',
             formatPercent(apy),
-            'YToken',
+            vc.YIcon,
             'Yield Token',
             formatPercent(roi), // `${fmtBoost}x`,
             (e) => {
