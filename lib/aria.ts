@@ -1,7 +1,7 @@
 import { abiAriaLegal } from '@/config/abi/third'
 import { story } from '@/config/network'
 import { Token } from '@/config/tokens'
-import { Address, PublicClient, WalletClient } from 'viem'
+import { Address, hexToBytes, PublicClient, toHex, WalletClient } from 'viem'
 import { promiseAll } from './utils'
 const address: Address = '0x5E8291e5799277429eb26da2Ff0364f6C39701CD'
 export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient; wc: WalletClient; token: Token; user: Address }) {
@@ -19,11 +19,12 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
         version: '1',
         chainId: story.id,
         verifyingContract: '0x5E8291e5799277429eb26da2Ff0364f6C39701CD',
+        salt: toHex('', { size: 32 }),
       },
       types: {
         SignLicense: [
           { name: 'LicenseURI', type: 'string' },
-          { name: 'ContentURIHash', type: 'bytes' },
+          { name: 'ContentURIHash', type: 'bytes32' },
         ],
       },
       primaryType: 'SignLicense',
