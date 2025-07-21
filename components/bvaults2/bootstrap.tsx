@@ -1,8 +1,10 @@
 import { abiBVault2 } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
+import { getTokenBy } from "@/config/tokens";
 import { DECIMAL } from "@/constants";
 import { reFet } from "@/hooks/useFet";
 import { useBalance } from "@/hooks/useToken";
+import { withIfAiraSign } from "@/lib/aria";
 import { aarToNumber, cn, FMT, fmtDate, genDeadline, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
@@ -11,14 +13,13 @@ import { useState } from "react";
 import { BsFire } from "react-icons/bs";
 import { useAccount } from "wagmi";
 import { Txs, withTokenApprove } from "../approve-and-tx";
-import { GetByStoryHunt, GetvIP } from "../get-lp";
+import { GetByStoryHunt } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
 import { useWrapBtTokens, wrapToBT } from "./bt";
 import { getLpToken } from "./getToken";
 import { getBvualt2BootTimes, useBvualt2Data } from "./useFets";
-import { getTokenBy } from "@/config/tokens";
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const tokens = useWrapBtTokens(vc)
@@ -39,7 +40,8 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const lpBalance = useBalance(lp)
     const bootFinished = currentAmount > 0n && currentAmount >= targetAmount;
     const { address } = useAccount()
-    const getTxs = async () => {
+    const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
+        await withIfAiraSign({ ...arg, token: ct, user: address! })
         const { txs, sharesBn } = await wrapToBT({ vc, token: ct.address, inputBn: inputAssetBn, user: address! })
         const txsApprove = await withTokenApprove({
             approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user: address!,
@@ -60,7 +62,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
             <div className="flex-1 w-full lg:w-0 h-full flex flex-col pt-5">
                 {/* <AssetInput asset={bt.symbol} amount={inputAsset} setAmount={setInputAsset} balance={inputBalance.result} /> */}
                 <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCT} />
-                <GetByStoryHunt t={asset}/>
+                <GetByStoryHunt t={asset} />
                 <Txs
                     className={cn('mx-auto mt-auto', { 'bg-red-300 disabled:hover:bg-red-300 text-black': bootFinished })}
                     tx={bootFinished ? 'Finished' : 'Deposit'}

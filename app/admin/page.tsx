@@ -31,7 +31,7 @@ const BVault2Params: ParamItem[] = [
   { label: 'initialAnchor', value: 'initialAnchor', units: 18 },
   { label: 'scalarRoot', value: 'scalarRoot', units: 18 },
   { label: '赎回手续费', value: 'f1', units: 18 },
-  { label: '利息佣金', value: 'f2', units: 18 },
+  { label: '交易手续费', value: 'f2', units: 18 },
 ]
 function UpdateVaultParams({ paramList, vault, protocoSettingAddress }: { paramList: ParamItem[]; vault: Address; protocoSettingAddress: Address }) {
   const params = useMemo(() => paramList.map((p) => ({ ...p, label: `${p.label}(${p.value})` })), [paramList])

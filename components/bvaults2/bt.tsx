@@ -18,6 +18,7 @@ import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Swap } from "../ui/bbtn";
 import { useUnderlingApy } from "./useDatas";
+import { withIfAiraSign } from "@/lib/aria";
 
 
 export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config, token: Address, inputBn: bigint, user: Address }) {
@@ -26,6 +27,7 @@ export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config
     if (!isAddressEqual(vc.bt, token)) {
         // to bt inputs
         let btinput = token
+
         const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
         if (isExtToken) {
             txs = [...txs, ...(await withTokenApprove({
@@ -114,7 +116,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const onSwitch = () => {
         toggle()
     }
-    const getTxs = async () => {
+    const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (isToggled) {
             const unwrapTxs = await unwrapBT({
                 vc,
@@ -124,6 +126,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
             })
             return [...unwrapTxs]
         } else {
+            await withIfAiraSign({ ...arg, token: cToken, user: address! })
             const wrapBt = await wrapToBT({
                 vc,
                 token: cToken.address,

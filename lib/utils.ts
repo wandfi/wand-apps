@@ -252,9 +252,9 @@ export function nowUnix() {
 
 type NonFunction<T> = T extends Function ? never : T
 
-export async function promiseT<T>(promiseOrData: NonFunction<T> | (() => Promise<NonFunction<T>> | NonFunction<T>)) {
+export async function promiseT<T>(promiseOrData: NonFunction<T> | ((...args: any[]) => Promise<NonFunction<T>> | NonFunction<T>), ...args: any[]) {
   if (typeof promiseOrData !== 'function') return promiseOrData
-  return (promiseOrData as () => Promise<NonFunction<T>> | NonFunction<T>)()
+  return (promiseOrData as (...args: any[]) => Promise<NonFunction<T>> | NonFunction<T>)(...args)
 }
 
 export const sqrt = function (value: bigint) {

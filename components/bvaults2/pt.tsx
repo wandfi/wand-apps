@@ -24,6 +24,7 @@ import { unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, usePTApy } from "./useDatas"
+import { withIfAiraSign } from "@/lib/aria"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
@@ -68,7 +69,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const onSwitch = () => {
         toggle()
     }
-    const getTxs = async () => {
+    const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (isToggled) {
             const txsApproves = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
@@ -89,6 +90,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             })
             return [...txsApproves, ...unwrapBTtxs]
         } else {
+            await withIfAiraSign({ ...arg, token: input, user: address! })
             const wrapBt = await wrapToBT({
                 vc,
                 inputBn: inputAssetBn,
@@ -167,8 +169,9 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
             return btAmount
         }
     })
-    const txs = async (): Promise<TX[]> => {
+    const txs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (!address) return []
+        await withIfAiraSign({ ...arg, token: input, user: address })
         const wrapBT = await wrapToBT({
             vc,
             inputBn: inputAssetBn,

@@ -26,6 +26,7 @@ import { reFetWithBvault2 } from "./fetKeys"
 import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
 import { usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
+import { withIfAiraSign } from "@/lib/aria"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -84,7 +85,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const errorInput = !isFetchingOut && calcYtSwapKey.includes(inputAssetBn) && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
     const [roi, roito, priceimpact] = useYTRoi(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
     const [apy, apyTo] = usePTApy(vc, isToggled ? -inputAssetBn : bt1Amount, isToggled ? inputAssetBn - outAmount : -refoundBt)
-    const getTxs = async () => {
+    const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (isToggled) {
             const txsApproves = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
@@ -106,6 +107,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             return [...txsApproves, ...unwrapTxs]
 
         } else {
+            await withIfAiraSign({ ...arg, token: input, user: address! })
             const { txs, sharesBn } = await wrapToBT({
                 vc,
                 token: input.address,

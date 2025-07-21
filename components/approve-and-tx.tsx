@@ -2,7 +2,7 @@ import { useApproves } from '@/hooks/useApprove'
 import { useWrapContractWrite } from '@/hooks/useWrapContractWrite'
 import { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, SimulateContractParameters, zeroAddress } from 'viem'
+import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, SimulateContractParameters, WalletClient, zeroAddress } from 'viem'
 
 import { useCurrentChainId, useNetworkWrong } from '@/hooks/useCurrentChainId'
 import { getErrorMsg, handleError, promiseT } from '@/lib/utils'
@@ -94,7 +94,7 @@ export type TX = SimulateContractParameters | (() => Promise<SimulateContractPar
 export function Txs({
   className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, onTxSuccess }:
   {
-    className?: string, tx: string, disabled?: boolean, txs: TX[] | (() => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
+    className?: string, tx: string, disabled?: boolean, txs: TX[] | ((args: { pc: PublicClient, wc: WalletClient }) => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
     disableSendCalls?: boolean
     onTxSuccess?: () => void
   }) {
@@ -105,7 +105,7 @@ export function Txs({
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       if (!wc) return
-      const calls = await promiseT(txs).then(items => Promise.all(items.map(promiseT)))
+      const calls = await promiseT(txs, { wc, pc: getPC(chainId) }).then(items => Promise.all(items.map(promiseT)))
       console.info('calls:', wc.account.address, calls)
       try {
         if (disableSendCalls) {
@@ -143,7 +143,7 @@ export function Txs({
     onError: toast ? handleError : () => { }
   })
   const txDisabled = disabled || isPending || (typeof txs !== 'function' && txs.length == 0) || !wc
-  if (isNetwrong) return <SwitchNet className={className}/>
+  if (isNetwrong) return <SwitchNet className={className} />
   return <BBtn className={twMerge('flex items-center justify-center gap-4', className)} onClick={() => mutate()} busy={isPending} busyShowContent={busyShowTxet} disabled={txDisabled}>
     {tx}
   </BBtn>
