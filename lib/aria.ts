@@ -15,10 +15,10 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
 
     const signature = await wc.signTypedData({
       domain: {
-        name: 'SignLicense',
+        name: 'Aria Protocol - Legal Contract',
         version: '1',
         chainId: story.id,
-        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        verifyingContract: '0x5E8291e5799277429eb26da2Ff0364f6C39701CD',
       },
       types: {
         SignLicense: [
