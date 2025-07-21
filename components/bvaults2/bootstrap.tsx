@@ -40,7 +40,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const bootFinished = currentAmount > 0n && currentAmount >= targetAmount;
     const { address } = useAccount()
     const getTxs = async () => {
-        const { txs, sharesBn } = await wrapToBT({ chainId: vc.chain, bt: vc.bt, token: ct.address, inputBn: inputAssetBn, user: address! })
+        const { txs, sharesBn } = await wrapToBT({ vc, token: ct.address, inputBn: inputAssetBn, user: address! })
         const txsApprove = await withTokenApprove({
             approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user: address!,
             tx: { abi: abiBVault2, address: vc.vault, functionName: 'addLiquidity', args: [sharesBn, genDeadline()], }
@@ -51,10 +51,10 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
         <div className="flex items-center gap-2 text-xl font-medium">
             <BsFire className='text-[#ff0000]' />
             {vc.tit}
-            <Tip>
+            {/* <Tip>
                 Verio is the liquid staking and IP asset restaking platform for Story. Users stake IP to receive vIP, a yield bearing LSD.
                 vIP can be restaked on multiple IP Assets to earn profits, while YT holders can leverage profits through the vIP-Verio Vault.
-            </Tip>
+            </Tip> */}
         </div>
         <div className="flex flex-col h-auto lg:flex-row lg:h-[13.75rem] gap-8">
             <div className="flex-1 w-full lg:w-0 h-full flex flex-col pt-5">

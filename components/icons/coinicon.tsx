@@ -65,6 +65,7 @@ const SupportICONS: { [k: string]: string } = {
   yAIDaUSDC: 'yAIDaUSDC.svg',
   'Spice Points': 'GAIB.svg',
   APL: 'APL.svg',
+  stAPL: 'APL.svg',
   pAPL: 'pAPL.svg',
   yAPL: 'yAPL.svg',
   LPAPL: 'LPAPL.svg',

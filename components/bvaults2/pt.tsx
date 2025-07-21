@@ -82,8 +82,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                 }
             })
             const unwrapBTtxs = await unwrapBT({
-                chainId: vc.chain,
-                bt: vc.bt,
+                vc,
                 btShareBn: outAmount,
                 token: output.address,
                 user: address!
@@ -91,8 +90,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             return [...txsApproves, ...unwrapBTtxs]
         } else {
             const wrapBt = await wrapToBT({
-                chainId: vc.chain,
-                bt: vc.bt,
+                vc,
                 inputBn: inputAssetBn,
                 token: input.address,
                 user: address!
@@ -172,8 +170,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
     const txs = async (): Promise<TX[]> => {
         if (!address) return []
         const wrapBT = await wrapToBT({
-            chainId: vc.chain,
-            bt: vc.bt,
+            vc,
             inputBn: inputAssetBn,
             token: input.address,
             user: address!
@@ -241,8 +238,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
             args: [inputBn]
         }]
         const unwrapBTtxs = await unwrapBT({
-            chainId: vc.chain,
-            bt: vc.bt,
+            vc,
             btShareBn: outAmount,
             token: out.address,
             user: address!

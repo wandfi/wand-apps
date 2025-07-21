@@ -20,12 +20,13 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result
     const { startTime, endTime, reamin, progress } = getBvault2EpochTimes(vd)
+    const asset = getTokenBy(vc.asset, vc.chain)!
     return <div className="animitem card bg-white flex flex-col gap-10">
         <div className="flex items-center gap-4">
-            <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol="vIP" />vIP-Verio Vault</div>
+            <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol={asset.symbol} />{vc.tit}</div>
             <div className="flex flex-col gap-2 mt-2">
                 <div className="font-semibold text-sm">Underlying Asset</div>
-                <div className="flex items-center gap-2 text-xs font-medium leading-4"> <CoinIcon size={16} symbol="vIP" /> vIP</div>
+                <div className="flex items-center gap-2 text-xs font-medium leading-4"> <CoinIcon size={16} symbol={asset.symbol} /> {asset.symbol}</div>
             </div>
             <div className="flex flex-col gap-2 mt-2 ml-10">
                 <div className="font-semibold text-sm">Total Vaule Locked</div>
@@ -33,8 +34,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
             </div>
         </div>
         <div className="font-medium text-sm opacity-70">
-            Verio is the liquid staking and IP asset restaking platform for Story. Users stake IP to receive vIP, a yield bearing LSD.
-            vIP can be restaked on multiple IP Assets to earn profits, while YT holders can leverage profits through the vIP-Verio Vault.
+            {vc.desc}
         </div>
 
         <div className="flex flex-col gap-2 text-xs">

@@ -2,51 +2,81 @@ import { abiBT } from "@/config/abi/BVault2";
 import { BVault2Config } from "@/config/bvaults2";
 import { getTokenBy, Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
-import { reFet, useFet } from "@/hooks/useFet";
+import { reFet } from "@/hooks/useFet";
 import { fmtBn, formatPercent, handleError, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useDebounce, useToggle } from "react-use";
-import { Address, isAddressEqual, SimulateContractParameters } from "viem";
+import { Address, isAddressEqual, parseAbi, SimulateContractParameters } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
 import { TX, Txs, withTokenApprove } from "../approve-and-tx";
-import { GetByStoryHunt, GetvIP } from "../get-lp";
+import { GetByStoryHunt } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Swap } from "../ui/bbtn";
 import { useUnderlingApy } from "./useDatas";
 
 
-export async function wrapToBT({ chainId, bt, token, inputBn, user }: { chainId: number, bt: Address, token: Address, inputBn: bigint, user: Address }) {
+export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config, token: Address, inputBn: bigint, user: Address }) {
     let txs: TX[] = []
     let sharesBn = inputBn;
-    if (!isAddressEqual(bt, token)) {
-        sharesBn = await getPC(chainId).readContract({ abi: abiBT, address: bt, functionName: 'previewDeposit', args: [token, inputBn] })
-        txs = await withTokenApprove({
-            approves: [{ token, spender: bt, amount: inputBn }], user, pc: getPC(chainId),
-            tx: { abi: abiBT, address: bt, functionName: 'deposit', args: [user, token, inputBn, sharesBn * 99n / 100n] }
-        })
+    if (!isAddressEqual(vc.bt, token)) {
+        // to bt inputs
+        let btinput = token
+        const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
+        if (isExtToken) {
+            txs = [...txs, ...(await withTokenApprove({
+                approves: [{ token, spender: isExtToken.contract, amount: inputBn }], user, pc: getPC(vc.chain),
+                tx: {
+                    abi: parseAbi(['function stake(uint256 _amount) external']),
+                    address: isExtToken.contract,
+                    functionName: 'stake', args: [inputBn]
+                }
+            }))]
+            btinput = isExtToken.out
+        }
+        if (!vc.btInputs.find(t => isAddressEqual(t, btinput))) throw new Error('input token error')
+        // to bt
+        sharesBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [btinput, inputBn] })
+        txs = [...txs, ...(await withTokenApprove({
+            approves: [{ token, spender: vc.bt, amount: inputBn }], user, pc: getPC(vc.chain),
+            tx: { abi: abiBT, address: vc.bt, functionName: 'deposit', args: [user, btinput, inputBn, sharesBn * 99n / 100n] }
+        }))]
     }
     return { txs, sharesBn }
 }
-export async function unwrapBT({ chainId, bt, token, btShareBn, user }: { chainId: number, bt: Address, token: Address, btShareBn: bigint, user: Address }) {
-    if (!isAddressEqual(token, bt)) {
-        const outBn = await getPC(chainId).readContract({ abi: abiBT, address: bt, functionName: 'previewRedeem', args: [token, btShareBn] })
-        return [{ abi: abiBT, address: bt, functionName: 'redeem', args: [user, btShareBn, token, outBn * 99n / 100n] }] as SimulateContractParameters[]
+export async function unwrapBT({ vc, token, btShareBn, user }: { vc: BVault2Config, token: Address, btShareBn: bigint, user: Address }) {
+    if (!isAddressEqual(token, vc.bt)) {
+        let btout = token
+        const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
+        if (isExtToken) {
+            btout = isExtToken.out;
+        }
+        const outBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [btout, btShareBn] })
+        let txs = [{ abi: abiBT, address: vc.bt, functionName: 'redeem', args: [user, btShareBn, btout, outBn * 99n / 100n] }] as SimulateContractParameters[]
+        if (isExtToken) {
+            txs.push({
+                abi: parseAbi(['function unstake(uint256 _amount) external']),
+                address: isExtToken.contract,
+                functionName: 'unstake',
+                args: [outBn]
+            })
+        }
+        return txs
     }
     return []
 }
 
 export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
-    const data = useFet({
-        key: `btInputs${vc.bt}`,
-        initResult: [vc.asset],
-        fetfn: async () => getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'getTokensIn' })
-    })
-    return useMemo(() => [...data.result, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt, JSON.stringify(data.result)])
+    // const data = useFet({
+    //     key: `btInputs${vc.bt}`,
+    //     initResult: [vc.asset],
+    //     fetfn: async () => getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'getTokensIn' })
+    // })
+    return useMemo(() => [...vc.extInputs.map(e => e.input), ...vc.btInputs, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt])
 }
 
 export function BT({ vc }: { vc: BVault2Config }) {
@@ -87,8 +117,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const getTxs = async () => {
         if (isToggled) {
             const unwrapTxs = await unwrapBT({
-                chainId: vc.chain,
-                bt: vc.bt,
+                vc,
                 token: cToken.address,
                 btShareBn: inputAssetBn,
                 user: address!
@@ -96,8 +125,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
             return [...unwrapTxs]
         } else {
             const wrapBt = await wrapToBT({
-                chainId: vc.chain,
-                bt: vc.bt,
+                vc,
                 token: cToken.address,
                 inputBn: inputAssetBn,
                 user: address!
@@ -133,7 +161,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
             <Swap onClick={onSwitch} />
             <div className="flex justify-between items-center">
                 <div className="font-bold">Receive</div>
-                <GetByStoryHunt t={asset}/>
+                <GetByStoryHunt t={asset} />
             </div>
             <TokenInput disable tokens={isToggled ? tokens : [bt]} loading={isFetchingCalc && inputAssetBn > 0n} amount={fmtBn(outAmount, output.decimals)} onTokenChange={outputSetCT} />
             <Txs

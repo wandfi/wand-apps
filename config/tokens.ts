@@ -34,6 +34,10 @@ export const TOKENS: Token[] = [
 
   { address: '0x97e733e8583169c3a8f8d18e0556b6567973c5b8', symbol: 'YTK', decimals: 18, chain: [sepolia.id] },
   { address: '0xaca6abef41315da039f0025900bdbb2e85034325', symbol: 'BT-INFRA', decimals: 18, chain: [sepolia.id] },
+
+  { address: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5', symbol: 'APL', decimals: 18, chain: [story.id] },
+  { address: '0xb5461c1FD0312Cd4bF037058F8a391e6A42F9639', symbol: 'stAPL', decimals: 18, chain: [story.id] },
+  { address: '0x773dd6686df237a7b3fe02632e91bd3664d81a0c', symbol: 'bAPL', decimals: 18, chain: [story.id] },
   // { address: '0xfd031434e2b4d6df10f1608d5adf218d71097a88', symbol: 'BT-VPT-INFRA-1', decimals: 18, chain: [sepolia.id] },
   // { address: '0xfc84818ea8715332c3d49064701c1cdef70efa88', symbol: 'BT-VPT-INFRA-2', decimals: 18, chain: [sepolia.id] },
 ]

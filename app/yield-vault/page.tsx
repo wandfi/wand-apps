@@ -133,7 +133,7 @@ function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: strin
   return <Fragment>
     {isError(vd) && 'Opps! Network Error!'}
     {isLoading(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
-    {isSuccess(vd) && vd.result?.current && <Fragment>
+    {isSuccess(vd) && vd.result?.current ? <Fragment>
       <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
         <BVault2Info vc={vc} />
         <div className="animitem row-span-2">
@@ -142,7 +142,7 @@ function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: strin
         <BVault2Chart vc={vc} />
       </div>
       <MyPositions vc={vc} />
-    </Fragment>}
+    </Fragment> : <div>Now not started</div>}
   </Fragment>
 }
 

@@ -98,8 +98,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 }
             })
             const unwrapTxs = await unwrapBT({
-                chainId: vc.chain,
-                bt: vc.bt,
+                vc,
                 btShareBn: outAmount,
                 token: output.address,
                 user: address!
@@ -108,8 +107,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
 
         } else {
             const { txs, sharesBn } = await wrapToBT({
-                chainId: vc.chain,
-                bt: vc.bt,
+                vc,
                 token: input.address,
                 inputBn: inputAssetBn,
                 user: address!
