@@ -89,11 +89,11 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                     Deposited: {displayBalance(lpBalance.result, undefined, lp?.decimals)} <Tip>The deposited assets will become LP after launch and users can withdraw deposited assets anytime.</Tip>
                 </div>
                 <div className="font-medium text-sm justify-between flex items-center mt-4">
-                    <div>Pool Share: 22.33%</div>
-                    <div className="flex items-start gap-2">Share a total rewards of 1000 <CoinIcon size={20} symbol="vIP" /></div>
+                    <div>Pool Share: --.--%</div>
+                    <div className="flex items-start gap-2">Share a total rewards of ---- <CoinIcon size={20} symbol={asset.symbol} /></div>
                 </div>
                 <div className="font-medium text-sm flex items-center justify-center gap-2 my-auto">
-                    <CoinIcon symbol="vIP" size={20} /> 22.33
+                    <CoinIcon symbol={asset.symbol} size={20} /> --.--
                 </div>
                 <Txs
                     className='mx-auto'

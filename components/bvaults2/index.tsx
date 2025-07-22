@@ -15,6 +15,7 @@ import { PT } from "./pt";
 import { usePTApy, useYTRoi } from "./useDatas";
 import { getBvault2EpochTimes, getBvualt2Times, useBvualt2Data } from "./useFets";
 import { YT } from "./yt";
+import { Points } from "./points";
 
 export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const vdFS = useBvualt2Data(vc)
@@ -107,12 +108,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
                     <CoinIcon symbol={asset.symbol} size={14} />
                     {asset.symbol}
                 </div>
-                {/* {
-                    vc.points && <div className='flex mt-2 items-center gap-2 text-sm font-medium'>
-                        <CoinIcon symbol={vc.points} size={14} />
-                        {vc.points}
-                    </div>
-                } */}
+                <Points vc={vc} size={14} className="text-sm font-medium" />
             </div>
         </div>
         {renderChoseSide(

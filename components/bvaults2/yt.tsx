@@ -175,7 +175,7 @@ export function YT({ vc }: { vc: BVault2Config }) {
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#E8E8FD] gap-5'>
-                <CoinIcon size={48} symbol='YToken' />
+                <CoinIcon size={48} symbol={yt.symbol} />
                 <div className='flex flex-col gap-3'>
                     <div className='text-xl leading-6 text-black dark:text-white font-semibold'>{yt.symbol}</div>
                     <div className='text-xs leading-none text-black/60 dark:text-white/60 font-medium'>1 {yt.symbol} gets the yield of 1 {asset.symbol} until maturity</div>

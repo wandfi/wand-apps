@@ -9,14 +9,14 @@ export type BVault2Config = {
   asset: Address
   bt: Address
   btInputs: Address[]
-  extInputs: { input: Address; out: Address; contract: Address; }[]
+  extInputs: { input: Address; out: Address; contract: Address }[]
   protocal: Address
   protocalSettings: Address
   hook: Address
   mockInfraredVault?: Address
   onEnv: TypeENV[]
   chain: number
-  points?: string
+  points?: { link?: string }
   logs?: boolean
   PIcon: string
   YIcon: string
@@ -68,7 +68,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     logs: true,
     PIcon: 'pAPL',
     YIcon: 'yAPL',
-    points: 'Points',
+    points: { link: 'https://app.ariaprotocol.xyz/points' },
     desc: `$APL is an IPRWA (Intellectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
   },
 ]
