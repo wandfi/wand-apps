@@ -20,7 +20,7 @@ import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
 import { Swap, SwapDown } from "../ui/bbtn"
-import { unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
+import { calcWrapBtInput, unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, usePTApy } from "./useDatas"
@@ -56,9 +56,10 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             if (isToggled) {
                 const btAmount = await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactPTforBT', args: [inputAssetBn] })
                 if (isAddressEqual(vc.bt, output.address)) return btAmount
-                return pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [output.address, btAmount] })
+
+                return pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [calcWrapBtInput(vc, output.address), btAmount] })
             } else {
-                const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] })
+                const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] })
                 return pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactBTforPT', args: [btAmount] })
             }
         }
@@ -165,7 +166,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
         queryFn: async (params) => {
             if (inputAssetBn <= 0n || params.queryKey.length == 1) return 0n
             const pc = getPC(vc.chain)
-            const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : (await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] }))
+            const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : (await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] }))
             return btAmount
         }
     })
@@ -222,14 +223,14 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const [input, setInput] = useState('')
     const inputBn = parseEthers(input)
     const [calcKey, setCalcKey] = useState<any[]>(['calcPTYTRedeemOut'])
-    useDebounce(() => setCalcKey(['calcPTYTRedeemOut', inputBn, out]), 300, [inputBn, input])
+    useDebounce(() => setCalcKey(['calcPTYTRedeemOut', inputBn, out]), 300, [inputBn, out])
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
         queryKey: calcKey,
         initialData: 0n,
         queryFn: async () => {
             if (inputBn <= 0n || setCalcKey.length == 1) return 0n
             const pc = getPC(vc.chain)
-            const outAmount = isAddressEqual(vc.bt, out.address) ? inputBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [out.address, inputBn] })
+            const outAmount = isAddressEqual(vc.bt, out.address) ? inputBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [calcWrapBtInput(vc, out.address), inputBn] })
             return outAmount
         }
     })

@@ -88,14 +88,16 @@ export function ApproveAndTx<
   )
 }
 
-export type TX = SimulateContractParameters | (() => Promise<SimulateContractParameters>)
+export type TxConfig = SimulateContractParameters & { name?: string }
+export type TX = TxConfig | (() => Promise<TxConfig>)
 
 
 export function Txs({
-  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, onTxSuccess }:
+  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, disableProgress, onTxSuccess }:
   {
     className?: string, tx: string, disabled?: boolean, txs: TX[] | ((args: { pc: PublicClient, wc: WalletClient }) => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
     disableSendCalls?: boolean
+    disableProgress?: boolean
     onTxSuccess?: () => void
   }) {
   const { data: wc } = useWalletClient()
@@ -116,6 +118,7 @@ export function Txs({
           calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
         })
         while (true) {
+
           const res = await wc.waitForCallsStatus({ id })
           if (res.status == 'pending') continue
           if (res.status == 'success') {
@@ -168,3 +171,6 @@ export async function withTokenApprove({ approves, pc, user, tx }: {
   })).then(txs => txs.filter(item => item !== null))
   return [...needApproves, { ...tx, ...(nativeAmount > 0n ? { value: nativeAmount } : {}) }]
 }
+
+
+

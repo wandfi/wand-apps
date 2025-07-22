@@ -1,4 +1,4 @@
-import { isLOCL } from '@/constants'
+import { isLOCL, isTEST } from '@/constants'
 import { sleep } from '@/lib/utils'
 import EventEmitter from 'events'
 import { useEffect, useReducer } from 'react'
@@ -166,7 +166,7 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
     fetStat = runFet(fet)
   }
   useEffect(() => {
-    if (isLOCL) {
+    if (isLOCL||isTEST) {
       ;(window as any).fets = fets
     }
     const unSub = sub(fet, (fs) => {

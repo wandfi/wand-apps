@@ -21,7 +21,7 @@ import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
 import { Swap } from "../ui/bbtn"
 import { Tip } from "../ui/tip"
-import { unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
+import { calcWrapBtInput, unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
@@ -63,13 +63,13 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             if (isToggled) {
                 let outAmount = await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactYTforBT', args: [inputAssetBn] })
                 if (!isAddressEqual(output.address, vc.bt))
-                    outAmount = await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [output.address, outAmount] })
+                    outAmount = await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [calcWrapBtInput(vc, output.address), outAmount] })
                 return [outAmount, 0n, 0n]
 
             } else {
                 let inputBtAmount = inputAssetBn
                 if (!isAddressEqual(input.address, vc.bt))
-                    inputBtAmount = await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [input.address, inputAssetBn] })
+                    inputBtAmount = await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] })
                 const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputBtAmount, parseUnits('0.02', 18)] })
                     .catch(() => [0n, 0n] as [bigint, bigint])
                 console.info('calcBT1:', formatEther(bestBT1), count)

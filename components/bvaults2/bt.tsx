@@ -50,6 +50,7 @@ export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config
     }
     return { txs, sharesBn }
 }
+
 export async function unwrapBT({ vc, token, btShareBn, user }: { vc: BVault2Config, token: Address, btShareBn: bigint, user: Address }) {
     if (!isAddressEqual(token, vc.bt)) {
         let btout = token
@@ -70,6 +71,13 @@ export async function unwrapBT({ vc, token, btShareBn, user }: { vc: BVault2Conf
         return txs
     }
     return []
+}
+
+export function calcWrapBtInput(vc: BVault2Config, token: Address) {
+    if (vc.btInputs.find(address => isAddressEqual(address, token))) return token
+    const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
+    if (isExtToken) return isExtToken.out
+    throw new Error('input error')
 }
 
 export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
@@ -110,7 +118,8 @@ export function BT({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async () => {
             if (calcOutAmountKey.length <= 1) return 0n
-            return getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [input.address, inputAssetBn] }).catch(() => inputAssetBn)
+
+            return getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] }).catch(() => inputAssetBn)
         }
     })
     const onSwitch = () => {
