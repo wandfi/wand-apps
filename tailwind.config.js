@@ -36,7 +36,7 @@ module.exports = {
       colors: {
         // light mode
         primary: { 
-          DEFAULT: '#5A3FFF',
+          DEFAULT: '#7A61BC', // '#5A3FFF'
         },
         border: {
           DEFAULT: '#4A5546',
