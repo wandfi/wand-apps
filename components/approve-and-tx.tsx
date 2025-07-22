@@ -164,7 +164,7 @@ export async function withTokenApprove({ approves, pc, user, tx }: {
     }
     const allowance = await pc.readContract({ abi: erc20Abi, address: item.token, functionName: 'allowance', args: [user, item.spender] })
     if (allowance >= item.amount) return null
-    return { abi: erc20Abi, address: item.token, functionName: 'approve', args: [item.spender, item.amount - allowance] } as SimulateContractParameters
+    return { abi: erc20Abi, address: item.token, functionName: 'approve', args: [item.spender, item.amount] } as SimulateContractParameters
   })).then(txs => txs.filter(item => item !== null))
   return [...needApproves, { ...tx, ...(nativeAmount > 0n ? { value: nativeAmount } : {}) }]
 }

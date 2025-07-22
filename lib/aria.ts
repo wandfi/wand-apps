@@ -13,25 +13,22 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
       licenseURI: pc.readContract({ abi: abiAriaLegal, address, functionName: 'licenseURI' }),
       contentURIHash: pc.readContract({ abi: abiAriaLegal, address, functionName: 'contentURIHash' }),
     })
-
     const domains = await getEip712Domain(pc, { address })
     console.info('domains:', domains)
     const signature = await wc.signTypedData({
-      ...domains,
+      account: user,
+      domain: domains.domain,
       types: {
         SignLicense: [
-          { name: 'licenseURI', type: 'string' },
-          { name: 'contentURIHash', type: 'bytes32' },
+          { type: 'string', name: 'licenseURI' },
+          { type: 'bytes32', name: 'contentURIHash' },
         ],
       },
       primaryType: 'SignLicense',
-      message: {
-        licenseURI,
-        contentURIHash,
-      },
-      account: user,
+      message: { licenseURI, contentURIHash },
     })
-    const { request } = await pc.simulateContract({ abi: abiAriaLegal, address, functionName: 'signLicense', args: [signature] })
+    console.info('signature:', user, signature)
+    const { request } = await pc.simulateContract({ account: user, abi: abiAriaLegal, address, functionName: 'signLicense', args: [signature] })
     const hash = await wc.writeContract(request as any)
     await pc.waitForTransactionReceipt({ hash, confirmations: 3 })
   }
