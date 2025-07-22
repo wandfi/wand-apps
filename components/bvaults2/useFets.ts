@@ -21,6 +21,7 @@ export async function getBvaut2Data(vc: BVault2Config) {
   const res = await promiseAll({
     initialized: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'initialized' }),
     BT: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'BT' }),
+    mintPoolTokenPot: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'mintPoolTokenPot' }),
     Points: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'points' }),
     bootstrapStartTime: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapStartTime' }),
     bootstrapDuration: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapDuration' }),

@@ -7,16 +7,17 @@ import { useCurrentChainId } from './useCurrentChainId'
 
 export const keyBalance = (token?: Token, address?: Address) => (address && token ? `tokenBalance:${token.chain}-${token.address}-by-${address}` : '')
 
-export function useBalance(token?: Token) {
+export function useBalance(token?: Token, user?: Address) {
   const { address } = useAccount()
+  const muser = user ?? address
   const chainId = useCurrentChainId()
   return useFet({
-    key: keyBalance(token, address),
+    key: keyBalance(token, muser),
     initResult: 0n,
     fetfn: async () =>
       token!.isNative
-        ? getPC(chainId).getBalance({ address: address! })
-        : getPC(chainId).readContract({ abi: erc20Abi, functionName: 'balanceOf', address: token!.address, args: [address!] }),
+        ? getPC(chainId).getBalance({ address: muser! })
+        : getPC(chainId).readContract({ abi: erc20Abi, functionName: 'balanceOf', address: token!.address, args: [muser!] }),
   })
 }
 

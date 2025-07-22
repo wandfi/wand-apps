@@ -22,12 +22,14 @@ import { Switch2 } from "../ui/switch"
 import { reFetWithBvault2 } from "./fetKeys"
 import { getLpToken, usePtToken, useYtToken } from "./getToken"
 import { useLogs, useLPApy, useLpShare } from "./useDatas"
+import { useBvualt2Data } from "./useFets"
+import { isSuccess } from "@/hooks/useFet"
 
 
 function LPAdd({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
-
+    const bt = getTokenBy(vc.bt, vc.chain)!
     const lp = getLpToken(vc)
     const lpc = useTotalSupply(lp)
     const pt = usePtToken(vc)!
@@ -38,8 +40,10 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     const [instantmode, toggleInstantmode] = useToggle(true)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
+    const vd = useBvualt2Data(vc)
     const input = getTokenBy(vc.bt, vc.chain)!
     const inputBalance = useBalance(input)
+    const poolBtBalance = useBalance(bt, vd.result?.mintPoolTokenPot)
     const [calcOutsKey, setCalcOutsKey] = useState<any[]>(['calcLPAddOut'])
     useDebounce(() => setCalcOutsKey(['calcLPAddOut', inputAssetBn, instantmode]), 300, [inputAssetBn, instantmode])
     const { data: { ptAmount, ytAmount, lpAmount, bestBt1 }, isFetching: isFetchingOut } = useQuery({
@@ -61,8 +65,9 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
     const [poolShare, poolShareTo] = useLpShare(vc, lpAmount)
+    const inputError = isSuccess(poolBtBalance) && !isFetchingOut && inputAssetBn > 0n && poolBtBalance.result < bestBt1 ? 'Exceeds the maximum allowed amount' : undefined
     return <div className='flex flex-col gap-1'>
-        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} />
+        <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} error={inputError} />
         <SwapDown />
         <div className="flex gap-5 items-center text-xs font-medium">
             <span>Instant mode</span>
@@ -83,7 +88,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
         <Txs
             className='mx-auto mt-4'
             tx='Add'
-            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || (instantmode && bestBt1 == 0n)}
+            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result || (instantmode && bestBt1 == 0n) || Boolean(inputError)}
             txs={() => withTokenApprove({
                 approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
                 user: address!,
@@ -140,7 +145,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         </div> */}
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-             <GetByStoryHunt t={asset} />
+            <GetByStoryHunt t={asset} />
         </div>
         <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
