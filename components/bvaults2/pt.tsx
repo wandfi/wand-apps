@@ -1,6 +1,7 @@
 import { abiBT, abiBVault2 } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
 import { getTokenBy, Token } from "@/config/tokens"
+import { withIfAiraSign } from "@/lib/aria"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
@@ -12,10 +13,10 @@ import { useDebounce, useToggle } from "react-use"
 import { isAddressEqual } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
-import { TX, Txs, withTokenApprove } from "../approve-and-tx"
+import { Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { Fees } from "../fees"
-import { GetByStoryHunt, GetvIP } from "../get-lp"
+import { GetByStoryHunt } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
@@ -24,8 +25,6 @@ import { calcWrapBtInput, unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, usePTApy } from "./useDatas"
-import { withIfAiraSign } from "@/lib/aria"
-
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
@@ -134,7 +133,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         <Txs
             className='mx-auto mt-4'
             tx='Swap'
-            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
+            // disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
             txs={getTxs}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTSwap:${isToggled ? 'PT->BT' : 'BT->PT'}:(${fmtBn(inputAssetBn)})`)
@@ -286,7 +285,7 @@ export function PT({ vc }: { vc: BVault2Config }) {
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
             <div className='flex p-5 bg-[#10B98126] gap-5'>
-                <CoinIcon size={48} symbol='PToken' />
+                <CoinIcon size={48} symbol={pt.symbol} />
                 <div className='flex flex-col gap-3'>
                     <div className='text-xl leading-6 text-black dark:text-white font-semibold'>{pt.symbol}</div>
                     <div className='text-xs leading-none text-black/60 dark:text-white/60 font-medium'>1 {pt.symbol} is equal to1 {asset.symbol} at maturity</div>

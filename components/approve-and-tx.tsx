@@ -5,13 +5,16 @@ import { twMerge } from 'tailwind-merge'
 import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, SimulateContractParameters, WalletClient, zeroAddress } from 'viem'
 
 import { useCurrentChainId, useNetworkWrong } from '@/hooks/useCurrentChainId'
-import { getErrorMsg, handleError, promiseT } from '@/lib/utils'
+import { cn, getErrorMsg, handleError, promiseT } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useMutation } from '@tanstack/react-query'
 import { toast as tos } from 'sonner'
 import { useSwitchChain, useWalletClient } from 'wagmi'
 import { BBtn } from './ui/bbtn'
-
+import { create } from 'zustand'
+import { FaCheck, FaSpinner } from "react-icons/fa6";
+import { getTokenBy } from '@/config/tokens'
+import { SimpleDialog } from './simple-dialog'
 
 export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()
@@ -90,7 +93,7 @@ export function ApproveAndTx<
 
 export type TxConfig = SimulateContractParameters & { name?: string }
 export type TX = TxConfig | (() => Promise<TxConfig>)
-
+export const useTxsStore = create(() => ({ txs: [] as TxConfig[], progress: 0 }))
 
 export function Txs({
   className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, disableProgress, onTxSuccess }:
@@ -118,7 +121,6 @@ export function Txs({
           calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
         })
         while (true) {
-
           const res = await wc.waitForCallsStatus({ id })
           if (res.status == 'pending') continue
           if (res.status == 'success') {
@@ -133,17 +135,25 @@ export function Txs({
         const msg = getErrorMsg(error)
         if (msg && (msg.includes('wallet_sendCalls') || msg.includes('EIP-7702 not supported'))) {
           const pc = getPC(chainId)
+          let progress = 0;
+          !disableProgress && useTxsStore.setState({ txs: calls, progress })
           for (const item of calls) {
             const tx = await wc.writeContract(item)
-            const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 1 })
+            const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 2 })
             if (res.status !== 'success') throw new Error('Transactions Reverted')
+            progress++
+            !disableProgress && useTxsStore.setState({ progress })
           }
           toast && tos.success("Transactions Success")
+          useTxsStore.setState({ progress: 0, txs: [] })
           onTxSuccess?.()
         }
       }
     },
-    onError: toast ? handleError : () => { }
+    onError: (error) => {
+      useTxsStore.setState({ progress: 0, txs: [] })
+      toast && handleError(error)
+    }
   })
   const txDisabled = disabled || isPending || (typeof txs !== 'function' && txs.length == 0) || !wc
   if (isNetwrong) return <SwitchNet className={className} />
@@ -154,10 +164,10 @@ export function Txs({
 
 
 export async function withTokenApprove({ approves, pc, user, tx }: {
-  approves: { spender: Address, token: Address, amount: bigint }[],
+  approves: { spender: Address, token: Address, amount: bigint, name?: string }[],
   pc: PublicClient
   user: Address,
-  tx: SimulateContractParameters
+  tx: TxConfig
 }) {
   let nativeAmount = 0n;
   const needApproves = await Promise.all(approves.map(async item => {
@@ -167,10 +177,24 @@ export async function withTokenApprove({ approves, pc, user, tx }: {
     }
     const allowance = await pc.readContract({ abi: erc20Abi, address: item.token, functionName: 'allowance', args: [user, item.spender] })
     if (allowance >= item.amount) return null
-    return { abi: erc20Abi, address: item.token, functionName: 'approve', args: [item.spender, item.amount] } as SimulateContractParameters
+    const name = item.name ?? `Approve ${getTokenBy(item.token, await pc.getChainId())!.symbol}`
+    return { name, abi: erc20Abi, address: item.token, functionName: 'approve', args: [item.spender, item.amount] } as TxConfig
   })).then(txs => txs.filter(item => item !== null))
   return [...needApproves, { ...tx, ...(nativeAmount > 0n ? { value: nativeAmount } : {}) }]
 }
 
-
-
+export function TxsStat({ className }: { className?: string }) {
+  const { txs, progress } = useTxsStore()
+  if (txs.length == 0) return null
+  return <SimpleDialog open className={cn('w-80 text-black dark:text-white flex flex-col gap-2 p-4', className)}>
+    <div className='text-xl font-semibold'>Progress</div>
+    {txs.map((tx, i) => <div className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
+      <span className='font-semibold'>{i + 1}</span>
+      {tx.name ?? tx.functionName}
+      <div className={cn('ml-auto text-xl', { 'animate-spin': progress == i })}>
+        {progress == i && <FaSpinner />}
+        {progress > i && <FaCheck className='text-green-500' />}
+      </div>
+    </div>)}
+  </SimpleDialog>
+}

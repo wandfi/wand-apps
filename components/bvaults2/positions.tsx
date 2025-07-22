@@ -190,7 +190,7 @@ function LPBT({ vc }: { vc: BVault2Config }) {
             <ApproveAndTx disabled={!item.rewards.find(item => item[1] > 0n)} onTxSuccess={() => reFet(rewards.key)} key="claim" className="w-28 font-semibold h-7" tx="Claim" config={{ abi: abiRewardManager, functionName: 'claimRewards', address: item.token.address, args: [address!] }} />,
         ])
     }, [rewards.result])
-    const header = ['YT', 'Value', '', 'Yield', 'Airdrops', '']
+    const header = ['LP/BT', 'Value', '', 'Yield', 'Airdrops', '']
     return <div className="animitem card !p-4 bg-white">
         <STable
             headerClassName='text-left font-semibold border-b-0'

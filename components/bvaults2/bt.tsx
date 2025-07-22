@@ -12,7 +12,7 @@ import { useDebounce, useToggle } from "react-use";
 import { Address, isAddressEqual, parseAbi, SimulateContractParameters } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
-import { TX, Txs, withTokenApprove } from "../approve-and-tx";
+import { TX, TxConfig, Txs, withTokenApprove } from "../approve-and-tx";
 import { GetByStoryHunt } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
@@ -35,7 +35,8 @@ export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config
                 tx: {
                     abi: parseAbi(['function stake(uint256 _amount) external']),
                     address: isExtToken.contract,
-                    functionName: 'stake', args: [inputBn]
+                    functionName: 'stake', args: [inputBn],
+                    name: `${getTokenBy(token, vc.chain)!.symbol} to ${getTokenBy(isExtToken.out, vc.chain)!.symbol}`
                 }
             }))]
             btinput = isExtToken.out
@@ -45,7 +46,10 @@ export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config
         sharesBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [btinput, inputBn] })
         txs = [...txs, ...(await withTokenApprove({
             approves: [{ token, spender: vc.bt, amount: inputBn }], user, pc: getPC(vc.chain),
-            tx: { abi: abiBT, address: vc.bt, functionName: 'deposit', args: [user, btinput, inputBn, sharesBn * 99n / 100n] }
+            tx: {
+                abi: abiBT, address: vc.bt, functionName: 'deposit', args: [user, btinput, inputBn, sharesBn * 99n / 100n],
+                name: `${getTokenBy(btinput, vc.chain)!.symbol} to ${getTokenBy(vc.bt, vc.chain)!.symbol}`
+            }
         }))]
     }
     return { txs, sharesBn }
@@ -59,13 +63,14 @@ export async function unwrapBT({ vc, token, btShareBn, user }: { vc: BVault2Conf
             btout = isExtToken.out;
         }
         const outBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [btout, btShareBn] })
-        let txs = [{ abi: abiBT, address: vc.bt, functionName: 'redeem', args: [user, btShareBn, btout, outBn * 99n / 100n] }] as SimulateContractParameters[]
+        let txs = [{ abi: abiBT, address: vc.bt, functionName: 'redeem', args: [user, btShareBn, btout, outBn * 99n / 100n] }] as TxConfig[]
         if (isExtToken) {
             txs.push({
                 abi: parseAbi(['function unstake(uint256 _amount) external']),
                 address: isExtToken.contract,
                 functionName: 'unstake',
-                args: [outBn]
+                args: [outBn],
+                name: `${getTokenBy(vc.bt, vc.chain)!.symbol} to ${getTokenBy(btout, vc.chain)!.symbol}`
             })
         }
         return txs

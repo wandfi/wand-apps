@@ -12,6 +12,7 @@ import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import { useInitAnimRoot } from '@/hooks/useAnim';
 import { useIsClient } from '@/hooks/useIsClient';
+import { TxsStat } from '@/components/approve-and-tx';
 // background: linear-gradient(105.67deg, #02050E 14.41%, #1D2F23 98.84%);
 
 function PageLoading() {
@@ -39,7 +40,7 @@ export default function PageLayout({ children }: { children: ReactNode }) {
           <Toaster position='top-right' offset={70} />
           {/* <BetaFlag /> */}
           <PageLoading />
-          
+          <TxsStat />
         </>
       }
     </div>

@@ -27,7 +27,7 @@ export function SimpleDialog({
 } & Dialog.DialogProps) {
   return (
     <Dialog.Root {...props}>
-      <Dialog.Trigger ref={triggerRef} {...(triggerProps||{})}>{trigger}</Dialog.Trigger>
+      {Boolean(trigger) && <Dialog.Trigger ref={triggerRef} {...(triggerProps || {})}>{trigger}</Dialog.Trigger>}
       <Dialog.Portal>
         <Dialog.Overlay className='fixed top-0 left-0 inset-0 z-[100] bg-black/60' />
 
