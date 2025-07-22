@@ -2,9 +2,11 @@ import { abiAriaLegal } from '@/config/abi/third'
 import { story } from '@/config/network'
 import { Token } from '@/config/tokens'
 import { Address, PublicClient, WalletClient } from 'viem'
-import { getEip712Domain } from 'viem/actions'
+import { getEip712Domain, signTypedData } from 'viem/actions'
 import { promiseAll } from './utils'
 const address: Address = '0x5E8291e5799277429eb26da2Ff0364f6C39701CD'
+
+// useSignTypedData
 export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient; wc: WalletClient; token: Token; user: Address }) {
   if (token.symbol === 'APL' && token.chain.includes(story.id)) {
     const alreadySign = await pc.readContract({ abi: abiAriaLegal, address, functionName: 'hasSignedCurrentLicense', args: [user] })
@@ -15,9 +17,15 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
     })
     const domains = await getEip712Domain(pc, { address })
     console.info('domains:', domains)
-    const signature = await wc.signTypedData({
+
+    const signature = await signTypedData(wc, {
       account: user,
-      domain: domains.domain,
+      domain: {
+        name: domains.domain.name,
+        version: domains.domain.version,
+        chainId: domains.domain.chainId,
+        verifyingContract: domains.domain.verifyingContract,
+      },
       types: {
         SignLicense: [
           { type: 'string', name: 'licenseURI' },
