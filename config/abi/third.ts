@@ -1,4 +1,5 @@
 import { parseAbi } from 'viem'
+import { getEip712Domain } from 'viem/actions'
 
 export const abiStakingAPL = parseAbi(['function stake(uint256 _amount) external'])
 

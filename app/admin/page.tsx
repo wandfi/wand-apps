@@ -167,7 +167,7 @@ export default function AdminPage() {
           )}
           {current?.type == 'B-Vault2' && (<>
             <UpdateVaultParams vault={current.data.vault} paramList={BVault2Params} protocoSettingAddress={current.data.protocalSettings} />
-            {['setAutoStartNewEpoch', 'updateThreshold', 'pause', 'unpause',].map((functionName) => (
+            {['setAutoStartNewEpoch', 'updateThreshold', 'updateBootstrapDuration', 'pause', 'unpause',].map((functionName) => (
               <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
             ))}
             <GeneralAction abi={abiProtocol} functionName='addPremiumHook' argsDef={[current.data.bt, current.data.hook]} address={current.data.protocal} />

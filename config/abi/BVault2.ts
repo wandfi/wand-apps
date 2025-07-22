@@ -29,6 +29,7 @@ export const abiBVault2 = parseAbi([
   'function swapExactYTforBT(uint256 amountYT, uint256 minAmountBT, uint256 deadline) external returns (uint256 amountBT)',
 
   'function updateThreshold(uint256 _threshold) external',
+  'function updateBootstrapDuration(uint256 _bootstrapDuration) external',
   'function pause() external',
   'function unpause() external',
 
