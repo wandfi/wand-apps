@@ -1,4 +1,4 @@
-import { abiBT, abiBVault2 } from "@/config/abi/BVault2"
+import { abiBVault2 } from "@/config/abi/BVault2"
 import { BVault2Config } from "@/config/bvaults2"
 import { getTokenBy, Token } from "@/config/tokens"
 import { withIfAiraSign } from "@/lib/aria"
@@ -10,7 +10,6 @@ import { useQuery } from "@tanstack/react-query"
 import _ from "lodash"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
-import { isAddressEqual } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
@@ -21,10 +20,10 @@ import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
 import { Swap, SwapDown } from "../ui/bbtn"
-import { calcWrapBtInput, unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
+import { convertBt, previewConvertBt, useWrapBtTokens } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
-import { useBT2PTPrice, usePTApy } from "./useDatas"
+import { useBT2PTPrice, useBTPriceConvertToken, usePTApy } from "./useDatas"
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
@@ -41,8 +40,10 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const output = isToggled ? ct : pt
     const inputBalance = useBalance(input)
     const outputBalance = useBalance(output)
-    const { result: btPrice } = useBT2PTPrice(vc)
-    const price = isToggled ? _.round(1 / btPrice, 2) : _.round(btPrice, 2)
+    const { result: btPricePT } = useBT2PTPrice(vc)
+    const { result: btPriceCT } = useBTPriceConvertToken(vc, ct.address)
+    const ctPricePT = btPriceCT !== 0 ? btPricePT / btPriceCT : 0;
+    const price = isToggled ? (ctPricePT !== 0 ? _.round(1 / ctPricePT, 2) : 0) : _.round(ctPricePT, 2)
     const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
     const [calcPtSwapKey, setCalcPtSwapKey] = useState<any[]>(['calcPTSwapOut'])
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn, input, output]), 300, [isToggled, inputAssetBn, input, output])
@@ -54,15 +55,15 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
             const pc = getPC(vc.chain)
             if (isToggled) {
                 const btAmount = await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactPTforBT', args: [inputAssetBn] })
-                if (isAddressEqual(vc.bt, output.address)) return btAmount
-
-                return pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [calcWrapBtInput(vc, output.address), btAmount] })
+                return previewConvertBt(vc, false, output.address, btAmount)
             } else {
-                const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] })
+                const btAmount = await previewConvertBt(vc, true, input.address, inputAssetBn)
                 return pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactBTforPT', args: [btAmount] })
             }
         }
     })
+    // const isFetchingOut = false
+    // const outAmount = 0n;
     const errorInput = !isFetchingOut && inputAssetBn > 0 && outAmount == 0n ? 'Market liquidity is insufficient' : ''
     // isInputBT ? -outputBn : inputBn, isInputBT ? inputBn : -outputBn
     const [apy, apyto, priceimpcat] = usePTApy(vc, isToggled ? inputAssetBn : -outAmount, isToggled ? -outAmount : inputAssetBn)
@@ -71,7 +72,6 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     }
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (isToggled) {
-            
             const txsApproves = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
                 pc: getPC(vc.chain),
@@ -83,30 +83,32 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })
-            const unwrapBTtxs = await unwrapBT({
+            const unwrapBTtxs = await convertBt(
                 vc,
-                btShareBn: outAmount,
-                token: output.address,
-                user: arg.wc.account.address
-            })
-            return [...txsApproves, ...unwrapBTtxs]
+                false,
+                output.address,
+                outAmount,
+                arg.wc.account.address
+            )
+            return [...txsApproves, ...unwrapBTtxs.txs]
         } else {
-            await withIfAiraSign({ ...arg, token: input, user:arg.wc.account.address })
-            const wrapBt = await wrapToBT({
+            await withIfAiraSign({ ...arg, token: input, user: arg.wc.account.address })
+            const wrapBt = await convertBt(
                 vc,
-                inputBn: inputAssetBn,
-                token: input.address,
-                user: arg.wc.account.address
-            })
+                true,
+                input.address,
+                inputAssetBn,
+                arg.wc.account.address
+            )
             const txsApprove = await withTokenApprove({
-                approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBt.sharesBn }],
+                approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBt.out }],
                 pc: getPC(vc.chain),
                 user: arg.wc.account.address,
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: 'swapExactBTforPT',
-                    args: [wrapBt.sharesBn, 0n, genDeadline()],
+                    args: [wrapBt.out, 0n, genDeadline()],
                 }
             })
             return [...wrapBt.txs, ...txsApprove]
@@ -134,7 +136,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         <Txs
             className='mx-auto mt-4'
             tx='Swap'
-            // disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
+            disabled={inputAssetBn <= 0n || inputAssetBn > inputBalance.result}
             txs={getTxs}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTSwap:${isToggled ? 'PT->BT' : 'BT->PT'}:(${fmtBn(inputAssetBn)})`)
@@ -165,24 +167,17 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async (params) => {
             if (inputAssetBn <= 0n || params.queryKey.length == 1) return 0n
-            const pc = getPC(vc.chain)
-            const btAmount = isAddressEqual(vc.bt, input.address) ? inputAssetBn : (await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] }))
-            return btAmount
+            return previewConvertBt(vc, true, input.address, inputAssetBn)
         }
     })
     const txs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (!address) return []
         await withIfAiraSign({ ...arg, token: input, user: address })
-        const wrapBT = await wrapToBT({
-            vc,
-            inputBn: inputAssetBn,
-            token: input.address,
-            user: address!
-        })
+        const wrapBT = await convertBt(vc, true, input.address, inputAssetBn, arg.wc.account.address)
         const txsApprove = await withTokenApprove({
-            approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBT.sharesBn, }],
+            approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBT.out, }],
             pc: getPC(vc.chain), user: address,
-            tx: { abi: abiBVault2, address: vc.vault, functionName: 'mintPTandYT', args: [wrapBT.sharesBn] }
+            tx: { abi: abiBVault2, address: vc.vault, functionName: 'mintPTandYT', args: [wrapBT.out] }
         })
         return [...wrapBT.txs, ...txsApprove]
     }
@@ -229,25 +224,18 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async () => {
             if (inputBn <= 0n || setCalcKey.length == 1) return 0n
-            const pc = getPC(vc.chain)
-            const outAmount = isAddressEqual(vc.bt, out.address) ? inputBn : await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [calcWrapBtInput(vc, out.address), inputBn] })
-            return outAmount
+            return previewConvertBt(vc, false, out.address, inputBn)
         }
     })
-    const getTxs = async () => {
+    const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         const redeemTxs = [{
             abi: abiBVault2,
             address: vc.vault,
             functionName: 'redeemByPTandYT',
             args: [inputBn]
         }]
-        const unwrapBTtxs = await unwrapBT({
-            vc,
-            btShareBn: outAmount,
-            token: out.address,
-            user: address!
-        })
-        return [...redeemTxs, ...unwrapBTtxs]
+        const unwrapBTtxs = await convertBt(vc, false, out.address, outAmount, arg.wc.account.address)
+        return [...redeemTxs, ...unwrapBTtxs.txs]
     }
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={pt.symbol} amount={input} balance={ptBalance.result} setAmount={setInput} />

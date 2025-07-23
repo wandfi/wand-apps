@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { formatUnits, parseUnits, parseEther as _parseEther, etherUnits, Address } from 'viem'
+import { formatUnits, parseUnits, parseEther as _parseEther, etherUnits, Address, isAddressEqual } from 'viem'
 import _, { get, now, round } from 'lodash'
 import { toast } from 'sonner'
 import dayjs from 'dayjs'
@@ -284,4 +284,8 @@ export const sqrt = function (value: bigint) {
     x1 = (value / x0 + x0) >> 1n
   } while (x0 !== x1 && x0 !== x1 - 1n)
   return x0
+}
+
+export function includesAddress(list: Address[], target: Address) {
+  return Boolean(list.find((item) => isAddressEqual(item, target)))
 }

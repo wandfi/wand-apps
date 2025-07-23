@@ -1,7 +1,7 @@
 import { isLOCL, isTEST } from '@/constants'
 import { sleep } from '@/lib/utils'
 import EventEmitter from 'events'
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 /******************************************************** types *********************************************************************** */
 export type Config = {
   cacheTime?: number // default 1000
@@ -38,8 +38,7 @@ export type FetsStat<FETS extends [...Fet<any>[]]> = {
   error?: Error
 }
 
-export type MergeFetStat<RES extends {}> = Omit<FetStat<Fet<RES>>, 'key'> & { key: string[] }
-export type AllFetStat<RES extends {}> = FetStat<Fet<RES>> | MergeFetStat<RES>
+export type AllFetStat<RES extends {}> = FetStat<Fet<RES>> | FetsStat<Fet<RES>[]>
 
 /******************************************************** impl *********************************************************************** */
 
@@ -166,11 +165,11 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
     fetStat = runFet(fet)
   }
   useEffect(() => {
-    if (isLOCL||isTEST) {
+    if (isLOCL || isTEST) {
       ;(window as any).fets = fets
     }
     const unSub = sub(fet, (fs) => {
-      // console.info('onSub:', fet.key, fs)
+      console.info('onSub:', fet.key, fs)
       update()
     })
     // check need fresh
@@ -186,8 +185,11 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
 
 export function useFets<FET extends Fet<any>>(..._fets: FET[]) {
   const update = useUpdate()
-  const fetsStat = initFSS(..._fets)
-  let successCount = 0
+  const refFetsStat = useRef<FetsStat<FET[]>>()
+  if (!refFetsStat.current || _fets.map((item) => item.key).join(',') !== refFetsStat.current.key.join(',')) {
+    refFetsStat.current = initFSS(..._fets)
+  }
+  const fetsStat = refFetsStat.current
   let index = 0
   for (const fet of _fets) {
     let fetStat = fets[fet.key]?.fs || initFS(fet)
@@ -195,27 +197,20 @@ export function useFets<FET extends Fet<any>>(..._fets: FET[]) {
     if (needRunFet) {
       fetStat = runFet(fet)
     }
-    if (fetStat.status == 'error') {
-      fetsStat.status = 'error'
-      fetsStat.error = fetStat.error
-    }
-    if (fetsStat.status == 'idle' && fetStat.status === 'fetching' && fetStat.lastUpDate === 0) {
-      fetsStat.status = 'fetching'
-    }
-    if (fetStat.lastUpDate > fetsStat.lastUpDate) {
-      fetsStat.lastUpDate = fetStat.lastUpDate
-    }
-    fetStat.status == 'success' && successCount++
     fetsStat.result[index] = fetStat.result
     index++
   }
-  if (successCount === _fets.length) {
-    fetsStat.status == 'success'
+  const stats = _fets.map((item) => fets[item.key]?.fs).filter(Boolean)
+  if (isSuccess(...stats)) {
+    fetsStat.lastUpDate = now()
+  }
+  if (isFetching(...stats)) {
+    fetsStat.status = 'fetching'
+  } else if (isError(...stats)) {
+    fetsStat.status = 'error'
+    fetsStat.error = stats.find((item) => item.error)?.error
   }
   useEffect(() => {
-    if (isLOCL) {
-      ;(window as any).fets = fets
-    }
     const onUpdate = () => {
       const fss = _fets.map((item) => fets[item.key].fs)
       if (isError(...fss) || isSuccess(...fss)) update()
@@ -246,8 +241,8 @@ export function isLoading(...status: AllFetStat<any>[]) {
 }
 export function isSuccess(...status: AllFetStat<any>[]) {
   if (status.length == 0) return false
-  if (status.find((item) => item.lastUpDate !== 0 || item.status == 'success')) return true
-  return false
+  if (status.find((item) => item.lastUpDate === 0)) return false
+  return true
 }
 
 export function isError(...status: AllFetStat<any>[]) {

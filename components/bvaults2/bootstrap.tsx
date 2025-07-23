@@ -11,13 +11,12 @@ import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@tremor/react";
 import { useState } from "react";
 import { BsFire } from "react-icons/bs";
-import { useAccount } from "wagmi";
 import { Txs, withTokenApprove } from "../approve-and-tx";
 import { GetByStoryHunt } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
-import { useWrapBtTokens, wrapToBT } from "./bt";
+import { convertBt, useWrapBtTokens } from "./bt";
 import { getLpToken } from "./getToken";
 import { getBvualt2BootTimes, useBvualt2Data } from "./useFets";
 
@@ -39,12 +38,11 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const lp = getLpToken(vc)
     const lpBalance = useBalance(lp)
     const bootFinished = currentAmount > 0n && currentAmount >= targetAmount;
-    const { address } = useAccount()
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
-        await withIfAiraSign({ ...arg, token: ct, user: address! })
-        const { txs, sharesBn } = await wrapToBT({ vc, token: ct.address, inputBn: inputAssetBn, user: address! })
+        await withIfAiraSign({ ...arg, token: ct, user:  arg.wc.account.address })
+        const { txs, out: sharesBn } = await convertBt(vc, true, input.address, inputAssetBn, arg.wc.account.address)
         const txsApprove = await withTokenApprove({
-            approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user: address!,
+            approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user:  arg.wc.account.address,
             tx: { abi: abiBVault2, address: vc.vault, functionName: 'addLiquidity', args: [sharesBn, genDeadline()], }
         })
         return [...txs, ...txsApprove]

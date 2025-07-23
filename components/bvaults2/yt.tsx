@@ -1,7 +1,8 @@
-import { abiBT, abiBVault2, abiBvault2Query, abiHook } from "@/config/abi/BVault2"
+import { abiBVault2, abiBvault2Query, abiHook } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
 import { BVault2Config } from "@/config/bvaults2"
 import { getTokenBy, Token } from "@/config/tokens"
+import { withIfAiraSign } from "@/lib/aria"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"
 import { getPC } from "@/providers/publicClient"
@@ -10,7 +11,7 @@ import { useQuery } from "@tanstack/react-query"
 import _ from "lodash"
 import { useState } from "react"
 import { useDebounce, useToggle } from "react-use"
-import { formatEther, isAddressEqual, parseUnits } from "viem"
+import { formatEther, parseUnits } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
@@ -21,12 +22,11 @@ import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
 import { Swap } from "../ui/bbtn"
 import { Tip } from "../ui/tip"
-import { calcWrapBtInput, unwrapBT, useWrapBtTokens, wrapToBT } from "./bt"
+import { convertBt, previewConvertBt, useWrapBtTokens } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
-import { usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
-import { withIfAiraSign } from "@/lib/aria"
+import { useBTPriceConvertToken, usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -46,7 +46,9 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const inputBalance = useBalance(input)
 
     const { result: ytPriceBt } = useYTPriceBt(vc)
-    const price = _.round(isToggled ? ytPriceBt : ytPriceBt > 0 ? 1 / ytPriceBt : 0, 2)
+    const { result: btPriceCT} = useBTPriceConvertToken(vc, ct.address)
+    const ytPriceCT = ytPriceBt * btPriceCT
+    const price = _.round(isToggled ? ytPriceCT : ytPriceCT > 0 ? 1 / ytPriceCT : 0, 2)
     const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
     const onSwitch = () => {
         toggle()
@@ -62,14 +64,11 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             const pc = getPC(vc.chain);
             if (isToggled) {
                 let outAmount = await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactYTforBT', args: [inputAssetBn] })
-                if (!isAddressEqual(output.address, vc.bt))
-                    outAmount = await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [calcWrapBtInput(vc, output.address), outAmount] })
+                outAmount = await previewConvertBt(vc, false, output.address, outAmount);
                 return [outAmount, 0n, 0n]
 
             } else {
-                let inputBtAmount = inputAssetBn
-                if (!isAddressEqual(input.address, vc.bt))
-                    inputBtAmount = await pc.readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] })
+                let inputBtAmount = await previewConvertBt(vc, true, input.address, inputAssetBn)
                 const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputBtAmount, parseUnits('0.02', 18)] })
                     .catch(() => [0n, 0n] as [bigint, bigint])
                 console.info('calcBT1:', formatEther(bestBT1), count)
@@ -98,22 +97,12 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })
-            const unwrapTxs = await unwrapBT({
-                vc,
-                btShareBn: outAmount,
-                token: output.address,
-                user: address!
-            })
-            return [...txsApproves, ...unwrapTxs]
+            const unwrapTxs = await convertBt(vc, false, output.address, outAmount, arg.wc.account.address)
+            return [...txsApproves, ...unwrapTxs.txs]
 
         } else {
             await withIfAiraSign({ ...arg, token: input, user: address! })
-            const { txs, sharesBn } = await wrapToBT({
-                vc,
-                token: input.address,
-                inputBn: inputAssetBn,
-                user: address!
-            })
+            const { txs, out: sharesBn } = await convertBt(vc, true, input.address, inputAssetBn, arg.wc.account.address)
             const txsApproves = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }],
                 pc: getPC(vc.chain),

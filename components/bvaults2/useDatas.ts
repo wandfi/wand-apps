@@ -6,9 +6,9 @@ import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet } from '@/hooks/useFet'
 import { aarToNumber, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import _ from 'lodash'
+import _, { toNumber } from 'lodash'
 import { useMemo, useRef } from 'react'
-import { formatEther, parseUnits } from 'viem'
+import { Address, formatEther, formatUnits, isAddressEqual, parseUnits } from 'viem'
 import { useBalance, useTotalSupply } from '../../hooks/useToken'
 import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
@@ -26,6 +26,21 @@ export function useLogs(vc: BVault2Config) {
 export function useBT2PTPrice(vc: BVault2Config) {
   const data = useLogs(vc)
   return useMemo(() => ({ ...data, result: calcBt2PtPrice(data.result, 0n, 0n) }), [data.result])
+}
+
+export function useBTPriceConvertToken(vc: BVault2Config, token?: Address) {
+  return useFet({
+    key: FetKEYS.BTPriceConvertToken(vc, token),
+    initResult: 0,
+    fetfn: async () => {
+      if (isAddressEqual(token!, vc.bt)) return 1
+      const tc = vc.btConverts.find((item) => isAddressEqual(item.tokens[0], token!))
+      if (!tc) return 0
+      const one = parseUnits('1', 6)
+      const out = await tc.previewConvert(false, one)
+      return toNumber(formatUnits(out, 6))
+    },
+  })
 }
 
 export function calcBt2PtPrice(logs: ReturnType<typeof useLogs>['result'], ptChange: bigint, btChange: bigint) {

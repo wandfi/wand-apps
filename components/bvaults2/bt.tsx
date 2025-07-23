@@ -1,97 +1,74 @@
 import { abiBT } from "@/config/abi/BVault2";
-import { BVault2Config } from "@/config/bvaults2";
+import { BVault2Config, TokenConvert } from "@/config/bvaults2";
 import { getTokenBy, Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
 import { withIfAiraSign } from "@/lib/aria";
-import { fmtBn, formatPercent, handleError, parseEthers } from "@/lib/utils";
+import { fmtBn, formatPercent, handleError, parseEthers, promiseAll } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useDebounce, useToggle } from "react-use";
-import { Address, isAddressEqual, parseAbi } from "viem";
+import { Address, isAddressEqual } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
-import { TX, TxConfig, Txs, withTokenApprove } from "../approve-and-tx";
+import { Txs, withTokenApprove } from "../approve-and-tx";
 import { GetByStoryHunt } from "../get-lp";
 import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Swap } from "../ui/bbtn";
 import { useUnderlingApy } from "./useDatas";
 
-
-export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config, token: Address, inputBn: bigint, user: Address }) {
-    let txs: TX[] = []
-    let sharesBn = inputBn;
-    if (!isAddressEqual(vc.bt, token)) {
-        // to bt inputs
-        let btinput = token
-
-        const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
-        if (isExtToken) {
-            txs = [...txs, ...(await withTokenApprove({
-                approves: [{ token, spender: isExtToken.contract, amount: inputBn }], user, pc: getPC(vc.chain),
-                tx: {
-                    abi: parseAbi(['function stake(uint256 _amount) external']),
-                    address: isExtToken.contract,
-                    functionName: 'stake', args: [inputBn],
-                    name: `${getTokenBy(token, vc.chain)!.symbol} to ${getTokenBy(isExtToken.out, vc.chain)!.symbol}`
-                }
-            }))]
-            btinput = isExtToken.out
-        }
-        if (!vc.btInputs.find(t => isAddressEqual(t, btinput))) throw new Error('input token error')
-        // to bt
-        sharesBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [btinput, inputBn] })
-        txs = [...txs, ...(await withTokenApprove({
-            approves: [{ token: btinput, spender: vc.bt, amount: inputBn }], user, pc: getPC(vc.chain),
-            tx: {
-                abi: abiBT, address: vc.bt, functionName: 'deposit', args: [user, btinput, inputBn, sharesBn * 99n / 100n],
-                name: `${getTokenBy(btinput, vc.chain)!.symbol} to ${getTokenBy(vc.bt, vc.chain)!.symbol}`
-            }
-        }))]
-    }
-    return { txs, sharesBn }
-}
-
-export async function unwrapBT({ vc, token, btShareBn, user }: { vc: BVault2Config, token: Address, btShareBn: bigint, user: Address }) {
+export async function previewConvertBt(vc: BVault2Config, isToBt: boolean, token: Address, amount: bigint) {
     if (!isAddressEqual(token, vc.bt)) {
-        let btout = token
-        const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
-        if (isExtToken) {
-            btout = isExtToken.out;
-        }
-        const outBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewRedeem', args: [btout, btShareBn] })
-        let txs = [{ abi: abiBT, address: vc.bt, functionName: 'redeem', args: [user, btShareBn, btout, outBn * 99n / 100n] }] as TxConfig[]
-        if (isExtToken) {
-            txs.push({
-                abi: parseAbi(['function unstake(uint256 _amount) external']),
-                address: isExtToken.contract,
-                functionName: 'unstake',
-                args: [outBn],
-                name: `${getTokenBy(vc.bt, vc.chain)!.symbol} to ${getTokenBy(btout, vc.chain)!.symbol}`
-            })
-        }
-        return txs
+        return vc.btConverts.find(tc => isAddressEqual(tc.tokens[0], token))!.previewConvert(isToBt, amount)
     }
-    return []
+    return amount
 }
 
-export function calcWrapBtInput(vc: BVault2Config, token: Address) {
-    if (vc.btInputs.find(address => isAddressEqual(address, token))) return token
-    const isExtToken = vc.extInputs.find(t => isAddressEqual(t.input, token) && vc.btInputs.find(address => isAddressEqual(address, t.out)))
-    if (isExtToken) return isExtToken.out
-    throw new Error('input error')
+export async function convertBt(vc: BVault2Config, isToBt: boolean, token: Address, amount: bigint, user: Address) {
+    if (!isAddressEqual(token, vc.bt)) {
+        const tc = vc.btConverts.find(tc => isAddressEqual(tc.tokens[0], token))!
+        return promiseAll({
+            txs: tc.convertTxs(isToBt, amount, user),
+            out: tc.previewConvert(isToBt, amount),
+        })
+    }
+    return {
+        txs: [],
+        out: amount
+    }
 }
 
 export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
-    // const data = useFet({
-    //     key: `btInputs${vc.bt}`,
-    //     initResult: [vc.asset],
-    //     fetfn: async () => getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'getTokensIn' })
-    // })
-    return useMemo(() => [...vc.extInputs.map(e => e.input), ...vc.btInputs, vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt])
+    return useMemo(() => [...vc.btConverts.map(tc => tc.tokens[0]), vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt])
+}
+
+
+export function genBtConvert(chain: number, bt: Address, btinput: Address): TokenConvert {
+    return {
+        tokens: [btinput, bt],
+        previewConvert: async (isZeroToOne, amount) =>
+            getPC(chain).readContract({
+                abi: abiBT,
+                address: bt,
+                functionName: isZeroToOne ? 'previewDeposit' : 'previewRedeem',
+                args: [btinput, amount],
+            }),
+        convertTxs: async (isZeroToOne, amount, user) =>
+            withTokenApprove({
+                pc: getPC(chain),
+                user,
+                approves: isZeroToOne ? [{ token: btinput, amount, spender: bt }] : [],
+                tx: {
+                    abi: abiBT,
+                    address: bt,
+                    functionName: isZeroToOne ? 'deposit' : 'redeem',
+                    args: isZeroToOne ? [user, btinput, amount, 0n] : [user, amount, btinput, 0n],
+                },
+            }),
+    }
 }
 
 export function BT({ vc }: { vc: BVault2Config }) {
@@ -123,32 +100,16 @@ export function BT({ vc }: { vc: BVault2Config }) {
         initialData: 0n,
         queryFn: async () => {
             if (calcOutAmountKey.length <= 1) return 0n
-
-            return getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: isToggled ? 'previewRedeem' : 'previewDeposit', args: [calcWrapBtInput(vc, input.address), inputAssetBn] }).catch(() => inputAssetBn)
+            return previewConvertBt(vc, !isToggled, input.address, inputAssetBn)
         }
     })
     const onSwitch = () => {
         toggle()
     }
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
-        if (isToggled) {
-            const unwrapTxs = await unwrapBT({
-                vc,
-                token: cToken.address,
-                btShareBn: inputAssetBn,
-                user: address!
-            })
-            return [...unwrapTxs]
-        } else {
-            await withIfAiraSign({ ...arg, token: cToken, user: address! })
-            const wrapBt = await wrapToBT({
-                vc,
-                token: cToken.address,
-                inputBn: inputAssetBn,
-                user: address!
-            })
-            return [...wrapBt.txs]
-        }
+        !isToggled && await withIfAiraSign({ ...arg, token: cToken, user: address! })
+        const { txs } = await convertBt(vc, !isToggled, cToken.address, inputAssetBn, address!)
+        return txs;
     }
     const { result: unlerlingApy } = useUnderlingApy(vc)
     return <div className="flex flex-col gap-4 w-full">

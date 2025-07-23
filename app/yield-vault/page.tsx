@@ -6,7 +6,7 @@ import { BVaultAddReward } from '@/components/bvault-add-reward'
 import BvaultEpochYtPrices from '@/components/bvault-epoch-ytprices'
 import { BVault2Card, BVault2Info, BVault2Swaps } from '@/components/bvaults2'
 import { MyPositions } from '@/components/bvaults2/positions'
-import { useBvualt2Data } from '@/components/bvaults2/useFets'
+import { getBvaut2Data, useBvualt2Data } from '@/components/bvaults2/useFets'
 import { BVault2Chart } from '@/components/bvaut2-chart'
 import { Noti } from '@/components/noti'
 import { PageWrap } from '@/components/page-wrap'
@@ -19,7 +19,7 @@ import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
 import { BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
 import { ENV } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
-import { isError, isLoading, isSuccess } from '@/hooks/useFet'
+import { isError, isLoading, isSuccess, useFets } from '@/hooks/useFet'
 import { useLoadBVaults } from '@/hooks/useLoads'
 import { getPC } from '@/providers/publicClient'
 import { useBoundStore, useStore } from '@/providers/useBoundStore'
@@ -32,6 +32,7 @@ import { FaSpinner } from 'react-icons/fa6'
 import { Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
+import { FetKEYS } from '@/components/bvaults2/fetKeys'
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
@@ -156,27 +157,30 @@ export default function Vaults() {
   const vcs = useMemo(() => {
     const olds = BvcsByEnv.filter(item => item.chain === chainId).map(vc => ({ ...vc, type: 'BVault' }) as VCItem)
     const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
-    return [...olds, ...v2vc]
+    return [...v2vc, ...olds]
   }, [ENV, chainId])
   const params = useSearchParams()
   const paramsVault = params.get('vault') as Address
   const currentTab = params.get('tab') as string
   const currentVc = vcs.findLast((item) => item.vault.toLowerCase() == (paramsVault ?? '').toLowerCase())
-  // useUpdateBVaultsData(bvcs)
   const { loading } = useLoadBVaults()
   const [currentFilter, setFilter] = useState(vaultsFilters.find(item => item === sessionStorage.getItem('bvualts-filter')) ?? vaultsFilters[0])
   const wrapSetFilter = (nf: (typeof vaultsFilters)[number]) => {
     setFilter(nf)
     sessionStorage.setItem("bvualts-filter", nf)
   }
-  // const bvd2 = useFets(...BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ key: FetKEYS.Bvault2Data(vc), fetfn: async () => getBvaut2Data(vc) })))
-  const mloading = loading
+  const vc2 = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
+  const vd2Res = useFets(...vc2.map(vc => ({ key: FetKEYS.Bvault2Data(vc), fetfn: async () => getBvaut2Data(vc) })))
+  const vd2 = vd2Res.result.map((vd, i) => ({ vc: vc2[i], ...(vd ?? {}) }))
+  const mloading = loading || isLoading(vd2Res)
   const bvaults = useStore(s => s.sliceBVaultsStore.bvaults, ['sliceBVaultsStore.bvaults'])
-  const fVcs = useMemo(() => {
-    if (currentFilter == 'All') return vcs
-    if (currentFilter == 'Active') return vcs.filter(vc => ((!Boolean(bvaults[vc.vault]?.closed) && (vc.type === 'BVault')) || (vc.type == 'BVault2')))
-    return vcs.filter(vc => (Boolean(bvaults[vc.vault]?.closed) && vc.type === 'BVault') || (vc.type == 'BVault2'))
-  }, [mloading, bvaults, currentFilter, vcs])
+  const fVcs = (() => {
+    console.info('vd2', vd2)
+    const mvcs = vcs.filter(item => item.type === 'BVault' || vd2.find(vd => vd.vc.vault === item.vault)?.current)
+    if (currentFilter == 'All') return mvcs
+    if (currentFilter == 'Active') return mvcs.filter(vc => vc.type == 'BVault2' || (!Boolean(bvaults[vc.vault]?.closed)))
+    return mvcs.filter(vc => vc.type !== 'BVault2' && (Boolean(bvaults[vc.vault]?.closed)))
+  })()
 
   return (
     <PageWrap>

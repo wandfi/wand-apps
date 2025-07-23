@@ -1,6 +1,9 @@
 import { parseAbi } from 'viem'
 
-export const abiStakingAPL = parseAbi(['function stake(uint256 _amount) external'])
+export const abiStakingAPL = parseAbi([
+    'function stake(uint256 _amount) external',
+    'function stIPRWAperIPRWA() external view returns (uint256)'
+])
 
 
 export const abiAriaLegal = parseAbi([
