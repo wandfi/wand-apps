@@ -188,7 +188,7 @@ export function TxsStat({ className }: { className?: string }) {
   if (txs.length == 0) return null
   return <SimpleDialog open className={cn('w-80 text-black dark:text-white flex flex-col gap-2 p-4', className)}>
     <div className='text-xl font-semibold'>Progress</div>
-    {txs.map((tx, i) => <div className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
+    {txs.map((tx, i) => <div key={`tx_item_stat_${i}`} className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
       <span className='font-semibold'>{i + 1}</span>
       {tx.name ?? tx.functionName}
       <div className={cn('ml-auto text-xl', { 'animate-spin': progress == i })}>
