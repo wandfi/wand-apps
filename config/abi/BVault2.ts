@@ -2,6 +2,7 @@ import { parseAbi } from 'viem'
 
 export const abiBVault2 = parseAbi([
   'function initialized() view returns (bool)',
+  'function autoStartNewEpoch() external view returns (bool)',
   'function BT() external view returns (address)',
   'function mintPoolTokenPot() external view returns (address)',
   'function Points() external view returns (address)',

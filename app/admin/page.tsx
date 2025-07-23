@@ -10,12 +10,13 @@ import { getTokenBy } from '@/config/tokens'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVaultsConfigs } from '@/hooks/useVaultsConfigs'
-import { cn, parseEthers } from '@/lib/utils'
+import { cn, parseEthers, promiseAll } from '@/lib/utils'
+import { getPC } from '@/providers/publicClient'
 import { useMemo } from 'react'
 import Select from 'react-select'
 import { useMeasure, useSetState } from 'react-use'
 import { Address, erc20Abi, formatUnits, isAddress, parseUnits, stringToHex } from 'viem'
-import { useReadContract, useReadContracts } from 'wagmi'
+import { useReadContracts } from 'wagmi'
 
 type ParamItem = { label: string; value: string; units?: number /** def 10 */ }
 
@@ -127,14 +128,14 @@ function Erc20Approve() {
 }
 
 function DeleteIpAssets(props: { vault: Address }) {
-  const { data, refetch } = useReadContract({
-    abi: abiBVault,
-    address: props.vault,
-    functionName: 'ipAssets'
-  })
-  const infos: any = {}
-  data?.forEach(ipID => { infos[ipID] = ipAssetsTit[ipID] })
-  return <GeneralAction key={`b-vault-removeIpAsset`} txProps={{ onTxSuccess: refetch }} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={JSON.stringify(infos, undefined, 2)} />
+  const chainId = useCurrentChainId()
+  const getInfos = async () => {
+    const data = await getPC(chainId).readContract({ abi: abiBVault, address: props.vault, functionName: 'ipAssets' })
+    const infos: any = {}
+    data.forEach(ipID => { infos[ipID] = ipAssetsTit[ipID] })
+    return infos
+  }
+  return <GeneralAction key={`b-vault-removeIpAsset`} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={getInfos} />
 }
 
 export default function AdminPage() {
@@ -167,9 +168,12 @@ export default function AdminPage() {
           )}
           {current?.type == 'B-Vault2' && (<>
             <UpdateVaultParams vault={current.data.vault} paramList={BVault2Params} protocoSettingAddress={current.data.protocalSettings} />
-            {['setAutoStartNewEpoch', 'updateThreshold', 'updateBootstrapDuration', 'pause', 'unpause',].map((functionName) => (
-              <GeneralAction key={`b-vault2-${functionName}`} abi={abiBVault2} functionName={functionName} address={current.data.vault} />
-            ))}
+            <GeneralAction abi={abiBVault2} functionName="setAutoStartNewEpoch" address={current.data.vault}
+              infos={() => promiseAll({ AutoStartNewEpoch: getPC(current.data.chain).readContract({ abi: abiBVault2, address: current.data.vault, functionName: 'autoStartNewEpoch' }) })} />
+            <GeneralAction abi={abiBVault2} functionName="updateThreshold" address={current.data.vault} />
+            <GeneralAction abi={abiBVault2} functionName="updateBootstrapDuration" address={current.data.vault} />
+            <GeneralAction abi={abiBVault2} functionName="pause" address={current.data.vault} />
+            <GeneralAction abi={abiBVault2} functionName="unpause" address={current.data.vault} />
             <GeneralAction abi={abiProtocol} functionName='addPremiumHook' argsDef={[current.data.bt, current.data.hook]} address={current.data.protocal} />
             <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
             <GeneralAction tit='protocal (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />

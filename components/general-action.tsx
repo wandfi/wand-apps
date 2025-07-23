@@ -1,11 +1,13 @@
-import { cn, parseEthers } from '@/lib/utils'
+import { cn, parseEthers, promiseT } from '@/lib/utils'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Collapse } from 'react-collapse'
 import { FiArrowDown, FiArrowUp } from 'react-icons/fi'
 import Select from 'react-select'
 import { useSetState } from 'react-use'
 import { Abi, AbiFunction, AbiParameter, Address, stringToHex } from 'viem'
-import { ApproveAndTx } from './approve-and-tx'
+import { ApproveAndTx, Txs } from './approve-and-tx'
+import { useQuery } from '@tanstack/react-query'
+import { Spinner } from './spinner'
 
 export const selectClassNames: Parameters<Select>[0]['classNames'] = {
   menu: () => cn('bg-white dark:bg-black dark:border'),
@@ -76,11 +78,11 @@ export function GeneralAction({
   address: Address
   functionName: string
   tit?: string
-  infos?: ReactNode
+  infos?: any | (() => Promise<any>)
   argsDef?: string[]
   convertArg?: (arg: string, i: number, param: AbiParameter) => any
   onArgs?: (args: string[]) => void
-  txProps?: Omit<Parameters<typeof ApproveAndTx>[0], 'tx' | 'config' | 'className'>
+  txProps?: Omit<Parameters<typeof Txs>[0], 'txs' | 'className'>
 }) {
   const abiItem = abi.find((item) => item.type == 'function' && item.name == functionName) as AbiFunction
   const inputsLength = abiItem?.inputs?.length || 0
@@ -95,7 +97,11 @@ export function GeneralAction({
   }, [args])
   if (!abiItem) return
   const disableExpand = !abiItem.inputs || abiItem.inputs.length == 0
-
+  const { data: qInfo, isLoading, isError, refetch } = useQuery({
+    queryKey: ['queryInfo', address, functionName, infos],
+    enabled: Boolean(infos),
+    queryFn: async () => promiseT(infos)
+  })
   return (
     <Expandable tit={tit || functionName} disable={disableExpand}>
       {abiItem.inputs?.map((item, index) => (
@@ -122,19 +128,28 @@ export function GeneralAction({
           className={cn(inputClassname)}
         />
       </div>}
-      {infos}
-      <ApproveAndTx
+      {
+        Boolean(infos) && <div className={cn('whitespace-normal')}>
+          {isLoading && <Spinner />}
+          {Boolean(qInfo) && JSON.stringify(qInfo, undefined, 2)}
+        </div>
+      }
+      <Txs
         {...(txProps || {})}
+        onTxSuccess={() => {
+          Boolean(infos) && refetch()
+          txProps?.onTxSuccess?.()
+        }}
         tx='Write'
-        config={
+        txs={[
           {
             abi,
             address,
             functionName,
             ...(margs.length ? { args: convertArgs(margs, abiItem.inputs, convertArg) } : {}),
             value: valueBn
-          } as any
-        }
+          }
+        ]}
         className={cn('!mt-0 flex items-center justify-center gap-4', disableExpand ? 'max-w-[100px]' : 'w-full')}
       />
     </Expandable>
