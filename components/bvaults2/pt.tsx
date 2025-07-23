@@ -71,10 +71,11 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     }
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         if (isToggled) {
+            
             const txsApproves = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: input.address, amount: inputAssetBn }],
                 pc: getPC(vc.chain),
-                user: address!,
+                user: arg.wc.account.address,
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
@@ -86,21 +87,21 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                 vc,
                 btShareBn: outAmount,
                 token: output.address,
-                user: address!
+                user: arg.wc.account.address
             })
             return [...txsApproves, ...unwrapBTtxs]
         } else {
-            await withIfAiraSign({ ...arg, token: input, user: address! })
+            await withIfAiraSign({ ...arg, token: input, user:arg.wc.account.address })
             const wrapBt = await wrapToBT({
                 vc,
                 inputBn: inputAssetBn,
                 token: input.address,
-                user: address!
+                user: arg.wc.account.address
             })
             const txsApprove = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBt.sharesBn }],
                 pc: getPC(vc.chain),
-                user: address!,
+                user: arg.wc.account.address,
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,

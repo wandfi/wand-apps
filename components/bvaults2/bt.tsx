@@ -45,7 +45,7 @@ export async function wrapToBT({ vc, token, inputBn, user }: { vc: BVault2Config
         // to bt
         sharesBn = await getPC(vc.chain).readContract({ abi: abiBT, address: vc.bt, functionName: 'previewDeposit', args: [btinput, inputBn] })
         txs = [...txs, ...(await withTokenApprove({
-            approves: [{ token, spender: vc.bt, amount: inputBn }], user, pc: getPC(vc.chain),
+            approves: [{ token: btinput, spender: vc.bt, amount: inputBn }], user, pc: getPC(vc.chain),
             tx: {
                 abi: abiBT, address: vc.bt, functionName: 'deposit', args: [user, btinput, inputBn, sharesBn * 99n / 100n],
                 name: `${getTokenBy(btinput, vc.chain)!.symbol} to ${getTokenBy(vc.bt, vc.chain)!.symbol}`

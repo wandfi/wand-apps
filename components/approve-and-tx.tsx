@@ -2,14 +2,14 @@ import { useApproves } from '@/hooks/useApprove'
 import { useWrapContractWrite } from '@/hooks/useWrapContractWrite'
 import { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, SimulateContractParameters, WalletClient, zeroAddress } from 'viem'
+import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, RpcSchema, SimulateContractParameters, WalletClient, zeroAddress } from 'viem'
 
 import { useCurrentChainId, useNetworkWrong } from '@/hooks/useCurrentChainId'
 import { cn, getErrorMsg, handleError, promiseT } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useMutation } from '@tanstack/react-query'
 import { toast as tos } from 'sonner'
-import { useSwitchChain, useWalletClient } from 'wagmi'
+import { Transport, useSwitchChain, useWalletClient } from 'wagmi'
 import { BBtn } from './ui/bbtn'
 import { create } from 'zustand'
 import { FaCheck, FaSpinner } from "react-icons/fa6";
@@ -98,7 +98,7 @@ export const useTxsStore = create(() => ({ txs: [] as TxConfig[], progress: 0 })
 export function Txs({
   className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, disableProgress, onTxSuccess }:
   {
-    className?: string, tx: string, disabled?: boolean, txs: TX[] | ((args: { pc: PublicClient, wc: WalletClient }) => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
+    className?: string, tx: string, disabled?: boolean, txs: TX[] | ((args: { pc: PublicClient, wc: WalletClient<Transport, Chain, Account, RpcSchema> }) => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
     disableSendCalls?: boolean
     disableProgress?: boolean
     onTxSuccess?: () => void
@@ -186,7 +186,7 @@ export async function withTokenApprove({ approves, pc, user, tx }: {
 export function TxsStat({ className }: { className?: string }) {
   const { txs, progress } = useTxsStore()
   if (txs.length == 0) return null
-  return <SimpleDialog open className={cn('w-80 text-black dark:text-white flex flex-col gap-2 p-4', className)}>
+  return <SimpleDialog open disableClose className={cn('w-80 text-black dark:text-white flex flex-col gap-2 p-4', className)}>
     <div className='text-xl font-semibold'>Progress</div>
     {txs.map((tx, i) => <div key={`tx_item_stat_${i}`} className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
       <span className='font-semibold'>{i + 1}</span>

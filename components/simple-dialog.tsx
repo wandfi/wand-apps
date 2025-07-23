@@ -48,12 +48,11 @@ export function SimpleDialog({
           )}
         >
           {children}
-          <Dialog.Close
-            disabled={disableClose}
+          {!disableClose && <Dialog.Close
             className={cn('absolute right-4 top-4 cursor-point text-xl', closeClassName)}
           >
             <IoIosCloseCircleOutline />
-          </Dialog.Close>
+          </Dialog.Close>}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
