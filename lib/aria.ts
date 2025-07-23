@@ -46,9 +46,6 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
   }
 }
 
-
-
-
 const Decimal_27 = 10n ** 27n
 
 export function genAplBtConvert(bt: Address): TokenConvert {
@@ -69,7 +66,7 @@ export function genAplBtConvert(bt: Address): TokenConvert {
       return withTokenApprove({
         pc: getPC(chain),
         user,
-        approves: isZeroToOne ? [] : [],
+        approves: isZeroToOne ? [{ token: apl, amount, spender: stakingAPL }] : [],
         tx: {
           abi: abiStakingAPL,
           address: stakingAPL,

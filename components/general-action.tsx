@@ -95,13 +95,13 @@ export function GeneralAction({
   useEffect(() => {
     onArgs && onArgs(args)
   }, [args])
-  if (!abiItem) return
-  const disableExpand = !abiItem.inputs || abiItem.inputs.length == 0
   const { data: qInfo, isLoading, isError, refetch } = useQuery({
     queryKey: ['queryInfo', address, functionName, infos],
     enabled: Boolean(infos),
     queryFn: async () => promiseT(infos)
   })
+  if (!abiItem) return
+  const disableExpand = !abiItem.inputs || abiItem.inputs.length == 0
   return (
     <Expandable tit={tit || functionName} disable={disableExpand}>
       {abiItem.inputs?.map((item, index) => (

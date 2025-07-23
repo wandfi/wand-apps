@@ -68,6 +68,7 @@ export const abiBT = parseAbi([
 export const abiHook = parseAbi([
   'function getAmountOutBTToVPT(uint256 amountBT) external view returns (uint256 amountVPT)',
   'function getAmountOutVPTToBT(uint256 amountVPT) external view returns (uint256 amountBT)',
+  'function getBTAddress() external view returns (address)',
 ])
 
 export const abiBvault2Query = parseAbi([

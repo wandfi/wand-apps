@@ -4,7 +4,7 @@ import { ApproveAndTx } from '@/components/approve-and-tx'
 import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/components/general-action'
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiMockERC20, abiProtocolSettings, abiZooProtocol } from '@/config/abi'
-import { abiBVault2, abiMockInfraredVault, abiProtocol } from '@/config/abi/BVault2'
+import { abiBVault2, abiHook, abiMockInfraredVault, abiProtocol } from '@/config/abi/BVault2'
 import { getCurrentChain } from '@/config/network'
 import { getTokenBy } from '@/config/tokens'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
@@ -174,7 +174,8 @@ export default function AdminPage() {
             <GeneralAction abi={abiBVault2} functionName="updateBootstrapDuration" address={current.data.vault} />
             <GeneralAction abi={abiBVault2} functionName="pause" address={current.data.vault} />
             <GeneralAction abi={abiBVault2} functionName="unpause" address={current.data.vault} />
-            <GeneralAction abi={abiProtocol} functionName='addPremiumHook' argsDef={[current.data.bt, current.data.hook]} address={current.data.protocal} />
+            <GeneralAction abi={abiProtocol} functionName='addPremiumHook' argsDef={[current.data.bt, current.data.hook]} address={current.data.protocal}
+              infos={() => promiseAll({ hookBT: getPC(current.data.chain).readContract({ abi: abiHook, address: current.data.hook, functionName: 'getBTAddress' }) })} />
             <GeneralAction tit='updateYieldSwapHookHelper' abi={abiZooProtocol} functionName='updateYieldSwapHookHelper' address={current.data.protocal} />
             <GeneralAction tit='protocal (transferOwnership)' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocal} />
             <GeneralAction tit='protocal (acceptOwnership)' abi={abiZooProtocol} functionName='acceptOwnership' address={current.data.protocal} />
