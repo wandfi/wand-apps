@@ -1,6 +1,4 @@
-import { abiCrocQuery } from '@/config/abi'
 import { getNftTokensIdsByUser, getTokenPricesBySymbol } from '@/config/api'
-import { CrocQueryAddress, HONEY_Address } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { getCurrentChain, getCurrentChainId, story, storyTestnet } from '@/config/network'
 import { DECIMAL } from '@/constants'
@@ -136,6 +134,9 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
 
       '0xd5255Cc08EBAf6D54ac9448822a18d8A3da29A42': DECIMAL,
       '0xF1815bd50389c46847f0Bda824eC8da914045D14': DECIMAL,
+
+      '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5': DECIMAL,
+      
     },
     updateTokenPrices,
 

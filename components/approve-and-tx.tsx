@@ -110,11 +110,15 @@ export function Txs({
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       if (!wc) return
-      const calls = await promiseT(txs, { wc, pc: getPC(chainId) }).then(items => Promise.all(items.map(promiseT)))
+      const pc = getPC(chainId);
+      const calls = await promiseT(txs, { wc, pc }).then(items => Promise.all(items.map(promiseT)))
       console.info('calls:', wc.account.address, calls)
       try {
         if (disableSendCalls) {
           throw new Error('disable wallet_sendCalls')
+        }
+        if (calls.length == 1) {
+          throw new Error('calls length one wallet_sendCalls')
         }
         const { id } = await wc.sendCalls({
           account: wc.account.address,
@@ -133,16 +137,16 @@ export function Txs({
         }
       } catch (error) {
         const msg = getErrorMsg(error)
+        const showTxsStat = !disableProgress && calls.length > 1
         if (msg && (msg.includes('wallet_sendCalls') || msg.includes('EIP-7702 not supported'))) {
-          const pc = getPC(chainId)
           let progress = 0;
-          !disableProgress && useTxsStore.setState({ txs: calls, progress })
+          showTxsStat && useTxsStore.setState({ txs: calls, progress })
           for (const item of calls) {
-            const tx = await wc.writeContract(item)
+            const tx = await wc.writeContract((await pc.simulateContract(item)).request)
             const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 2 })
             if (res.status !== 'success') throw new Error('Transactions Reverted')
             progress++
-            !disableProgress && useTxsStore.setState({ progress })
+            showTxsStat && useTxsStore.setState({ progress })
           }
           toast && tos.success("Transactions Success")
           useTxsStore.setState({ progress: 0, txs: [] })
