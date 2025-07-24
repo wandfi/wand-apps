@@ -83,23 +83,12 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })
-            const unwrapBTtxs = await convertBt(
-                vc,
-                false,
-                output.address,
-                outAmount,
-                arg.wc.account.address
-            )
+            const btAmount = await arg.pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactPTforBT', args: [inputAssetBn] })
+            const unwrapBTtxs = await convertBt(vc, false, output.address, btAmount, arg.wc.account.address)
             return [...txsApproves, ...unwrapBTtxs.txs]
         } else {
             await withIfAiraSign({ ...arg, token: input, user: arg.wc.account.address })
-            const wrapBt = await convertBt(
-                vc,
-                true,
-                input.address,
-                inputAssetBn,
-                arg.wc.account.address
-            )
+            const wrapBt = await convertBt(vc, true, input.address, inputAssetBn, arg.wc.account.address)
             const txsApprove = await withTokenApprove({
                 approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBt.out }],
                 pc: getPC(vc.chain),
@@ -234,7 +223,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
             functionName: 'redeemByPTandYT',
             args: [inputBn]
         }]
-        const unwrapBTtxs = await convertBt(vc, false, out.address, outAmount, arg.wc.account.address)
+        const unwrapBTtxs = await convertBt(vc, false, out.address, inputBn, arg.wc.account.address)
         return [...redeemTxs, ...unwrapBTtxs.txs]
     }
     return <div className='flex flex-col gap-1'>

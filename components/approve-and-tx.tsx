@@ -151,6 +151,8 @@ export function Txs({
           toast && tos.success("Transactions Success")
           useTxsStore.setState({ progress: 0, txs: [] })
           onTxSuccess?.()
+        } else {
+          throw error
         }
       }
     },

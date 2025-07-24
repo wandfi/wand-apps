@@ -97,7 +97,8 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })
-            const unwrapTxs = await convertBt(vc, false, output.address, outAmount, arg.wc.account.address)
+            let btAmount = await arg.pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'quoteExactYTforBT', args: [inputAssetBn] })
+            const unwrapTxs = await convertBt(vc, false, output.address, btAmount, arg.wc.account.address)
             return [...txsApproves, ...unwrapTxs.txs]
 
         } else {

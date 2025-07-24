@@ -82,7 +82,6 @@ export function BT({ vc }: { vc: BVault2Config }) {
 
     const tokens = useWrapBtTokens(vc, false)
     const [cToken, setCToken] = useState<Token>(tokens[0])
-    const { address } = useAccount()
     const assetBalance = useBalance(asset)
     const btBalance = useBalance(bt)
     const btTotalSupply = useTotalSupply(bt)
@@ -107,8 +106,8 @@ export function BT({ vc }: { vc: BVault2Config }) {
         toggle()
     }
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
-        !isToggled && await withIfAiraSign({ ...arg, token: cToken, user: address! })
-        const { txs } = await convertBt(vc, !isToggled, cToken.address, inputAssetBn, address!)
+        !isToggled && await withIfAiraSign({ ...arg, token: cToken, user: arg.wc.account.address })
+        const { txs } = await convertBt(vc, !isToggled, cToken.address, inputAssetBn, arg.wc.account.address)
         return txs;
     }
     const { result: unlerlingApy } = useUnderlingApy(vc)
