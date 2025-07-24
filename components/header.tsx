@@ -12,7 +12,7 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
-import { LuBox, LuLineChart, LuSettings, LuUserCircle } from 'react-icons/lu'
+import { LuBox, LuChartLine, LuSettings, LuCircleUser, LuSquareSquare } from 'react-icons/lu'
 import { TbBook2, TbBrandDiscordFilled, TbBrandX, TbChevronDown } from 'react-icons/tb'
 import { useWindowSize } from 'react-use'
 import { isAddressEqual } from 'viem'
@@ -42,11 +42,11 @@ export function Header() {
   const showAdmin = useShowAdmin()
   const links = useMemo(() => {
     const links = [
-      ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuBox, disable: false }] : []),
+      ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuSquareSquare, disable: false }] : []),
       { href: '/yield-vault', label: 'Yield-Vault', icon: LuBox, disable: false },
       // { href: '/l-vaults', label: 'L-Vaults', icon: LuBox, disable: true },
-      { href: '/portfolio', label: 'Portfolio', icon: LuUserCircle },
-      { href: '/dashboard', label: 'Dashboard', icon: LuLineChart },
+      { href: '/portfolio', label: 'Portfolio', icon: LuCircleUser },
+      { href: '/dashboard', label: 'Dashboard', icon: LuChartLine },
     ]
     showAdmin && links.push({ href: '/admin', label: 'Admin', icon: LuSettings })
 
