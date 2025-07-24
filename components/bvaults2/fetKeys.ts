@@ -13,6 +13,7 @@ export const FetKEYS = {
   BTPriceUsd: (vc: BVault2Config) => `btPrice:${vc.bt}`,
   UnderlingApy: (vc: BVault2Config) => `underlingApy:${vc.asset}`,
   BTPriceConvertToken: (vc: BVault2Config, token?: Address) => (token ? `BTPriceConvertToken:${vc.bt}:${token}` : ''),
+  Bvault2TVL: (vc: BVault2Config) => `Bvualt2TVL:${vc.vault}`
 }
 
 export function reFetWithBvault2(vc: BVault2Config, ...keys: string[]) {

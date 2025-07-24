@@ -13,7 +13,7 @@ import { BT } from "./bt";
 import { LP } from "./lp";
 import { PT } from "./pt";
 import { usePTApy, useYTRoi } from "./useDatas";
-import { getBvault2EpochTimes, getBvualt2Times, useBvualt2Data } from "./useFets";
+import { getBvault2EpochTimes, getBvualt2Times, useBvault2TVL, useBvualt2Data } from "./useFets";
 import { YT } from "./yt";
 import { Points } from "./points";
 
@@ -22,6 +22,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const vd = vdFS.result
     const { startTime, endTime, reamin, progress } = getBvault2EpochTimes(vd)
     const asset = getTokenBy(vc.asset, vc.chain)!
+    const tvl = useBvault2TVL(vc)
     return <div className="animitem card bg-white flex flex-col gap-10">
         <div className="flex items-center gap-4">
             <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol={asset.symbol} />{vc.tit}</div>
@@ -31,7 +32,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
             </div>
             <div className="flex flex-col gap-2 mt-2 ml-10">
                 <div className="font-semibold text-sm">Total Vaule Locked</div>
-                <div className="text-xs font-medium opacity-60 leading-4">$-</div>
+                <div className="text-xs font-medium opacity-60 leading-4">${displayBalance(tvl, 2, asset.decimals)}</div>
             </div>
         </div>
         <div className="font-medium text-sm opacity-70">
@@ -73,6 +74,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const { endTime, reamin } = getBvualt2Times(vd)
     const [apy] = usePTApy(vc)
     const [roi] = useYTRoi(vc)
+    const tvl = useBvault2TVL(vc)
     if (!asset) return null
     return <div className={cn('animitem card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} >
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
@@ -83,7 +85,7 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
             </div>
             <div className='ml-auto'>
                 <div className='text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{'Total Value Locked'}</div>
-                <div className='text-sm font-medium'>${displayBalance(0n, 2)}</div>
+                <div className='text-sm font-medium'>${displayBalance(tvl, 2, asset.decimals)}</div>
             </div>
         </div>
 

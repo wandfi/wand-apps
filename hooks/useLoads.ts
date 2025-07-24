@@ -33,7 +33,7 @@ export function useLoadBVaults() {
     queryKey: ['UpdateBvautlsTokens', tokens],
     enabled: chainId == story.id,
     queryFn: async () => {
-      await Promise.all([useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(chainId,tokens), useBoundStore.getState().sliceTokenStore.updateTokenPrices(tokens)])
+      await Promise.all([useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(chainId,tokens), useBoundStore.getState().sliceTokenStore.updateTokenPrices()])
       return true
     },
     throwOnError(error, query) {

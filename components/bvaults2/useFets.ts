@@ -2,15 +2,16 @@ import { abiBVault2, abiBvault2Query, abiRewardManager } from '@/config/abi/BVau
 import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
-import { DECIMAL_10 } from '@/constants'
+import { DECIMAL, DECIMAL_10 } from '@/constants'
 import { useFet } from '@/hooks/useFet'
-import { aarToNumber, bnRange, promiseAll, UnPromise } from '@/lib/utils'
+import { aarToNumber, bnRange, getBigint, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
 import { Address, erc20Abi, parseUnits, PublicClient } from 'viem'
 import { useAccount } from 'wagmi'
 import { FetKEYS } from './fetKeys'
 import { getLpToken } from './getToken'
+import { useStore } from '@/providers/useBoundStore'
 
 export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient) {
   return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
@@ -146,4 +147,11 @@ export function useBvault2LPBTRewards(vc: BVault2Config) {
     },
   })
   return rewards
+}
+
+export function useBvault2TVL(vc: BVault2Config) {
+  const vd = useBvualt2Data(vc)
+  const prices = useStore((s) => s.sliceTokenStore.prices, ['sliceTokenStore.prices'])
+  const btPrice = getBigint(prices, vc.bt)
+  return ((vd.result?.totalDeposits ?? 0n) * btPrice) / DECIMAL
 }

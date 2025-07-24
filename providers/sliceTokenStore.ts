@@ -1,6 +1,5 @@
 import { getNftTokensIdsByUser, getTokenPricesBySymbol } from '@/config/api'
-import { LP_TOKENS } from '@/config/lpTokens'
-import { getCurrentChain, getCurrentChainId, story, storyTestnet } from '@/config/network'
+import { getCurrentChainId, story, storyTestnet } from '@/config/network'
 import { DECIMAL } from '@/constants'
 import _ from 'lodash'
 import { Address, erc20Abi, zeroAddress } from 'viem'
@@ -19,7 +18,7 @@ export type TokenStore = {
   prices: { [k: Address]: bigint }
 
   updateTokenTotalSupply: (chainId: number, tokens: Address[]) => Promise<TokenStore['totalSupply']>
-  updateTokenPrices: (tokens: Address[]) => Promise<TokenStore['prices']>
+  updateTokenPrices: () => Promise<TokenStore['prices']>
 
   // ---------------------- For current user ------------------------
   balances: { [k: Address]: bigint }
@@ -60,24 +59,17 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
     return map
   }
 
-  const updateTokenPrices = async (tokens: Address[]) => {
-    const groups = _.groupBy(tokens, (token) => (LP_TOKENS[token] ? 'lp' : 'token'))
-    const mLps = groups['lp'] || []
-    // const mTokens = groups['token'] || []
-    if (mLps.length !== 0) {
-      console.info('mlps;', tokens, mLps)
-      // for testnet
-      const chain = getCurrentChain()
-      if (chain.id === storyTestnet.id) {
-        // await updateLPTokensStatForTest(mLps)
-      } else if (chain.id === story.id) {
-        // const map = await getBeraTokensPrices()
-        // set({ prices: { ...get().prices, ...map } })
-      }
-    }
+  const updateTokenPrices = async () => {
     const prices = await getTokenPricesBySymbol(['IP'])
     if (prices.length) {
-      set({ prices: { ...get().prices, '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': prices[0].price } })
+      set({
+        prices: {
+          ...get().prices,
+          '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': prices[0].price,
+          '0x773dd6686df237a7b3fe02632e91bd3664d81a0c': DECIMAL,
+          '0x1e0ca0e6bbf6b2e14c6e5360e430905759fd8677': DECIMAL,
+        },
+      })
     }
     // const  getTokenPricesBySymbol()
     return {}
@@ -136,7 +128,6 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
       '0xF1815bd50389c46847f0Bda824eC8da914045D14': DECIMAL,
 
       '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5': DECIMAL,
-      
     },
     updateTokenPrices,
 
