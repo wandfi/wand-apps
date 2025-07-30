@@ -13,7 +13,6 @@ import { useState } from "react";
 import { BsFire } from "react-icons/bs";
 import { Txs, withTokenApprove } from "../approve-and-tx";
 import { GetByStoryHunt } from "../get-lp";
-import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
 import { convertBt, useWrapBtTokens } from "./bt";
@@ -86,7 +85,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                 <div className="font-medium text-sm flex items-center gap-2 mt-2">
                     Deposited: {displayBalance(lpBalance.result, undefined, lp?.decimals)} <Tip>The deposited assets will become LP after launch and users can withdraw deposited assets anytime.</Tip>
                 </div>
-                <div className="font-medium text-sm justify-between flex items-center mt-4">
+                {/* <div className="font-medium text-sm justify-between flex items-center mt-4">
                     <div>Pool Share: --.--%</div>
                     <div className="flex items-start gap-2">Share a total rewards of ---- <CoinIcon size={20} symbol={asset.symbol} /></div>
                 </div>
@@ -106,7 +105,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                     onTxSuccess={() => {
                         setInputAsset('')
                     }}
-                />
+                /> */}
             </div>
         </div>
     </div>

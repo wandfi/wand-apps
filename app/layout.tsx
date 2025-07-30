@@ -8,8 +8,10 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 import './globals.css'
+import dynamic from 'next/dynamic'
 
-import PageLayout from './pagelayout'
+const PageLayout = dynamic(() => import("./pagelayout"), { ssr: false })
+
 const inter = Inter({ subsets: ['latin'] })
 
 const baseMeta = {
