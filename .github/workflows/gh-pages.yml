@@ -85,7 +85,7 @@ jobs:
       - name: Deploy Gh-Pages 🚀
         uses: XueMoMo/actions-gh-pages@v4.0.1
         with:
-          deploy_key: ${{ secrets.DK_STORY_TEST3 }}
+          deploy_key: ${{ secrets.DK_TEST1 }}
           publish_dir: ./out
           external_repository: wandfi/wand-apps-site-test
           cname: test-app.wandfi.io
