@@ -12,6 +12,8 @@ import { useAccount } from 'wagmi'
 import { FetKEYS } from './fetKeys'
 import { getLpToken } from './getToken'
 import { useStore } from '@/providers/useBoundStore'
+import { useBalance } from '@/hooks/useToken'
+import { useLogs } from './useDatas'
 
 export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient) {
   return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
@@ -153,5 +155,9 @@ export function useBvault2TVL(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
   const prices = useStore((s) => s.sliceTokenStore.prices, ['sliceTokenStore.prices'])
   const btPrice = getBigint(prices, vc.bt)
-  return ((vd.result?.totalDeposits ?? 0n) * btPrice) / DECIMAL
+  const bt = getTokenBy(vc.bt, vc.chain)!
+  const mintPoolBt = useBalance(bt, vd.result?.mintPoolTokenPot)
+  const logs = useLogs(vc)
+  const totalBt = logs.result?.BTtp ?? 0n + mintPoolBt.result
+  return (totalBt * btPrice) / DECIMAL
 }
