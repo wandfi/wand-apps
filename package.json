@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5321",
+    "dev": "next dev -p 6321",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -36,7 +36,7 @@
     "axios": "^1.6.7",
     "bignumber.js": "^9.1.2",
     "class-variance-authority": "^0.6.1",
-    "clsx": "^2.0.0",
+    "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.10",
     "echarts": "^5.5.1",

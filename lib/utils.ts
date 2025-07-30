@@ -1,12 +1,10 @@
+import { DECIMAL } from '@/constants'
 import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-import { formatUnits, parseUnits, parseEther as _parseEther, etherUnits, Address, isAddressEqual } from 'viem'
+import dayjs from 'dayjs'
 import _, { get, now, round } from 'lodash'
 import { toast } from 'sonner'
-import dayjs from 'dayjs'
-import { DECIMAL } from '@/constants'
-import { getCurrentChainId } from '@/config/network'
-import { Token, TOKENS_MAP } from '@/config/tokens'
+import { twMerge } from 'tailwind-merge'
+import { parseEther as _parseEther, Address, etherUnits, formatUnits, isAddressEqual, parseUnits } from 'viem'
 
 export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer S> ? S : T
 export type UnPromise<T extends (() => Promise<any>) | Promise<any>> = T extends () => Promise<infer U> ? U : T extends Promise<infer M> ? M : never

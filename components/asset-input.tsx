@@ -1,8 +1,7 @@
 'use client'
 
-import { parseEthers } from '@/lib/utils'
+import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import clsx from 'clsx'
 import { useRef } from 'react'
 import Select from 'react-select'
 import { formatUnits } from 'viem'
@@ -80,7 +79,7 @@ export function AssetInput({
         </div>
         <div className='absolute flex items-center gap-2 w-fit top-1/2 left-4 -translate-y-1/2' ref={coinSymbolRef}>
           <CoinIcon size={24} symbol={assetIcon || asset} url={assetURL} />
-          <div className={clsx('relative', price || exchange ? '-top-[6px]' : '')}>
+          <div className={cn('relative', price || exchange ? '-top-[6px]' : '')}>
             {Boolean(options) && options!!.length > 1 ? (
               <Select
                 options={options}
@@ -132,7 +131,7 @@ export function AssetInput({
           type='number'
           disabled={disable}
           style={{ paddingLeft: `${_.round((coinSymbolWidth + 32) / 16, 3)}rem` }}
-          className={clsx(
+          className={cn(
             readonly ? 'bg-slate-50 cursor-not-allowed dark:bg-slate-800' : 'bg-white dark:bg-transparent',
             {
               'border-green-700 border-2': selected,

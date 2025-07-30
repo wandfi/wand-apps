@@ -1,9 +1,8 @@
 'use client'
 
 import { Token } from '@/config/tokens'
-import { parseEthers } from '@/lib/utils'
+import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import clsx from 'clsx'
 import _ from 'lodash'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMeasure } from 'react-use'
@@ -109,7 +108,7 @@ export function TokenInput({
           type='number'
           disabled={disable}
           style={{ paddingLeft: `${_.round((coinSymbolWidth + 32) / 16, 3)}rem` }}
-          className={clsx(
+          className={cn(
             readonly ? 'bg-slate-50 cursor-not-allowed dark:bg-slate-800' : 'bg-white dark:bg-transparent',
             {
               'border-green-700 border-2': selected,

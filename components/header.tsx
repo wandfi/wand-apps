@@ -8,7 +8,6 @@ import { DomainRef } from '@/hooks/useConfigDomain'
 import { getPC } from '@/providers/publicClient'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useQuery } from '@tanstack/react-query'
-import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
@@ -22,6 +21,7 @@ import { CoinIcon } from './icons/coinicon'
 import { SwitchChain } from './switch-chain'
 import { ThemeMode } from './theme-mode'
 import { Tip } from './ui/tip'
+import { cn } from '@/lib/utils'
 
 export function useShowAdmin() {
   const { address } = useAccount()
@@ -72,7 +72,7 @@ export function Header() {
           </Link>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger
-              className={clsx('flex text-slate-500 dark:text-slate-50 font-medium items-center capitalize text-sm whitespace-nowrap', {
+              className={cn('flex text-slate-500 dark:text-slate-50 font-medium items-center capitalize text-sm whitespace-nowrap', {
                 hidden: !hiddenTitle,
               })}
             >
@@ -131,7 +131,7 @@ export function Header() {
 
               return (
                 <Link
-                  className={clsx(
+                  className={cn(
                     'text-sm font-medium flex gap-1 items-center transition-all active:translate-y-1',
                     pathname === href ? 'text-slate-700 dark:text-slate-50' : 'text-slate-500 dark:text-slate-50/50',
                   )}
