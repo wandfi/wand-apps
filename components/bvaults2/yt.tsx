@@ -26,7 +26,8 @@ import { convertBt, previewConvertBt, useWrapBtTokens } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { useYtToken } from "./getToken"
 import { PTYTMint, PTYTRedeem } from "./pt"
-import { useBTPriceConvertToken, usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
+import { useBTPriceConvertToken, useLogs, usePTApy, useYTPriceBt, useYTRoi } from "./useDatas"
+import { Bvault2Feerate } from "./feerate"
 
 
 function YTSwap({ vc }: { vc: BVault2Config }) {
@@ -44,9 +45,8 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const input = isToggled ? yt : ct
     const output = isToggled ? ct : yt
     const inputBalance = useBalance(input)
-
     const { result: ytPriceBt } = useYTPriceBt(vc)
-    const { result: btPriceCT} = useBTPriceConvertToken(vc, ct.address)
+    const { result: btPriceCT } = useBTPriceConvertToken(vc, ct.address)
     const ytPriceCT = ytPriceBt * btPriceCT
     const price = _.round(isToggled ? ytPriceCT : ytPriceCT > 0 ? 1 / ytPriceCT : 0, 2)
     const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
@@ -121,6 +121,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     }
     const inputSetCT = (t: Token) => !isToggled && setCT(t)
     const outputSetCT = (t: Token) => isToggled && setCT(t)
+
     return <div className='flex flex-col gap-1'>
         <TokenInput tokens={inputs} onTokenChange={inputSetCT} amount={inputAsset} setAmount={setInputAsset} error={errorInput} />
         <Swap onClick={onSwitch} />
@@ -138,7 +139,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 Est. ROI Change:   {formatPercent(roi)} → {formatPercent(roito)}<br />
                 Implied APY Change: {formatPercent(apy)} → {formatPercent(apyTo)}
             </div>
-            <Fees fees={'0.3%'} />
+            <Bvault2Feerate vc={vc} />
         </div>
         <Txs
             className='mx-auto mt-4'

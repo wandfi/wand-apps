@@ -24,6 +24,7 @@ import { convertBt, previewConvertBt, useWrapBtTokens } from "./bt"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, useBTPriceConvertToken, usePTApy } from "./useDatas"
+import { Bvault2Feerate } from "./feerate"
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
@@ -120,7 +121,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         </div>
         <div className="flex justify-between items-center text-xs font-medium opacity-60">
             <div>Implied APY Change: {formatPercent(apy)} → {formatPercent(apyto)}</div>
-            <Fees fees={'0.3%'} />
+            <Bvault2Feerate vc={vc} />
         </div>
         <Txs
             className='mx-auto mt-4'
