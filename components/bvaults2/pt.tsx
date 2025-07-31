@@ -78,6 +78,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                 pc: getPC(vc.chain),
                 user: arg.wc.account.address,
                 tx: {
+                    name: `Swap ${pt.symbol} for ${bt.symbol}`,
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: 'swapExactPTforBT',
@@ -95,6 +96,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
                 pc: getPC(vc.chain),
                 user: arg.wc.account.address,
                 tx: {
+                    name: `Swap ${bt.symbol} for ${pt.symbol}`,
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: 'swapExactBTforPT',
@@ -167,7 +169,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
         const txsApprove = await withTokenApprove({
             approves: [{ spender: vc.vault, token: vc.bt, amount: wrapBT.out, }],
             pc: getPC(vc.chain), user: address,
-            tx: { abi: abiBVault2, address: vc.vault, functionName: 'mintPTandYT', args: [wrapBT.out] }
+            tx: { name: `Mint ${pt.symbol} and ${yt.symbol}`, abi: abiBVault2, address: vc.vault, functionName: 'mintPTandYT', args: [wrapBT.out] }
         })
         return [...wrapBT.txs, ...txsApprove]
     }
@@ -206,7 +208,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const ytBalance = useBalance(yt)
     const outBalance = useBalance(out)
     const [input, setInput] = useState('')
-    const inputBn = parseEthers(input)
+    const inputBn = parseEthers(input, pt.decimals)
     const [calcKey, setCalcKey] = useState<any[]>(['calcPTYTRedeemOut'])
     useDebounce(() => setCalcKey(['calcPTYTRedeemOut', inputBn, out]), 300, [inputBn, out])
     const { data: outAmount, isFetching: isFetchingOut } = useQuery({
@@ -219,6 +221,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     })
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
         const redeemTxs = [{
+            name: `Redeem ${pt.symbol} and ${yt.symbol}`,
             abi: abiBVault2,
             address: vc.vault,
             functionName: 'redeemByPTandYT',

@@ -194,13 +194,16 @@ export function TxsStat({ className }: { className?: string }) {
   if (txs.length == 0) return null
   return <SimpleDialog open disableClose className={cn('w-80 text-black dark:text-white flex flex-col gap-2 p-4', className)}>
     <div className='text-xl font-semibold'>Progress</div>
-    {txs.map((tx, i) => <div key={`tx_item_stat_${i}`} className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
-      <span className='font-semibold'>{i + 1}</span>
-      {tx.name ?? tx.functionName}
-      <div className={cn('ml-auto text-xl', { 'animate-spin': progress == i })}>
-        {progress == i && <FaSpinner />}
-        {progress > i && <FaCheck className='text-green-500' />}
-      </div>
-    </div>)}
+    <div className='flex flex-col gap-2 max-h-80 overflow-y-auto px-2.5'>
+      {txs.map((tx, i) => <div key={`tx_item_stat_${i}`} className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
+        <span className='font-semibold'>{i + 1}</span>
+        {tx.name ?? tx.functionName}
+        <div className={cn('ml-auto text-xl', { 'animate-spin': progress == i })}>
+          {progress == i && <FaSpinner />}
+          {progress > i && <FaCheck className='text-green-500' />}
+        </div>
+      </div>)}
+    </div>
+    <div className='opacity-80 text-center'>Will require multiple signatures, this will be simplified into 1 approval with future updates!</div>
   </SimpleDialog>
 }

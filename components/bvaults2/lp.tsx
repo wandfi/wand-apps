@@ -65,7 +65,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
     })
     const outAmount = ptc.result >= ytc.result ? ptAmount : ytAmount
     const [poolShare, poolShareTo] = useLpShare(vc, lpAmount)
-    const inputError = isSuccess(poolBtBalance) && !isFetchingOut && inputAssetBn > 0n && poolBtBalance.result < bestBt1 ? 'Exceeds the maximum allowed amount' : undefined
+    const inputError = isSuccess(poolBtBalance) && instantmode && !isFetchingOut && inputAssetBn > 0n && poolBtBalance.result < bestBt1 ? 'Exceeds the maximum allowed amount' : undefined
     return <div className='flex flex-col gap-1'>
         <AssetInput asset={input.symbol} amount={inputAsset} balance={inputBalance.result} setAmount={setInputAsset} error={inputError} />
         <SwapDown />
@@ -94,6 +94,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
                 user: address!,
                 pc: getPC(vc.chain),
                 tx: {
+                    name: instantmode ? 'Add Liquidity Instant' : 'Add Liquidity',
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: instantmode ? 'addLiquidityInstant' : 'addLiquidity',
@@ -162,7 +163,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
                 tx: {
                     abi: abiBVault2,
                     address: vc.vault,
-                    functionName: 'removeLiquidity',
+                    functionName: 'Remove Liquidity',
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })}

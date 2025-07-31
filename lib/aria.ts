@@ -68,6 +68,7 @@ export function genAplBtConvert(bt: Address): TokenConvert {
         user,
         approves: isZeroToOne ? [{ token: apl, amount, spender: stakingAPL }] : [],
         tx: {
+          name: isZeroToOne ? `Stake APL for stAPL` : 'Unstake stAPL for APL',
           abi: abiStakingAPL,
           address: stakingAPL,
           functionName: isZeroToOne ? 'stake' : 'unstake',

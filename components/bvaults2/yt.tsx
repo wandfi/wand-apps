@@ -34,6 +34,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
     const yt = useYtToken(vc)!
+    const bt = getTokenBy(vc.bt, vc.chain)!
     const ytBalance = useBalance(yt)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
@@ -91,6 +92,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 pc: getPC(vc.chain),
                 user: address!,
                 tx: {
+                    name: `Swap ${yt.symbol} for ${bt.symbol}`,
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: 'swapExactYTforBT',
@@ -109,6 +111,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
                 pc: getPC(vc.chain),
                 user: address!,
                 tx: {
+                    name: `Swap ${bt.symbol} for ${yt.symbol}`,
                     abi: abiBVault2,
                     address: vc.vault,
                     functionName: 'swapBTforExactYT',

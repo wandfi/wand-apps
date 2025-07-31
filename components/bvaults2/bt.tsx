@@ -47,6 +47,8 @@ export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
 
 
 export function genBtConvert(chain: number, bt: Address, btinput: Address): TokenConvert {
+    const input = getTokenBy(btinput, chain)!
+    const BT = getTokenBy(bt, chain)!
     return {
         tokens: [btinput, bt],
         previewConvert: async (isZeroToOne, amount) =>
@@ -62,6 +64,7 @@ export function genBtConvert(chain: number, bt: Address, btinput: Address): Toke
                 user,
                 approves: isZeroToOne ? [{ token: btinput, amount, spender: bt }] : [],
                 tx: {
+                    name: isZeroToOne ? `Deposit ${input.symbol} for ${BT.symbol}` : `Redeem ${BT.symbol} for ${input.symbol}`,
                     abi: abiBT,
                     address: bt,
                     functionName: isZeroToOne ? 'deposit' : 'redeem',
