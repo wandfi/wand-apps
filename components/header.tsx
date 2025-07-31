@@ -42,7 +42,8 @@ export function Header() {
   const showAdmin = useShowAdmin()
   const links = useMemo(() => {
     const links = [
-      ...(isLOCL || isTEST ? [{ href: '/bootstrap', label: 'Bootstrap', icon: LuSquareSquare, disable: false }] : []),
+      // ...(isLOCL || isTEST ? [] : []),
+      { href: '/bootstrap', label: 'Bootstrap', icon: LuSquareSquare, disable: false },
       { href: '/yield-vault', label: 'Yield-Vault', icon: LuBox, disable: false },
       // { href: '/l-vaults', label: 'L-Vaults', icon: LuBox, disable: true },
       { href: '/portfolio', label: 'Portfolio', icon: LuCircleUser },
