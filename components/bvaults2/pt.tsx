@@ -243,7 +243,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
         <Txs
             className='mx-auto mt-4'
             tx='Redeem'
-            disabled={inputBn <= 0n || inputBn < ptBalance.result || inputBn < ytBalance.result}
+            disabled={inputBn <= 0n || inputBn > ptBalance.result || inputBn > ytBalance.result}
             txs={getTxs}
             onTxSuccess={() => {
                 logUserAction(vc, address!, `PTYTRedeem:(${fmtBn(inputBn)})`)
