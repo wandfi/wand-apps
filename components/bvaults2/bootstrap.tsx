@@ -42,7 +42,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
         const { txs, out: sharesBn } = await convertBt(vc, true, input.address, inputAssetBn, arg.wc.account.address)
         const txsApprove = await withTokenApprove({
             approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user:  arg.wc.account.address,
-            tx: { abi: abiBVault2, address: vc.vault, functionName: 'Add Liquidity', args: [sharesBn, genDeadline()], }
+            tx: { abi: abiBVault2, address: vc.vault, functionName: 'addLiquidity', args: [sharesBn, genDeadline()], }
         })
         return [...txs, ...txsApprove]
     }

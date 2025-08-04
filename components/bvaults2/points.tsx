@@ -6,7 +6,7 @@ import { getTokenBy } from "@/config/tokens";
 
 export function Points({ vc, className, size }: { vc: BVault2Config, className?: string, size?: number }) {
     if (!vc.points) return null
-    if (vc.points.link) return <Link href={vc.points.link} target="_blank" className={cn("flex gap-2 items-center", className)}>
+    if (vc.points.link) return <Link href={vc.points.link} target="_blank" className={cn("flex gap-2 items-center underline underline-offset-2", className)}>
         <CoinIcon size={size} symbol={getTokenBy(vc.asset, vc.chain)?.symbol ?? 'Points'} />
         {'Points'}
     </Link>
