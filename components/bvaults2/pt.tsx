@@ -215,7 +215,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
         queryKey: calcKey,
         initialData: 0n,
         queryFn: async () => {
-            if (inputBn <= 0n || setCalcKey.length == 1) return 0n
+            if (inputBn <= 0n || calcKey.length == 1) return 0n
             return previewConvertBt(vc, false, out.address, inputBn)
         }
     })
