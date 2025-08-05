@@ -158,6 +158,7 @@ export function useBvault2TVL(vc: BVault2Config) {
   const bt = getTokenBy(vc.bt, vc.chain)!
   const mintPoolBt = useBalance(bt, vd.result?.mintPoolTokenPot)
   const logs = useLogs(vc)
-  const totalBt = logs.result?.BTtp ?? 0n + mintPoolBt.result
+  const totalBt = (logs.result?.BTtp ?? 0n) + mintPoolBt.result
+  console.info('tvl:', logs.result?.BTtp ?? 0n, mintPoolBt.result)
   return (totalBt * btPrice) / DECIMAL
 }

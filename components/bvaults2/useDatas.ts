@@ -134,8 +134,8 @@ export function useBTPriceYt(vc: BVault2Config) {
 export function useUnderlingApy(vc: BVault2Config) {
   return useFet({
     key: FetKEYS.UnderlingApy(vc),
-    initResult: 1.07,
-    fetfn: async () => 1.07,
+    initResult: 0.07,
+    fetfn: async () => 0.07,
   })
 }
 export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: bigint = 0n) {
