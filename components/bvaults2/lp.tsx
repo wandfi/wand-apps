@@ -161,9 +161,10 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
                 user: address!,
                 pc: getPC(vc.chain),
                 tx: {
+                    name: 'Remove Liquidity',
                     abi: abiBVault2,
                     address: vc.vault,
-                    functionName: 'Remove Liquidity',
+                    functionName: 'removeLiquidity',
                     args: [inputAssetBn, 0n, genDeadline()],
                 }
             })}
