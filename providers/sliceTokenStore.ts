@@ -68,6 +68,7 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
           '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': prices[0].price,
           '0x773dd6686df237a7b3fe02632e91bd3664d81a0c': DECIMAL,
           '0x1e0ca0e6bbf6b2e14c6e5360e430905759fd8677': DECIMAL,
+          '0x3bb7dc96832f8f98b8aa2e9f2cc88a111f96a118': DECIMAL,
         },
       })
     }
