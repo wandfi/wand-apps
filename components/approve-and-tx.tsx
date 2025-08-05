@@ -138,7 +138,7 @@ export function Txs({
       } catch (error) {
         const msg = getErrorMsg(error)
         const showTxsStat = !disableProgress && calls.length > 1
-        if (msg && (msg.includes('wallet_sendCalls') || msg.includes('EIP-7702 not supported'))) {
+        if (msg && (msg.includes("Not supported batch request") || msg.includes('wallet_sendCalls') || msg.includes('EIP-7702 not supported'))) {
           let progress = 0;
           showTxsStat && useTxsStore.setState({ txs: calls, progress })
           for (const item of calls) {
