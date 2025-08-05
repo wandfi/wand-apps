@@ -71,7 +71,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
             } else {
                 let inputBtAmount = await previewConvertBt(vc, true, input.address, inputAssetBn)
 
-                const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputBtAmount, parseUnits('0.02', 18)] })
+                const [bestBT1, count] = await pc.readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'calcBT1ForSwapBTForYT', args: [vc.hook, inputBtAmount] })
                     .catch(() => [0n, 0n] as [bigint, bigint])
                 console.info('calcBT1:', formatEther(bestBT1), count, formatEther(inputBtAmount))
                 if (bestBT1 == 0n) return [0n, 0n, 0n]

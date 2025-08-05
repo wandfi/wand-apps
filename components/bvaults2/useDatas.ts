@@ -120,7 +120,7 @@ export function useBTPriceYt(vc: BVault2Config) {
         abi: abiBvault2Query,
         code: codeBvualt2Query,
         functionName: 'calcBT1ForSwapBTForYT',
-        args: [vc.hook, one, parseUnits('0.05', asset.decimals)],
+        args: [vc.hook, one],
       })
       if (bt1 == 0n) return 0
       const bt2 = await getPC(chainId).readContract({ abi: abiHook, address: vc.hook, functionName: 'getAmountOutVPTToBT', args: [bt1] })

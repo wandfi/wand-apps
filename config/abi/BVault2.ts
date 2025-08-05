@@ -74,7 +74,7 @@ export const abiHook = parseAbi([
 export const abiBvault2Query = parseAbi([
   // 'function quoteExactBTforYT(address hook,uint256 amountBT,uint256 amountBT1) external view returns (uint256 amountYT, uint256 expectedRefundBT)',
   // 'function quoteExactYTforBT(address hook,uint256 amountYT) external view returns (uint256 amountBT)',
-  'function calcBT1ForSwapBTForYT(address hook,uint256 amountBT,uint256 tolerance) external view returns (uint256 bestAmountBT1, uint256 count)',
+  'function calcBT1ForSwapBTForYT(address hook,uint256 amountBT) external view returns (uint256 bestAmountBT1, uint256 count)',
   'function quoteAddLPInstant(address vault,uint256 amountBT,uint256 count) external view returns (uint256 bt1,uint256 shares)',
   'struct LogData { uint256 BTtp;uint256 BTnet;uint256 Anet;uint256 PTc;uint256 YTc;uint256 vPT;uint256 pt;uint256 Feerate;uint256 ShareTotal;uint256 rateScalar;uint256 rateAnchor;}',
   'function getLog(address vault) external view returns(LogData memory log)',
