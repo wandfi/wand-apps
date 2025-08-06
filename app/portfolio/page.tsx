@@ -4,8 +4,10 @@ import { CoinIcon } from '@/components/icons/coinicon'
 import { PageWrap } from '@/components/page-wrap'
 import STable, { TableProps } from '@/components/simple-table'
 import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
+import { BVAULTS2CONIG } from '@/config/bvaults2'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { getTokenBy } from '@/config/tokens'
+import { ENV } from '@/constants'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useLoadBVaults, useLoadUserBVaults } from '@/hooks/useLoads'
 import { fmtDate } from '@/lib/utils'
@@ -17,6 +19,7 @@ import { ReactNode, useMemo } from 'react'
 import { MdArrowOutward } from 'react-icons/md'
 import { Address } from 'viem'
 import { toBVault } from '../routes'
+import { LPBTs, PTs, YTs } from '@/components/bvaults2/positionsAll'
 
 function PortfolioItem({
   title,
@@ -32,7 +35,7 @@ function PortfolioItem({
   tableProps?: Omit<TableProps, 'header' | 'data'>
 }) {
   return (
-    <div className='animitem card whitespace-nowrap'>
+    <div className='animitem card whitespace-nowrap !p-4 bg-white'>
       {typeof title == 'string' ? <div className='text-2xl leading-none font-semibold'>{title}</div> : title}
       {typeof sub == 'string' ? <div className='text-[2rem] text-primary leading-none font-semibold mt-2'>{sub}</div> : sub}
       <div className='my-4 h-[1px] bg-border/60 dark:bg-border'></div>
@@ -93,18 +96,20 @@ function PrincipalItem() {
         const uBase = lp && totalLP && totalLPBase && pTotalUser ? (pTotalUser * totalLPBase) / totalLP : 0n
         const uQuote = lp && totalLP && totalLPQuote && pTotalUser ? (pTotalUser * totalLPQuote) / totalLP : 0n
         const fmtTotalUser = displayBalance(pTotalUser)
-        return { bvc, pBalance, pRedeeming, pClaimAble, lp, baseSymbol, quoteSymbol, uBase, uQuote, pTotalUser, fmtTotalUser }
+        const pDecimals = getTokenBy(bvc.pToken, bvc.chain)?.decimals
+        return { bvc, pDecimals, pBalance, pRedeeming, pClaimAble, lp, baseSymbol, quoteSymbol, uBase, uQuote, pTotalUser, fmtTotalUser }
       })
       .filter((item) => item.pTotalUser > 0n)
     const maxFmtTotalUserLength = datas.reduce((max, item) => Math.max(max, item.fmtTotalUser.length), 0)
     const fmtTotalUserWidth = Math.round(maxFmtTotalUserLength * 5 + 20)
-    return datas.map(({ bvc, pBalance, pRedeeming, pClaimAble, lp, fmtTotalUser, baseSymbol, quoteSymbol, uBase, uQuote }) => {
+
+    return datas.map(({ bvc, pDecimals, pBalance, pRedeeming, pClaimAble, lp, fmtTotalUser, baseSymbol, quoteSymbol, uBase, uQuote }) => {
       return [
         <CoinText key={'coin'} symbol={bvc.assetSymbol} txt={bvc.pTokenSymbol} size={32} />,
-        displayBalance(pBalance),
-        displayBalance(pRedeeming),
+        displayBalance(pBalance, undefined, pDecimals),
+        displayBalance(pRedeeming, undefined, pDecimals),
         <div key={'claim'} className='flex w-fit cursor-pointer items-center gap-2 underline' onClick={() => toBVault(r, bvc.vault, 'principal_panda', 'claim')}>
-          {displayBalance(pClaimAble)}
+          {displayBalance(pClaimAble, undefined, pDecimals)}
           <MdArrowOutward />
         </div>,
         <div key={'total'} className='flex items-center gap-2'>
@@ -123,7 +128,7 @@ function PrincipalItem() {
   }, [bvcs, useBoundStore.getState()])
   return (
     <PortfolioItem
-      title={<IconTitle tit='Principal Token' icon='PToken' />}
+      title={<IconTitle tit='Principal Token (v1)' icon='PToken' />}
       tHeader={['', 'Balance', 'In Redemption', 'Claimable', 'Total Amount', 'APY', 'Est.Yield/day']}
       tData={data}
     />
@@ -205,24 +210,28 @@ function BoostItem() {
   }, [bvcs, useBoundStore.getState()])
   return (
     <PortfolioItem
-      title={<IconTitle tit='Yield Token' icon='YToken' />}
+      title={<IconTitle tit='Yield Token (v1)' icon='YToken' />}
       tHeader={['', 'Epoch', 'YT Balance', 'YT Points', 'Status']}
       tData={data}
       tableProps={{ cellClassName: (_index, celIndex) => (celIndex == 0 ? 'flex flex-col' : 'leading-[30px]') }}
     />
   )
 }
+
+
+const vcsV2 = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
 export default function Dashboard() {
   useLoadBVaults()
   useLoadUserBVaults()
+
   return (
     <PageWrap>
       <div className='w-full max-w-[1200px] px-4 mx-auto flex flex-col gap-5 md:pb-8'>
-        {/* {<InterestItem />} */}
-        {/* <LeverageItem /> */}
         <PrincipalItem />
         <BoostItem />
-        {/* {chainId !== 80094 && <StakedPoolsItem />} */}
+        <PTs vcs={vcsV2} />
+        <YTs vcs={vcsV2} />
+        <LPBTs vcs={vcsV2} />
       </div>
     </PageWrap>
   )

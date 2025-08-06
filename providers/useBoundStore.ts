@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { create } from 'zustand'
 import { sliceBVaultsStore } from './sliceBVaultsStore'
 import { sliceTokenStore } from './sliceTokenStore'
@@ -39,6 +39,9 @@ type Paths<T> = { [K in KKeys<T>]: `${K}.${EK<T[K]>}` }[KKeys<T>] | EK<T> | KKey
 
 export function useStore<T>(selector: (s: BoundStoreType) => T, dependsPaths: ('' | Paths<BoundStoreType>)[] = ['']) {
   const store = useBoundStore()
+  useEffect(() => {
+    ;(window as any).__store = useBoundStore
+  }, [])
   return useMemo(
     () => selector(store),
     dependsPaths.map((path) => (!path ? store : _.get(store, path))),

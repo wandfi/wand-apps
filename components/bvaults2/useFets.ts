@@ -3,7 +3,7 @@ import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
 import { DECIMAL, DECIMAL_10 } from '@/constants'
-import { useFet } from '@/hooks/useFet'
+import { useFet, useFets } from '@/hooks/useFet'
 import { aarToNumber, bnRange, getBigint, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
@@ -43,6 +43,14 @@ export function useBvualt2Data(vc: BVault2Config) {
     fetfn: async () => getBvaut2Data(vc),
   })
 }
+export function useBvualt2sData(vcs: BVault2Config[]) {
+  return useFets(
+    ...vcs.map((vc) => ({
+      key: FetKEYS.Bvault2Data(vc),
+      fetfn: async () => getBvaut2Data(vc),
+    })),
+  )
+}
 
 export function getBvault2EpochTimes(vd?: Vault2Data) {
   const startTime = (vd?.current?.startTime ?? 0n) * 1000n
@@ -69,38 +77,69 @@ export function getBvualt2Times(vd?: Vault2Data) {
   }
 }
 
+export async function getBvault2Epochs(vc: BVault2Config, epochCount: bigint) {
+  if (epochCount <= 0n) return []
+  const pc = getPC(vc.chain)
+  const epochs = await Promise.all(bnRange(epochCount).map((id) => getBvault2Epoch(vc, id, pc)))
+  return epochs.reverse()
+}
 export function useBvault2Epochs(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
   const epochs = useFet({
     key: FetKEYS.Bvault2Epochs(vc, vd.result?.epochIdCount),
     initResult: [],
-    fetfn: async () => {
-      const count = vd.result!.epochIdCount
-      const pc = getPC(vc.chain)
-      const epochs = await Promise.all(bnRange(count).map((id) => getBvault2Epoch(vc, id, pc)))
-      return epochs.reverse()
-    },
+    fetfn: () => getBvault2Epochs(vc, vd.result!.epochIdCount),
   })
   if (vd.status == 'fetching') {
     epochs.status = 'fetching'
   }
   return epochs
 }
+export function useBvault2sEpochs(vcs: BVault2Config[]) {
+  const vds = useBvualt2sData(vcs)
+  const epochs = useFets(
+    ...vcs.map((vc, i) => ({
+      key: FetKEYS.Bvault2Epochs(vc, vds.result[i]?.epochIdCount),
+      initResult: [],
+      fetfn: () => getBvault2Epochs(vc, vds.result[i]!.epochIdCount),
+    })),
+  )
+  if (vds.status == 'fetching') {
+    epochs.status = 'fetching'
+  }
+  return epochs
+}
 
+export async function getBvualt2PTRedeems(vc: BVault2Config, epochs: UnPromise<typeof getBvault2Epochs>, user: Address) {
+  if (epochs.length == 0) return []
+  const pc = getPC(vc.chain)
+  return Promise.all(epochs.map((item) => pc.readContract({ abi: erc20Abi, address: item.PT, functionName: 'balanceOf', args: [user] }))).then((datas) =>
+    datas.map((redeemable, i) => ({ ...epochs[i], redeemable })),
+  )
+}
 export function useBvualt2PTRedeems(vc: BVault2Config) {
   const epochs = useBvault2Epochs(vc)
   const { address } = useAccount()
   const redeems = useFet({
     key: FetKEYS.Bvualt2PTRedeems(vc, address, epochs.result),
     initResult: [],
-    fetfn: async () => {
-      const mEpochs = epochs.result!
-      const pc = getPC(vc.chain)
-      return Promise.all(mEpochs.map((item) => pc.readContract({ abi: erc20Abi, address: item.PT, functionName: 'balanceOf', args: [address!] }))).then((datas) =>
-        datas.map((redeemable, i) => ({ ...mEpochs[i], redeemable })),
-      )
-    },
+    fetfn: () => getBvualt2PTRedeems(vc, epochs.result, address!),
   })
+  if (epochs.status === 'fetching') {
+    redeems.status = 'fetching'
+  }
+  return redeems
+}
+export function useBvualt2sPTRedeems(vcs: BVault2Config[]) {
+  const epochs = useBvault2sEpochs(vcs)
+  const { address } = useAccount()
+  const redeems = useFets(
+    ...vcs.map((vc, i) => ({
+      key: FetKEYS.Bvualt2PTRedeems(vc, address, epochs.result[i]),
+      initResult: [],
+      fetfn: () => getBvualt2PTRedeems(vc, epochs.result[i], address!),
+    })),
+  )
   if (epochs.status === 'fetching') {
     redeems.status = 'fetching'
   }
@@ -112,42 +151,69 @@ export async function getRewardsBy(rewradManager: Address, user: Address, pc: Pu
     .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'earned', args: [rewradManager, user, parseUnits('1', 28)] })
     .then((item) => item.map((r) => [r.token, r.value] as [Address, bigint]))
 }
+
+export async function getBvault2YTRewards(vc: BVault2Config, epochs: UnPromise<typeof getBvault2Epochs>, user: Address) {
+  if (epochs.length == 0) return []
+  const pc = getPC(vc.chain)
+  return Promise.all(epochs.map((item) => getRewardsBy(item.YT, user, pc))).then((datas) => datas.map((rewrads, i) => ({ ...epochs[i], rewrads })))
+}
 export function useBvault2YTRewards(vc: BVault2Config) {
   const epochs = useBvault2Epochs(vc)
   const { address } = useAccount()
   const rewards = useFet({
     key: FetKEYS.Bvault2YTRewards(vc, address, epochs.result),
     initResult: [],
-    fetfn: async () => {
-      const mEpochs = epochs.result!
-      const pc = getPC(vc.chain)
-      return Promise.all(mEpochs.map((item) => getRewardsBy(item.YT, address!, pc))).then((datas) => datas.map((rewrads, i) => ({ ...mEpochs[i], rewrads })))
-    },
+    fetfn: () => getBvault2YTRewards(vc, epochs.result, address!),
   })
   if (epochs.status === 'fetching') {
     rewards.status = 'fetching'
   }
   return rewards
 }
+export function useBvault2sYTRewards(vcs: BVault2Config[]) {
+  const epochs = useBvault2sEpochs(vcs)
+  const { address } = useAccount()
+  const rewards = useFets(
+    ...vcs.map((vc, i) => ({
+      key: FetKEYS.Bvault2YTRewards(vc, address, epochs.result[i]),
+      initResult: [],
+      fetfn: () => getBvault2YTRewards(vc, epochs.result[i], address!),
+    })),
+  )
+  if (epochs.status === 'fetching') {
+    rewards.status = 'fetching'
+  }
+  return rewards
+}
+
+export async function getBvault2LPBTRewards(vc: BVault2Config, user: Address) {
+  const lp = getLpToken(vc)
+  const bt = getTokenBy(vc.bt, vc.chain)!
+  const pc = getPC(vc.chain)
+  const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, user, pc), getRewardsBy(bt.address, user, pc)])
+  return [
+    { token: lp, rewards: lpRewards },
+    { token: bt, rewards: btRewards },
+  ]
+}
 export function useBvault2LPBTRewards(vc: BVault2Config) {
   const { address } = useAccount()
   const rewards = useFet({
     key: FetKEYS.Bvault2LPBTRewards(vc, address),
     initResult: [],
-    fetfn: async () => {
-      const lp = getLpToken(vc)
-      const bt = getTokenBy(vc.bt, vc.chain)!
-      const pc = getPC(vc.chain)
-      pc.readContract({ abi: abiRewardManager, functionName: 'getUserRewards', address: lp.address, args: [address!] }).then((data) => {
-        console.info('userRewards:', data)
-      })
-      const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, address!, pc), getRewardsBy(bt.address, address!, pc)])
-      return [
-        { token: lp, rewards: lpRewards },
-        { token: bt, rewards: btRewards },
-      ]
-    },
+    fetfn: async () => getBvault2LPBTRewards(vc, address!),
   })
+  return rewards
+}
+export function useBvault2sLPBTRewards(vcs: BVault2Config[]) {
+  const { address } = useAccount()
+  const rewards = useFets(
+    ...vcs.map((vc) => ({
+      key: FetKEYS.Bvault2LPBTRewards(vc, address),
+      initResult: [],
+      fetfn: async () => getBvault2LPBTRewards(vc, address!),
+    })),
+  )
   return rewards
 }
 
