@@ -125,7 +125,7 @@ function BVaultsItem() {
       <BVaultROI key={'roi'} vc={bvc} />,
     ])
   }, [bvcs, bvaults, prices])
-  return <DashItem title='B-Vault' tHeader={['Vaults', 'Total Deposit', 'Status', 'PT APY', 'YT ROI']} tData={data} />
+  return <DashItem title='Yield-Vault' tHeader={['Vaults', 'Total Deposit', 'Status', 'PT APY', 'YT ROI']} tData={data} />
 }
 export default function Dashboard() {
   useLoadBVaults()

@@ -3,7 +3,7 @@ import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
-import { useFet } from '@/hooks/useFet'
+import { useFet, useFets } from '@/hooks/useFet'
 import { aarToNumber, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import _, { toNumber } from 'lodash'
@@ -14,15 +14,27 @@ import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
 
+export function getLogs(vc: BVault2Config) {
+  return getPC(vc.chain)
+    .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] })
+    .catch(() => undefined)
+}
 export function useLogs(vc: BVault2Config) {
   return useFet({
     key: FetKEYS.Logs(vc),
-    fetfn: async () =>
-      getPC(vc.chain)
-        .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'getLog', args: [vc.vault] })
-        .catch(() => undefined),
+    fetfn: () => getLogs(vc),
   })
 }
+
+export function useLogss(vcs: BVault2Config[]) {
+  return useFets(
+    ...vcs.map((vc) => ({
+      key: FetKEYS.Logs(vc),
+      fetfn: () => getLogs(vc),
+    })),
+  )
+}
+
 export function useBT2PTPrice(vc: BVault2Config) {
   const data = useLogs(vc)
   return useMemo(() => ({ ...data, result: calcBt2PtPrice(data.result, 0n, 0n) }), [data.result])

@@ -1,19 +1,21 @@
 import { abiBVault2, abiBvault2Query, abiRewardManager } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
 import { BVault2Config } from '@/config/bvaults2'
-import { getTokenBy } from '@/config/tokens'
+import { getTokenBy, Token } from '@/config/tokens'
 import { DECIMAL, DECIMAL_10 } from '@/constants'
 import { useFet, useFets } from '@/hooks/useFet'
 import { aarToNumber, bnRange, getBigint, promiseAll, UnPromise } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { now } from 'lodash'
-import { Address, erc20Abi, parseUnits, PublicClient } from 'viem'
+import { Address, erc20Abi, isAddressEqual, parseUnits, PublicClient } from 'viem'
 import { useAccount } from 'wagmi'
 import { FetKEYS } from './fetKeys'
 import { getLpToken } from './getToken'
 import { useStore } from '@/providers/useBoundStore'
-import { useBalance } from '@/hooks/useToken'
-import { useLogs } from './useDatas'
+import { useBalance, useBalances } from '@/hooks/useToken'
+import { useLogs, useLogss } from './useDatas'
+import { useMemo } from 'react'
+import { TVLItem } from '@/hooks/tvl'
 
 export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient) {
   return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
@@ -227,4 +229,36 @@ export function useBvault2TVL(vc: BVault2Config) {
   const totalBt = (logs.result?.BTtp ?? 0n) + mintPoolBt.result
   console.info('tvl:', logs.result?.BTtp ?? 0n, mintPoolBt.result)
   return (totalBt * btPrice) / DECIMAL
+}
+export function useBvault2sTVL(vcs: BVault2Config[]) {
+  const vds = useBvualt2sData(vcs)
+  const mintPoolBt = useBalances(vcs.map((vc, i) => ({ token: getTokenBy(vc.bt, vc.chain), user: vds.result[i]?.mintPoolTokenPot })))
+  const logss = useLogss(vcs)
+  const prices = useStore((s) => s.sliceTokenStore.prices, ['sliceTokenStore.prices'])
+  return useMemo(() => {
+    const items: TVLItem[] = []
+    vcs.forEach((vc, i) => {
+      const btPrice = getBigint(prices, vc.bt)
+      const bt = getTokenBy(vc.bt, vc.chain)!
+      const totalBt = (logss.result[i]?.BTtp ?? 0n) + mintPoolBt.result[i]
+      console.info('tvl:', logss.result[i]?.BTtp ?? 0n, mintPoolBt.result)
+      const usdAmount = (totalBt * btPrice) / DECIMAL
+      const last = items.find((item) => isAddressEqual(item.address, bt.address))
+      if (last) {
+        last.amount += totalBt
+        last.usdAmount += usdAmount
+      } else {
+        items.push({
+          name: bt.symbol,
+          symbol: bt.symbol,
+          address: bt.address,
+          decimals: bt.decimals,
+          price: btPrice,
+          amount: totalBt,
+          usdAmount,
+        })
+      }
+    })
+    return items
+  }, [vds.result, mintPoolBt.result, logss.result, prices])
 }
