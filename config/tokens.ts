@@ -48,10 +48,12 @@ export const TOKENS_MAP: { [k: `${number}_${Address}`]: Token } = TOKENS.reduce(
 
 export function getTokenBy(address?: Address, chainId?: number, defOpt?: Partial<Exclude<Token, 'address' | 'chain'>>) {
   if (!address || !chainId) return undefined
-  const token = TOKENS_MAP[`${chainId}_${address.toLowerCase() as Address}`]
+  const key: `${number}_${Address}` = `${chainId}_${address.toLowerCase() as Address}`
+  const token = TOKENS_MAP[key]
   if (!token) {
     const { symbol = 'Token', decimals = 18, isNative } = defOpt ?? {}
-    return { address, chain: [chainId], symbol, decimals, isNative } as Token
+    TOKENS_MAP[key] = { address, chain: [chainId], symbol, decimals, isNative } as Token
+    return TOKENS_MAP[key]
   }
   return token
 }

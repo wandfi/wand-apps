@@ -14,17 +14,17 @@ import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
-import { Fees } from "../fees"
 import { GetByStoryHunt } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
 import { Swap, SwapDown } from "../ui/bbtn"
 import { convertBt, previewConvertBt, useWrapBtTokens } from "./bt"
+import { Bvault2Feerate } from "./feerate"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, useBTPriceConvertToken, usePTApy } from "./useDatas"
-import { Bvault2Feerate } from "./feerate"
+
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
