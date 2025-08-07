@@ -18,6 +18,9 @@ export const getLntVaultNftStatByUser = (vault: Address, user: Address) => api.g
 export const getNftTokenIdsByUser = (token: Address, user: Address) => api.get<string[]>(`/api/nft/${token}/${user}/tokenIds`)
 export const getNftTokensIdsByUser = (tokens: Address[], user: Address) => api.post<{ [k: Address]: string[] }>(`/api/nft/${user}/tokenIds`, { tokens })
 
+export const getBvault2ChartsData = (vault: Address, start: bigint | number, end: bigint | number) =>
+  api.get<{ ytPrice: string; ytRoi: string; ptPrice: string; ptApy: string; time: number }[]>(`/api/bvault/charts-data/${vault}/${start}/${end}`)
+
 export const getBeraTokensPrices = (
   tokens: Address[] = [
     '0x6969696969696969696969696969696969696969', // BERA,WBERA
