@@ -37,7 +37,7 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
             animationDuration: 200,
             tooltip: {
                 trigger: 'axis',
-                // valueFormatter: valueFormater,
+                valueFormatter: ct.format,
             },
             grid: { top: 30, bottom: 30, right: 20, show: false },
             toolbox: { show: false },
