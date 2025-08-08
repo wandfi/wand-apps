@@ -55,6 +55,8 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
         min: (value: any) => (value.min - (value.max - value.min) * 0.1),
         axisLabel: {
           formatter: valueFormater,
+          showMinLabel: false,
+          showMaxLabel: false,
         },
       },
       dataZoom: [

@@ -56,6 +56,8 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
                 min: (value: any) => (value.min - (value.max - value.min) * 0.1),
                 axisLabel: {
                     formatter: ct.format,
+                    showMinLabel: false,
+                    showMaxLabel: false,
                 },
             },
             dataZoom: [
