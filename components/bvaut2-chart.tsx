@@ -5,7 +5,7 @@ import EChartsReact from "echarts-for-react";
 import { ReactNode, useMemo, useState } from "react";
 import { useBvualt2Data } from "./bvaults2/useFets";
 import { SimpleSelect } from "./ui/select";
-import { FMT, fmtDate, UnPromise } from "@/lib/utils";
+import { FMT, fmtDate, formatPercent, UnPromise } from "@/lib/utils";
 import { round, toNumber } from "lodash";
 import { formatUnits } from "viem";
 import { graphic } from "echarts";
@@ -13,10 +13,11 @@ import { graphic } from "echarts";
 const chartTypes: {
     key: keyof UnPromise<ReturnType<typeof getBvault2ChartsData>>[number]
     show: ReactNode
+    format?: (num: number) => string
 }[] = [
-        { key: 'ptApy', show: 'PT APY' },
+        { key: 'ptApy', show: 'PT APY', format: (per) => formatPercent(per, 2, false) },
         { key: 'ptPrice', show: 'PT Price' },
-        { key: 'ytRoi', show: 'YT ROI' },
+        { key: 'ytRoi', show: 'YT ROI', format: (per) => formatPercent(per, 2, false) },
         { key: 'ytPrice', show: 'YT Price' },
     ]
 export function BVault2Chart({ vc }: { vc: BVault2Config }) {
@@ -51,10 +52,13 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
                 type: 'value',
                 boundaryGap: [0, '100%'],
                 splitLine: { show: false },
-                max: (value: any) => value.max > 0 ? value.max * 1.1 : value.max * 0.9,
-                // axisLabel: {
-                //     formatter: valueFormater,
-                // },
+                max: (value: any) => ((value.max - value.min) * 0.1 + value.max),
+                min: (value: any) => (value.min - (value.max - value.min) * 0.1),
+                // max: (value: any) => round(value.max > 0 ? value.max * 1.04 : value.max * 0.96, 3),
+                // min: (value: any) => round(value.min > 0 ? value.min * 0.96 : value.min * 1.04, 3),
+                axisLabel: {
+                    formatter: ct.format,
+                },
             },
             dataZoom: [
                 {
@@ -79,14 +83,8 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
                     areaStyle: {
                         origin: 'start',
                         color: new graphic.LinearGradient(0, 0, 0, 1, [
-                            {
-                                offset: 0,
-                                color: 'rgb(30, 202, 83)',
-                            },
-                            {
-                                offset: 1,
-                                color: 'rgba(30, 202, 83, 0.2)',
-                            },
+                            { offset: 0, color: 'rgba(30, 202, 83, 0.26)' },
+                            { offset: 1, color: 'rgba(30, 202, 83, 0.07)' },
                         ]),
                     },
                     data: cdata,

@@ -212,7 +212,7 @@ export function useFets<FET extends Fet<any>>(..._fets: FET[]) {
   }
   useEffect(() => {
     const onUpdate = () => {
-      const fss = _fets.map((item) => fets[item.key].fs)
+      const fss = _fets.map((item) => fets[item.key]?.fs).filter(Boolean)
       if (isError(...fss) || isSuccess(...fss)) {
         if (refFetsStat.current?.result) {
           refFetsStat.current.result = [...refFetsStat.current.result]

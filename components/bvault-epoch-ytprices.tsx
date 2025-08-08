@@ -29,7 +29,7 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
     const data = prices.map((p) => [fmtDate(p.time * 1000, FMT.ALL), isLOG ? logTrans(bnToNum(p.price)) : bnToNum(p.price)])
     const valueFormater = (value: number) => (isLOG ? revertLog(value).toString() : value.toString())
     const calcMax = (v: any) => {
-    //    const max = value.max * 1.1
+      //    const max = value.max * 1.1
     }
     const options = {
       animation: true,
@@ -44,7 +44,7 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
         type: 'category',
         boundaryGap: false,
         axisLine: {
-            onZero: false,
+          onZero: false,
         }
       },
       yAxis: {
@@ -70,7 +70,7 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
       series: [
         {
           name: 'YT Price',
-          type: 'line', 
+          type: 'line',
           symbol: 'none',
           sampling: 'lttb',
           itemStyle: {
@@ -79,14 +79,8 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
           areaStyle: {
             origin: 'start',
             color: new graphic.LinearGradient(0, 0, 0, 1, [
-              {
-                offset: 0,
-                color: 'rgb(30, 202, 83)',
-              },
-              {
-                offset: 1,
-                color: 'rgba(30, 202, 83, 0.2)',
-              },
+              { offset: 0, color: 'rgba(30, 202, 83, 0.26)' },
+              { offset: 1, color: 'rgba(30, 202, 83, 0.07)' },
             ]),
           },
           data: data,

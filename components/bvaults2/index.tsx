@@ -23,7 +23,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const { startTime, endTime, reamin, progress } = getBvault2EpochTimes(vd)
     const asset = getTokenBy(vc.asset, vc.chain)!
     const tvl = useBvault2TVL(vc)
-    return <div className="animitem card bg-white flex flex-col gap-10">
+    return <div className="animitem card bg-white flex flex-col gap-10 shrink-0">
         <div className="flex items-center gap-4">
             <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol={asset.symbol} />{vc.tit}</div>
             <div className="flex flex-col gap-2 mt-2">

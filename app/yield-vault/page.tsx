@@ -136,7 +136,7 @@ function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: strin
     {isLoading(vd) && <Spinner className="mt-10 mx-auto text-black dark:text-white" />}
     {isSuccess(vd) && <Fragment>
       {vd.result?.current ? <>
-        <div className="grid gap-5 lg:grid-cols-[8fr_5fr] mb-5">
+        <div className="grid gap-5 lg:grid-cols-[7fr_5fr] mb-5">
           <BVault2Info vc={vc} />
           <div className="animitem row-span-2">
             <BVault2Swaps vc={vc} currentTab={currentTab} />
