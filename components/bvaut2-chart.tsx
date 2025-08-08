@@ -54,8 +54,6 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
                 splitLine: { show: false },
                 max: (value: any) => ((value.max - value.min) * 0.1 + value.max),
                 min: (value: any) => (value.min - (value.max - value.min) * 0.1),
-                // max: (value: any) => round(value.max > 0 ? value.max * 1.04 : value.max * 0.96, 3),
-                // min: (value: any) => round(value.min > 0 ? value.min * 0.96 : value.min * 1.04, 3),
                 axisLabel: {
                     formatter: ct.format,
                 },
