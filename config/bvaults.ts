@@ -69,7 +69,7 @@ export const BVAULTS_CONFIG: BVaultConfig[] = [
     protocolAddress: '0xE5CaCEF6109fd9B874A9f5C9264f8691346A9116',
     protocolSettingsAddress: '0xD8277c10A28e919921Ce4E1bAA5B83DD1b4C80dB',
     bQueryAddres: BQueryAddress[story.id],
-    onEnv: ['test'],
+    onEnv: ['test', 'prod'],
     ipAssetStaking: '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE',
     newUI: true,
     rewardSymbol: 'Spice Points',
