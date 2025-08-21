@@ -31,6 +31,7 @@ export const TOKENS: Token[] = [
   { address: '0xF1815bd50389c46847f0Bda824eC8da914045D14', symbol: 'USDC', decimals: 6, chain: [story.id] },
   { address: '0x66B4CB07229EcCC6f48161DfcC229Ac06af25457', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
   { address: '0x67B7B0B3fA057703E077D1Df6b50065a1229D41A', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
+  { address: '0x712FAC9d6D88296D8023A91b95B363aAE8EC5846', symbol: 'pAIDaUSDC', decimals: 6, chain: [story.id] },
 
   { address: '0x97e733e8583169c3a8f8d18e0556b6567973c5b8', symbol: 'YTK', decimals: 18, chain: [sepolia.id] },
   { address: '0xaca6abef41315da039f0025900bdbb2e85034325', symbol: 'BT-INFRA', decimals: 18, chain: [sepolia.id] },
