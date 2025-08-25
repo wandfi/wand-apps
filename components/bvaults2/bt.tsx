@@ -116,7 +116,7 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const { result: unlerlingApy } = useUnderlingApy(vc)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
-            <div className='flex p-5 bg-[#E8E8FD] gap-5'>
+            <div className='flex p-5 bg-indigo-400/50 gap-5'>
                 <CoinIcon size={48} symbol={bt.symbol} />
                 <div className='flex flex-col gap-3'>
                     <div className='text-xl leading-6 text-black dark:text-white font-semibold'>{bt.symbol}</div>

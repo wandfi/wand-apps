@@ -266,7 +266,7 @@ export function PT({ vc }: { vc: BVault2Config }) {
     const [apy] = usePTApy(vc)
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
-            <div className='flex p-5 bg-[#10B98126] gap-5'>
+            <div className='flex p-5 bg-green-500/50 gap-5'>
                 <CoinIcon size={48} symbol={pt.symbol} />
                 <div className='flex flex-col gap-3'>
                     <div className='text-xl leading-6 text-black dark:text-white font-semibold'>{pt.symbol}</div>
