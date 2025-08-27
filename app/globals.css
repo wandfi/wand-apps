@@ -52,6 +52,13 @@
 .aarslider .recharts-tooltip-wrapper {
   display: none;
 }
+:root {
+  --primary: #5a3fff;
+}
+
+.dark {
+  --primary: #8e7dfe;
+}
 
 /* html {
   height: 100%;
@@ -112,5 +119,4 @@
 }
 
 .animitem {
-  
 }

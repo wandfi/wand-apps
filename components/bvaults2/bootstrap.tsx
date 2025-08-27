@@ -8,7 +8,7 @@ import { withIfAiraSign } from "@/lib/aria";
 import { aarToNumber, cn, FMT, fmtDate, genDeadline, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
-import { ProgressBar } from "@tremor/react";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { useState } from "react";
 import { BsFire } from "react-icons/bs";
 import { Txs, withTokenApprove } from "../approve-and-tx";

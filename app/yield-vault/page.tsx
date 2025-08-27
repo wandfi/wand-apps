@@ -25,7 +25,6 @@ import { getPC } from '@/providers/publicClient'
 import { useBoundStore, useStore } from '@/providers/useBoundStore'
 import { useBVault, useBVaultEpoches } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
-import { Grid } from '@tremor/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, ReactNode, useMemo, useState } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
@@ -195,7 +194,7 @@ export default function Vaults() {
             {mloading ? <div className='animitem w-full flex items-center justify-center pt-40'>
               <FaSpinner className='animate-spin text-4xl opacity-80' />
             </div> :
-              <Grid numItems={1} numItemsMd={2} numItemsLg={3} className='gap-5 mt-4'>
+              <div className='grid grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-5 mt-4'>
                 {fVcs.map((item, index) => (
                   <ConfigChainsProvider chains={[item.chain]} key={`vault_item_${index}`}>
                     {
@@ -209,7 +208,7 @@ export default function Vaults() {
                     }
                   </ConfigChainsProvider>
                 ))}
-              </Grid>
+              </div>
             }
           </>
         ) : (

@@ -10,7 +10,6 @@ import { useTVL } from '@/hooks/useTVL'
 import { fmtPercent, getBigint } from '@/lib/utils'
 import { useStore } from '@/providers/useBoundStore'
 import { displayBalance } from '@/utils/display'
-import { TableCell as _TableCell } from '@tremor/react'
 
 import { BVaultApy } from '@/components/b-vault'
 import { getTokenBy } from '@/config/tokens'
@@ -18,9 +17,6 @@ import { useBvaultROI } from '@/hooks/useBVaultROI'
 import { ReactNode, useMemo } from 'react'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 
-const TableCell = (p: React.TdHTMLAttributes<HTMLTableCellElement> & React.RefAttributes<HTMLTableCellElement>) => {
-  return <_TableCell {...p} className={`!p-3 w-max ${p.className}`} />
-}
 
 const greenPoint = (
   <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'>

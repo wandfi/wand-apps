@@ -26,7 +26,6 @@
     "@rainbow-me/rainbowkit": "2.2.x",
     "@redstone-finance/evm-connector": "^0.3.6",
     "@tanstack/react-query": "^5.35.1",
-    "@tremor/react": "^3.4.1",
     "@types/node": "20.4.2",
     "@types/numeral": "^2.0.5",
     "@types/react": "18.2.15",

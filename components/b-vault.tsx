@@ -12,7 +12,7 @@ import { useStore } from '@/providers/useBoundStore'
 import { useBVault, useBVaultApy, useBVaultBoost, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { ProgressBar } from '@tremor/react'
+import { ProgressBar } from "@/components/ui/progress-bar"
 import _ from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'

@@ -32,12 +32,14 @@ export function GetvIP({ address }: { address: Address }) {
 
 export function GetByStoryHunt({ t }: { t: Token }) {
     if (!t || !t.chain.includes(story.id)) return null
-    return <div className='text-xs font-medium flex gap-2 justify-end items-center'>
-        <div className="bg-black">
-            <CoinIcon symbol="StoryHunt" size={18} />
-        </div>
+    return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
+        Get {t.symbol} on
+        <Link target="_blank" className="underline" href={`https://app.piperx.xyz/#/swap?token1=0xF1815bd50389c46847f0Bda824eC8da914045D14&token2=${t.address}`}>
+            Piperx
+        </Link>
+        /
         <Link target='_blank' className='underline' href={`https://app.storyhunt.xyz/token/${t.address}`}>
-            Get {t.symbol} on StoryHunt
+            StoryHunt
         </Link>
     </div>
 }

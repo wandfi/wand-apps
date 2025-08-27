@@ -4,7 +4,7 @@ import { BVault2Config } from "@/config/bvaults2";
 import { getTokenBy } from "@/config/tokens";
 import { cn, FMT, fmtDate, fmtDuration, formatPercent } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
-import { ProgressBar } from "@tremor/react";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { useRouter } from "next/navigation";
 import { CoinIcon } from "../icons/coinicon";
 import { SimpleTabs } from "../simple-tabs";
