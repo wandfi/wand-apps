@@ -150,7 +150,7 @@ export function Txs({
           let progress = 0;
           showTxsStat && useTxsStore.setState({ txs: calls, progress })
           for (const item of calls) {
-            !skipSimulate && (await pc.simulateContract(item))
+            !skipSimulate && (await pc.simulateContract({ ...item, account: wc.account.address }))
             const tx = await wc.writeContract(item)
             const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 2 })
             if (res.status !== 'success') throw new Error('Transactions Reverted')
