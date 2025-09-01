@@ -169,8 +169,11 @@ export default function AdminPage() {
             <UpdateVaultParams vault={current.data.vault} paramList={BVault2Params} protocoSettingAddress={current.data.protocalSettings} />
             <GeneralAction abi={abiBVault2} functionName="setAutoStartNewEpoch" address={current.data.vault}
               infos={() => promiseAll({ AutoStartNewEpoch: getPC(current.data.chain).readContract({ abi: abiBVault2, address: current.data.vault, functionName: 'autoStartNewEpoch' }) })} />
-            <GeneralAction abi={abiBVault2} functionName="updateThreshold" address={current.data.vault} />
-            <GeneralAction abi={abiBVault2} functionName="updateBootstrapDuration" address={current.data.vault} />
+            <GeneralAction abi={abiBVault2} functionName="updateThreshold" address={current.data.vault}
+              infos={() => promiseAll({ threshold: getPC(current.data.chain).readContract({ abi: abiBVault2, address: current.data.vault, functionName: 'bootstrapThreshold' }) })} />
+            <GeneralAction abi={abiBVault2} functionName="updateBootstrapDuration" address={current.data.vault}
+              infos={() => promiseAll({ duration: getPC(current.data.chain).readContract({ abi: abiBVault2, address: current.data.vault, functionName: 'bootstrapDuration' }) })}
+            />
             <GeneralAction abi={abiBVault2} functionName="pause" address={current.data.vault} />
             <GeneralAction abi={abiBVault2} functionName="unpause" address={current.data.vault} />
             <GeneralAction abi={abiProtocol} functionName='addPremiumHook' argsDef={[current.data.bt, current.data.hook]} address={current.data.protocal}

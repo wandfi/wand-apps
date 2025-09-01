@@ -15,6 +15,7 @@ import { create } from 'zustand'
 import { FaCheck, FaSpinner } from "react-icons/fa6";
 import { getTokenBy } from '@/config/tokens'
 import { SimpleDialog } from './simple-dialog'
+import { isPROD, isTEST } from '@/constants'
 
 export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()
@@ -96,11 +97,12 @@ export type TX = TxConfig | (() => Promise<TxConfig>)
 export const useTxsStore = create(() => ({ txs: [] as TxConfig[], progress: 0 }))
 
 export function Txs({
-  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, disableProgress, onTxSuccess }:
+  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, disableProgress, skipSimulate = isPROD, onTxSuccess }:
   {
     className?: string, tx: string, disabled?: boolean, txs: TX[] | ((args: { pc: PublicClient, wc: WalletClient<Transport, Chain, Account, RpcSchema> }) => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
     disableSendCalls?: boolean
     disableProgress?: boolean
+    skipSimulate?: boolean
     onTxSuccess?: () => void
   }) {
   const { data: wc } = useWalletClient()
@@ -119,6 +121,12 @@ export function Txs({
         }
         if (calls.length == 1) {
           throw new Error('calls length one wallet_sendCalls')
+        }
+        if (!skipSimulate) {
+          await pc.simulateCalls({
+            account: wc.account.address,
+            calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
+          })
         }
         const { id } = await wc.sendCalls({
           account: wc.account.address,
@@ -142,6 +150,7 @@ export function Txs({
           let progress = 0;
           showTxsStat && useTxsStore.setState({ txs: calls, progress })
           for (const item of calls) {
+            !skipSimulate && (await pc.simulateContract(item))
             const tx = await wc.writeContract(item)
             const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 2 })
             if (res.status !== 'success') throw new Error('Transactions Reverted')
