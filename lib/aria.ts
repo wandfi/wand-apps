@@ -63,6 +63,7 @@ export function genAplBtConvert(bt: Address): TokenConvert {
       return isZeroToOne ? (amount * raito) / Decimal_27 : (amount * Decimal_27) / raito
     },
     async convertTxs(isZeroToOne, amount, user) {
+      const minOut = ((await this.previewConvert(isZeroToOne, amount)) * 99n) / 100n
       return withTokenApprove({
         pc: getPC(chain),
         user,
@@ -72,7 +73,7 @@ export function genAplBtConvert(bt: Address): TokenConvert {
           abi: abiStakingAPL,
           address: stakingAPL,
           functionName: isZeroToOne ? 'stake' : 'unstake',
-          args: [amount],
+          args: [amount, minOut],
         },
       })
     },
