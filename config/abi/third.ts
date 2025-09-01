@@ -9,6 +9,7 @@ export const abiStakingAPL = parseAbi([
 
 export const abiAriaLegal = parseAbi([
     'function hasSignedCurrentLicense(address account) external view returns (bool)',
+    'function nonce(address account) external view returns (uint256)',
     'function licenseURI() external view returns (string memory)',
     'function contentURIHash() external view returns (bytes32)',
     'function signLicense(bytes calldata signature) external'

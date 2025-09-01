@@ -9,15 +9,14 @@ import { genBtConvert } from '@/components/bvaults2/bt'
 import { getPC } from '@/providers/publicClient'
 import { withTokenApprove } from '@/components/approve-and-tx'
 const address: Address = '0x5E8291e5799277429eb26da2Ff0364f6C39701CD'
-
-// useSignTypedData
 export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient; wc: WalletClient; token: Token; user: Address }) {
   if (token.symbol === 'APL' && token.chain.includes(story.id)) {
     const alreadySign = await pc.readContract({ abi: abiAriaLegal, address, functionName: 'hasSignedCurrentLicense', args: [user] })
     if (alreadySign) return
-    const { licenseURI, contentURIHash } = await promiseAll({
+    const { licenseURI, contentURIHash, userNonce } = await promiseAll({
       licenseURI: pc.readContract({ abi: abiAriaLegal, address, functionName: 'licenseURI' }),
       contentURIHash: pc.readContract({ abi: abiAriaLegal, address, functionName: 'contentURIHash' }),
+      userNonce: pc.readContract({ abi: abiAriaLegal, address, functionName: 'nonce', args: [user] }),
     })
     const domains = await getEip712Domain(pc, { address })
     console.info('domains:', domains)
@@ -32,12 +31,13 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
       },
       types: {
         SignLicense: [
+          { type: 'uint256', name: 'userNonce' },
           { type: 'string', name: 'licenseURI' },
           { type: 'bytes32', name: 'contentURIHash' },
         ],
       },
       primaryType: 'SignLicense',
-      message: { licenseURI, contentURIHash },
+      message: { userNonce, licenseURI, contentURIHash },
     })
     console.info('signature:', user, signature)
     const { request } = await pc.simulateContract({ account: user, abi: abiAriaLegal, address, functionName: 'signLicense', args: [signature] })
