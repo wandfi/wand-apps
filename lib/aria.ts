@@ -37,7 +37,7 @@ export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient
         ],
       },
       primaryType: 'SignLicense',
-      message: { userNonce, licenseURI, contentURIHash },
+      message: { userNonce: userNonce + 1n, licenseURI, contentURIHash },
     })
     console.info('signature:', user, signature)
     const { request } = await pc.simulateContract({ account: user, abi: abiAriaLegal, address, functionName: 'signLicense', args: [signature] })
