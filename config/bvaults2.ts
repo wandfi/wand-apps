@@ -37,6 +37,23 @@ const BTS = {
 }
 export const BVAULTS2CONIG: BVault2Config[] = [
   {
+    tit: 'APL-Aria Vault2(test)',
+    vault: '0x2fc3dc5081f249e0361dcf54e0e9600579600211',
+    asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
+    bt: BTS.APLVaultProd,
+    btConverts: [genAplBtConvert(BTS.APLVaultProd), genBtConvert(story.id, BTS.APLVaultProd, '0xb5461c1FD0312Cd4bF037058F8a391e6A42F9639')],
+    protocal: '0x15489e8e4a9d0909c77560058a392c8dc89ff33c',
+    protocalSettings: '0x2735dfe98587b16c737e770af8fa1c9c071cc62f',
+    hook: '0xedccfe315be6a186172530c4212c990ebf157a88',
+    onEnv: ['test'],
+    chain: story.id,
+    logs: true,
+    PIcon: 'pAPL',
+    YIcon: 'yAPL',
+    points: { link: 'https://app.ariaprotocol.xyz/points' },
+    desc: `$APL is an IPRWA (Intellectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
+  },
+  {
     tit: 'APL-Aria Vault',
     vault: '0xd589836c3c031e2238c25ad5c6a910794c8827ad',
     asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
