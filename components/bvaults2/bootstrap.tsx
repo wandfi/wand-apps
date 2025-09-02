@@ -55,6 +55,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                 vIP can be restaked on multiple IP Assets to earn profits, while YT holders can leverage profits through the vIP-Verio Vault.
             </Tip> */}
         </div>
+        <div className="opacity-60 text-xs pl-7">{vc.subTitle}</div>
         <div className="flex flex-col h-auto lg:flex-row lg:h-[13.75rem] gap-8">
             <div className="flex-1 w-full lg:w-0 h-full flex flex-col pt-5">
                 {/* <AssetInput asset={bt.symbol} amount={inputAsset} setAmount={setInputAsset} balance={inputBalance.result} /> */}

@@ -13,6 +13,7 @@ export type TokenConvert = {
 
 export type BVault2Config = {
   tit: string
+  subTitle: string
   desc: string
   vault: Address
   asset: Address
@@ -38,6 +39,7 @@ const BTS = {
 export const BVAULTS2CONIG: BVault2Config[] = [
   {
     tit: 'APL-Aria Vault ',
+    subTitle: '2025/09/04 (30days)',
     vault: '0x1e46583d9da2f28cea5d075c57d71d919353b3d9',
     asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
     bt: BTS.APLVaultProd,
@@ -55,6 +57,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
   },
   {
     tit: 'APL-Aria Vault',
+    subTitle: '2025/08/02 (30days)',
     vault: '0xd589836c3c031e2238c25ad5c6a910794c8827ad',
     asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
     bt: BTS.APLVaultProd,
