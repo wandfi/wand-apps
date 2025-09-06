@@ -38,7 +38,7 @@ export function useShowAdmin() {
 export function Header() {
   const pathname = usePathname()
   const { width } = useWindowSize(window.innerWidth, window.innerHeight)
-  const hiddenTitle = pathname !== '/' && width < 1024
+  const hiddenTitle = width < 1024
   const showAdmin = useShowAdmin()
   const links = useMemo(() => {
     const links = [
@@ -77,7 +77,7 @@ export function Header() {
                 hidden: !hiddenTitle,
               })}
             >
-              {pathname.split('/')[1]}
+              {pathname.split('/')[1] || 'Yield-Vault'}
               <TbChevronDown />
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
