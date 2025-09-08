@@ -368,7 +368,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const upForUserAction = useUpBVaultForUserAction(bvc)
   const { roi, roiChange } = useBvaultROI(bvc, outputYTokenForInput, afterYtAssetPrice)
   return (
-    <div className='animitem card !p-4 flex flex-col h-[24.25rem] gap-1'>
+    <div className='animitem card !p-4 flex flex-col h-[28rem] gap-1'>
       <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
       <GetvIP address={bvc.asset} />
       <div className='text-base font-bold my-2'>Receive</div>
@@ -455,7 +455,7 @@ function BVaultPoolsOld({ bvc }: { bvc: BVaultConfig }) {
     )
   }
   return (
-    <div className='animitem md:h-[24.25rem] card !p-4'>
+    <div className='animitem md:h-[28rem] card !p-4'>
       <div className='font-bold text-base'>Harvest</div>
       <div className={cn('flex flex-col md:flex-row gap-4 mt-2')}>
         <div className='flex flex-col gap-4 shrink-0 w-full md:w-[14.375rem]' ref={mesRef}>
@@ -556,7 +556,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
     const fTime = `${fmtDate(itemEpoch.startTime * 1000n)}-${fmtDate((itemEpoch.startTime + itemEpoch.duration) * 1000n)}`
     return (
       <div key={key} style={style} className='cursor-pointer' onClick={() => onRowClick(index)}>
-        <div className={cn('h-[56px] card !rounded-lg !px-5 !py-2 font-semibold', index < epoches.length - 1 ? 'mb-[20px]' : '')}>
+        <div className={cn('h-[56px] card !rounded-lg !px-5 !py-2 font-semibold whitespace-nowrap', index < epoches.length - 1 ? 'mb-[20px]' : '')}>
           <div className='text-sm'>Epoch {epoches[index].epochId.toString()}</div>
           <div className='text-xs dark:text-white/60 mt-1'>{fTime}</div>
         </div>
@@ -564,7 +564,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
     )
   }
   return (
-    <div className='animitem md:h-[24.25rem] card !p-4'>
+    <div className='animitem md:h-[28rem] card !p-4'>
       <div className='font-bold text-base'>Harvest</div>
       <div className={cn('flex flex-col md:flex-row gap-4 mt-2')}>
         <div className='flex flex-col gap-4 shrink-0 w-full md:w-[14.375rem]' ref={mesRef}>
@@ -575,7 +575,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
           <List
             className={epoches.length > viewMax ? 'pr-5' : ''}
             width={mes.width}
-            height={280}
+            height={330}
             rowHeight={({ index }) => (index < epoches.length - 1 ? itemHeight + itemSpaceY : itemHeight)}
             overscanRowCount={viewMax}
             rowCount={epoches.length}
@@ -592,7 +592,6 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
               <span className='text-sm'>{bvc.yTokenSymbol} Balance</span>
               <span className='text-sm opacity-60'>{displayBalance(userBalanceYToken)}</span>
             </div>
-
             <div className='flex flex-col gap-5 justify-start relative pt-8 items-center'>
               {sBribes.map(item => <div key={item.bribeToken} className='flex items-center w-full relative gap-20 pl-[20%]'>
                 <BribeTit name={item.bribeSymbol} />
@@ -600,20 +599,20 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
               </div>)}
               <span className='absolute left-0 top-0'>Restaking Earnings</span>
               <span className='absolute left-1/2 top-0 opacity-60'>Claimable</span>
-              <ApproveAndTx
-                className='absolute w-28 top-0 right-0'
-                tx='Claim'
-                disabled={!current}
-                config={{
-                  abi: abiStakingBribesPool,
-                  address: current?.stakingBribesPool!,
-                  functionName: 'getBribes',
-                }}
-                onTxSuccess={() => {
-                  upForUserAction()
-                }}
-              />
             </div>
+            {sBribes.length > 0 && <ApproveAndTx
+              className='w-28 mx-auto'
+              tx='Claim'
+              disabled={!current}
+              config={{
+                abi: abiStakingBribesPool,
+                address: current?.stakingBribesPool!,
+                functionName: 'getBribes',
+              }}
+              onTxSuccess={() => {
+                upForUserAction()
+              }}
+            />}
             <div className='flex items-center relative'>
               <span className='text-sm'>YT Points <Tip>YT Points are calculated based on the duration of YT holding and apply to some uncertain rewards, such as airdrops.</Tip></span>
               <span className=' opacity-60 ml-10'>{displayBalance(userBalanceYTokenSyntyetic, undefined, 23)}</span>
@@ -621,20 +620,20 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
                 <span className='opacity-60'>Claimable</span>
                 <span>{displayBalance(userClaimableYTokenSyntyetic, undefined, 23)}</span>
               </div>
-              <ApproveAndTx
-                className='w-28 ml-auto'
-                tx='Claim'
-                disabled={!current}
-                config={{
-                  abi: abiAdhocBribesPool,
-                  address: current?.adhocBribesPool!,
-                  functionName: 'collectYT',
-                }}
-                onTxSuccess={() => {
-                  upForUserAction()
-                }}
-              />
             </div>
+            <ApproveAndTx
+              className='mt-6 w-28 mx-auto'
+              tx='Claim'
+              disabled={!current}
+              config={{
+                abi: abiAdhocBribesPool,
+                address: current?.adhocBribesPool!,
+                functionName: 'collectYT',
+              }}
+              onTxSuccess={() => {
+                upForUserAction()
+              }}
+            />
             {aBribes.length > 0 && <div className='flex flex-col gap-5 justify-start relative pt-8 items-center'>
               {aBribes.map(item => <div key={item.bribeToken} className='flex items-center w-full relative gap-20 pl-[20%]'>
                 <BribeTit name={item.bribeSymbol} />
@@ -642,20 +641,21 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
               </div>)}
               <span className='absolute left-0 top-0'>Additional Incentives</span>
               <span className='absolute left-1/2 top-0 opacity-60'>Claimable</span>
-              <ApproveAndTx
-                className='absolute w-28 top-0 right-0'
-                tx='Claim'
-                disabled={!current}
-                config={{
-                  abi: abiAdhocBribesPool,
-                  address: current?.adhocBribesPool!,
-                  functionName: 'getBribes',
-                }}
-                onTxSuccess={() => {
-                  upForUserAction()
-                }}
-              />
+
             </div>}
+            {aBribes.length > 0 && <ApproveAndTx
+              className='w-28'
+              tx='Claim'
+              disabled={!current}
+              config={{
+                abi: abiAdhocBribesPool,
+                address: current?.adhocBribesPool!,
+                functionName: 'getBribes',
+              }}
+              onTxSuccess={() => {
+                upForUserAction()
+              }}
+            />}
             <div className='text-center text-sm font-medium flex items-center flex-nowrap justify-center whitespace-nowrap mt-auto gap-1'>
               {/* Additional Airdrops: 1000 <CoinIcon symbol='vIP' size={16} /> vIP <Tip>Will be distributed based on YT points after Epoch ends</Tip> */}
             </div>

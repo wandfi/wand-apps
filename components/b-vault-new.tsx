@@ -392,7 +392,7 @@ function YT({ vc }: { vc: BVaultConfig }) {
           </span>
         </div>
       </div>
-      <div className='card !p-4 flex flex-col h-[24.25rem] gap-1'>
+      <div className='card !p-4 flex flex-col h-[28rem] gap-1'>
         <TokenInput tokens={tokens} onTokenChange={setCurrentToken} amount={inputAsset} setAmount={setInputAsset} error={error} />
         <GetvIP address={vc.asset} />
         <div className='text-base font-bold my-2'>Receive</div>

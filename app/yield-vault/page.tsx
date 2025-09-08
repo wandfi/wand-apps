@@ -32,6 +32,7 @@ import { Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
 import { FetKEYS } from '@/components/bvaults2/fetKeys'
+import { nowUnix } from '@/lib/utils'
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
@@ -177,8 +178,17 @@ export default function Vaults() {
     console.info('vd2', vd2)
     const mvcs = vcs.filter(item => item.type === 'BVault' || vd2.find(vd => vd.vc.vault === item.vault)?.current)
     if (currentFilter == 'All') return mvcs
-    if (currentFilter == 'Active') return mvcs.filter(vc => vc.type == 'BVault2' || (!Boolean(bvaults[vc.vault]?.closed)))
-    return mvcs.filter(vc => vc.type !== 'BVault2' && (Boolean(bvaults[vc.vault]?.closed)))
+    function isActive(vc: VCItem): boolean {
+      if (vc.type == 'BVault2') {
+        const vd = vd2.find(vd => vd.vc.vault === vc.vault)
+        return Boolean(vd && vd.current && (vd.current.startTime + vd.current.duration) > nowUnix())
+      } else {
+        const vd = bvaults[vc.vault]
+        return Boolean(vd && !vd.closed)
+      }
+    }
+    if (currentFilter == 'Active') return mvcs.filter(isActive)
+    return mvcs.filter((vc) => !isActive(vc))
   })()
 
   return (

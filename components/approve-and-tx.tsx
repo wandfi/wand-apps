@@ -16,6 +16,7 @@ import { FaCheck, FaSpinner } from "react-icons/fa6";
 import { getTokenBy } from '@/config/tokens'
 import { SimpleDialog } from './simple-dialog'
 import { isPROD, isTEST } from '@/constants'
+import { Tip } from './ui/tip'
 
 export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()
@@ -202,9 +203,9 @@ export function TxsStat({ className }: { className?: string }) {
   const { txs, progress } = useTxsStore()
   if (txs.length == 0) return null
   return <SimpleDialog open disableClose className={cn('w-80 text-black dark:text-white flex flex-col gap-2 p-4', className)}>
-    <div className='text-xl font-semibold'>Progress</div>
+    <div className='text-xl font-semibold'>Progress <Tip>Will require multiple signatures, this will be simplified into 1 approval with future updates!</Tip></div>
     <div className='flex flex-col gap-2 max-h-80 overflow-y-auto px-2.5'>
-      {txs.map((tx, i) => <div key={`tx_item_stat_${i}`} className='animitem flex items-center gap-5 bg-primary/20 rounded-lg px-4 py-2'>
+      {txs.map((tx, i) => <div key={`tx_item_stat_${i}`} className={cn('animitem flex items-center gap-5 bg-primary/20 px-4 py-2', { 'border-t border-black/20 dark:border-white/20': i > 0 })}>
         <span className='font-semibold'>{i + 1}</span>
         {tx.name ?? tx.functionName}
         <div className={cn('ml-auto text-xl', { 'animate-spin': progress == i })}>
@@ -213,6 +214,6 @@ export function TxsStat({ className }: { className?: string }) {
         </div>
       </div>)}
     </div>
-    <div className='opacity-80 text-center'>Will require multiple signatures, this will be simplified into 1 approval with future updates!</div>
+    {/* <div className='opacity-80 text-center'>Will require multiple signatures, this will be simplified into 1 approval with future updates!</div> */}
   </SimpleDialog>
 }
