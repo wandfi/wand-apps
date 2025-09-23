@@ -108,7 +108,6 @@ export function Txs({
   }) {
   const { data: wc } = useWalletClient()
   const isNetwrong = useNetworkWrong()
-  // const { sendCallsAsync } = useSendCalls()
   const chainId = useCurrentChainId()
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
