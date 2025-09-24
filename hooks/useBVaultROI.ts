@@ -44,6 +44,8 @@ export const ipAssetsTit: { [k: Address]: string } = {
   '0x4D31d2417b64597Bf346f278728f3A1C7065907e': 'DaVinci',
   '0xCE11dD7008494B6b4F9DF01213F77B87A4dab579': 'Terra',
   '0x9B438f52a0A94d3D7D1325C80711FF4709571054': 'Oaisis',
+  '0x5021F7438ea502b0c346cB59F8E92B749Ecd74B5': 'Variants 🧬 NFT',
+  '0x816453EbC9b9E55b4faF326614BfFf915e5dCc3d': 'DoubleUp',
 }
 
 /*
