@@ -70,7 +70,13 @@ const SupportICONS: { [k: string]: string } = {
   yAPL: 'yAPL.svg',
   LPAPL: 'LPAPL.svg',
   bAPL: 'bAPL.svg',
-  StoryHunt: 'StoryHunt.svg'
+  StoryHunt: 'StoryHunt.svg',
+  MON: 'MON.svg',
+  aprMON: 'aprMON.svg',
+  paprMON: 'paprMON.svg',
+  yaprMON: 'aprMON.svg',
+  LPaprMON: 'LPaprMON.svg',
+  baprMON: 'baprMON.svg',
 }
 
 export function CoinIcon({ symbol, size = 48, url, ...p }: { symbol: string; className?: string; style?: CSSProperties; size?: number; url?: string }) {

@@ -63,7 +63,7 @@ export function SwitchChain() {
         }
 
         {
-            show && <div className="fixed bg-black/30 w-screen h-screen left-0 top-0 flex">
+            show && <div className="fixed bg-black/30 w-screen h-screen left-0 top-0 flex z-50">
                 <div ref={modalRef} className="bg-white shadow-sm dark:bg-slate-800 rounded-2xl m-auto w-full max-w-sm p-4">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-extrabold">Switch Networks</span>

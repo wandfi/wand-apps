@@ -12,7 +12,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { useState } from "react";
 import { BsFire } from "react-icons/bs";
 import { Txs, withTokenApprove } from "../approve-and-tx";
-import { GetByStoryHunt } from "../get-lp";
+import { GetByThird } from "../get-lp";
 import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
 import { convertBt, useWrapBtTokens } from "./bt";
@@ -38,10 +38,10 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const lpBalance = useBalance(lp)
     const bootFinished = currentAmount > 0n && currentAmount >= targetAmount;
     const getTxs: Parameters<typeof Txs>['0']['txs'] = async (arg) => {
-        await withIfAiraSign({ ...arg, token: ct, user:  arg.wc.account.address })
+        await withIfAiraSign({ ...arg, token: ct, user: arg.wc.account.address })
         const { txs, out: sharesBn } = await convertBt(vc, true, input.address, inputAssetBn, arg.wc.account.address)
         const txsApprove = await withTokenApprove({
-            approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user:  arg.wc.account.address,
+            approves: [{ spender: vc.vault, token: vc.bt, amount: sharesBn }], pc: getPC(vc.chain), user: arg.wc.account.address,
             tx: { abi: abiBVault2, address: vc.vault, name: 'Add Liquidity', functionName: 'addLiquidity', args: [sharesBn, genDeadline()], }
         })
         return [...txs, ...txsApprove]
@@ -56,11 +56,10 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
             </Tip> */}
         </div>
         <div className="opacity-60 text-xs pl-7">{vc.subTitle}</div>
-        <div className="flex flex-col h-auto lg:flex-row lg:h-[13.75rem] gap-8">
+        <div className="flex flex-col h-auto lg:flex-row lg:h-[10rem] gap-8">
             <div className="flex-1 w-full lg:w-0 h-full flex flex-col pt-5">
                 {/* <AssetInput asset={bt.symbol} amount={inputAsset} setAmount={setInputAsset} balance={inputBalance.result} /> */}
-                <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCT} />
-                <GetByStoryHunt t={asset} />
+                <TokenInput tokens={tokens} amount={inputAsset} setAmount={setInputAsset} onTokenChange={setCT} otherInfo={<GetByThird t={asset} />} />
                 <Txs
                     className={cn('mx-auto mt-auto', { 'bg-red-300 disabled:hover:bg-red-300 text-black': bootFinished })}
                     tx={bootFinished ? 'Finished' : 'Deposit'}

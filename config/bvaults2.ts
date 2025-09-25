@@ -3,7 +3,7 @@ import { genBtConvert } from '@/components/bvaults2/bt'
 import { genAplBtConvert } from '@/lib/aria'
 import { Address } from 'viem'
 import { TypeENV } from './env'
-import { story } from './network'
+import { monadTestnet, story } from './network'
 
 export type TokenConvert = {
   tokens: [Address, Address]
@@ -35,6 +35,8 @@ const BTS = {
   APLVault: '0x773dd6686df237a7b3fe02632e91bd3664d81a0c' as Address,
   APLVault2: '0x1e0ca0e6bbf6b2e14c6e5360e430905759fd8677' as Address,
   APLVaultProd: '0x3bb7dc96832f8f98b8aa2e9f2cc88a111f96a118' as Address,
+
+  APRMonad: '0xc0685bb397eca74763b8b90738abf868a3502c21' as Address,
 }
 export const BVAULTS2CONIG: BVault2Config[] = [
   {
@@ -71,23 +73,23 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     PIcon: 'pAPL',
     YIcon: 'yAPL',
     points: { link: 'https://app.ariaprotocol.xyz/points' },
-    desc: `$APL is an IPRWA (Intellectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
+    desc: `$APL is an IPRWA (Intel lectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
   },
-  // {
-  //   tit: 'APL-Aria Vault',
-  //   vault: '0xcc393c83e7ccb3313cbf2eb08199184b8f9fd1e5',
-  //   asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
-  //   bt: BTS.APLVault,
-  //   btConverts: [genAplBtConvert(BTS.APLVault), genBtConvert(story.id, BTS.APLVault, '0xb5461c1FD0312Cd4bF037058F8a391e6A42F9639')],
-  //   protocal: '0xc96979ae3c19166b43a0d225bb346909df24de81',
-  //   protocalSettings: '0x75f7b53dd5e324866cb33099378d1a30923bd881',
-  //   hook: '0xc4828140eab72d8d790feb90d42ab404e077ba88',
-  //   onEnv: ['test'],
-  //   chain: story.id,
-  //   logs: true,
-  //   PIcon: 'pAPL',
-  //   YIcon: 'yAPL',
-  //   points: { link: 'https://app.ariaprotocol.xyz/points' },
-  //   desc: `$APL is an IPRWA (Intellectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
-  // }
+  {
+    tit: 'aprMON-aPrioir Vault(Testnet)',
+    subTitle: '2025/09/24 (30days)',
+    vault: '0xc0bcd558df01a1464221b2bed239a31ade10cd38',
+    asset: '0xb2f82D0f38dc453D596Ad40A37799446Cc89274A',
+    bt: BTS.APRMonad,
+    btConverts: [genBtConvert(monadTestnet.id, BTS.APRMonad, '0xb2f82D0f38dc453D596Ad40A37799446Cc89274A')],
+    protocal: '0x3197e1332cc522ea192f8288bbdd3da58b00ee89',
+    protocalSettings: '0x85cd26a15f3e880232d56f11fbaa8e02ee405e4e',
+    hook: '0xc9606aeccecc8b1fe6041cc9152cedde63e9ba88',
+    onEnv: ['test'],
+    chain: monadTestnet.id,
+    logs: true,
+    PIcon: 'paprMON',
+    YIcon: 'yaprMON',
+    desc: `aPriori is the leading MEV-powered liquid staking platform on Monad. We provide a simple way for users to earn MEV-boosted rewards on their Monad tokens. Users that stake with aPriori can use liquid tokens on a range of DeFi applications to gain extra rewards.`,
+  }
 ]

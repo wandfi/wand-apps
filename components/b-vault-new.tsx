@@ -552,7 +552,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
     const isSpicePoints = vc.rewardSymbol === 'Spice Points'
     return [
       [
-        <TokenSymbol key={'token'} t={{ address: zeroAddress, symbol: vc.yTokenSymbol, decimals: 18, chain: [chainId] }} />,
+        <TokenSymbol key={'token'} t={{ address: zeroAddress, symbol: vc.yTokenSymbol, decimals: 18, chain: chainId }} />,
         displayBalance(yBalance, undefined, asset.decimals),
         vd.closed ? 'Mature' : 'Active',
         <div key={'yields'}>
@@ -560,7 +560,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
           {yieldsOne.map((item, i) => <MCoinAmount key={`yields_${i}`} token={item.token} amount={item.amount} />)}
           {isSpicePoints &&
             <TokenSymbol
-              t={{ chain: [1], decimals: 18, symbol: 'Spice Points', address: '0x' }}
+              t={{ chain: 1, decimals: 18, symbol: 'Spice Points', address: '0x' }}
               size={16}
               className='cursor-pointer underline underline-offset-2'
               onClick={() => open("https://aid.gaib.ai", '_blank')} />

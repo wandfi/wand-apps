@@ -14,7 +14,7 @@ import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
-import { GetByStoryHunt } from "../get-lp"
+import { GetByThird } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
@@ -114,7 +114,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetByStoryHunt t={asset} />
+            <GetByThird t={asset} />
         </div>
         <TokenInput tokens={outputs} checkBalance={false} balance={false} onTokenChange={outputSetCT} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="flex justify-between items-center text-xs font-medium">
@@ -178,7 +178,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
         <SwapDown />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetByStoryHunt t={asset} />
+            <GetByThird t={asset} />
         </div>
         <AssetInput asset={pt.symbol} disable amount={fmtBn(outAmount, bt.decimals)} loading={isFetchingOut} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>
@@ -237,7 +237,7 @@ export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
         <SwapDown />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetByStoryHunt t={asset} />
+            <GetByThird t={asset} />
         </div>
         <TokenInput tokens={tokens} onTokenChange={setCT} disable amount={fmtBn(outAmount, out.decimals)} loading={isFetchingOut && inputBn > 0n} />
         <Txs

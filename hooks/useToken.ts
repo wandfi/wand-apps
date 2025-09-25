@@ -9,8 +9,8 @@ export const keyBalance = (token?: Token, address?: Address) => (address && toke
 
 export async function getBalance(token: Token, user: Address) {
   return token!.isNative
-    ? getPC(token.chain[0]).getBalance({ address: user })
-    : getPC(token.chain[0]).readContract({ abi: erc20Abi, functionName: 'balanceOf', address: token!.address, args: [user] })
+    ? getPC(token.chain).getBalance({ address: user })
+    : getPC(token.chain).readContract({ abi: erc20Abi, functionName: 'balanceOf', address: token!.address, args: [user] })
 }
 export function useBalance(token?: Token, user?: Address) {
   const { address } = useAccount()

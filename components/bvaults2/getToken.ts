@@ -8,7 +8,7 @@ export function getPtToken(vc: BVault2Config, pt: Address) {
   const asset = getTokenBy(vc.asset, vc.chain)!
   const key = `pt_${vc.chain}_${vc.vault}_${pt}`
   if (!cacheTokens[key]) {
-    cacheTokens[key] = { address: pt, chain: [vc.chain], symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
+    cacheTokens[key] = { address: pt, chain: vc.chain, symbol: `p${asset.symbol}`, decimals: asset.decimals } as Token
   }
   return cacheTokens[key]
 }
@@ -22,7 +22,7 @@ export function getYtToken(vc: BVault2Config, yt: Address) {
   const asset = getTokenBy(vc.asset, vc.chain)!
   const key = `yt_${vc.chain}_${vc.vault}_${yt}`
   if (!cacheTokens[key]) {
-    cacheTokens[key] = { address: yt, chain: [vc.chain], symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
+    cacheTokens[key] = { address: yt, chain: vc.chain, symbol: `y${asset.symbol}`, decimals: asset.decimals } as Token
   }
   return cacheTokens[key]
 }
@@ -36,7 +36,7 @@ export function getLpToken(vc: BVault2Config) {
   const asset = getTokenBy(vc.asset, vc.chain)!
   const key = `lp_${vc.chain}_${vc.vault}_${vc.hook}`
   if (!cacheTokens[key]) {
-    cacheTokens[key] = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: [vc.chain], decimals: asset.decimals } as Token
+    cacheTokens[key] = { address: vc.hook, symbol: `LP${asset.symbol}`, chain: vc.chain, decimals: asset.decimals } as Token
   }
   return cacheTokens[key]
 }

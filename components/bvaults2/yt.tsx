@@ -16,7 +16,7 @@ import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
 import { Fees } from "../fees"
-import { GetByStoryHunt } from "../get-lp"
+import { GetByThird } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { TokenInput } from "../token-input"
@@ -131,7 +131,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
         <Swap onClick={onSwitch} />
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetByStoryHunt t={asset} />
+            <GetByThird t={asset} />
         </div>
         <TokenInput tokens={outputs} onTokenChange={outputSetCT} checkBalance={false} balance={false} disable amount={fmtBn(outAmount, output.decimals)} loading={isFetchingOut} />
         <div className="flex justify-between items-center text-xs font-medium">

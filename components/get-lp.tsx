@@ -1,5 +1,5 @@
 import { LP_TOKENS } from "@/config/lpTokens"
-import { getBexPoolURL, story } from "@/config/network"
+import { getBexPoolURL, monadTestnet, story } from "@/config/network"
 import { Address } from "viem"
 import Link from 'next/link'
 import { CoinIcon } from "./icons/coinicon"
@@ -30,9 +30,9 @@ export function GetvIP({ address }: { address: Address }) {
     </div>
 }
 
-export function GetByStoryHunt({ t }: { t: Token }) {
-    if (!t || !t.chain.includes(story.id)) return null
-    return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
+export function GetByThird({ t }: { t: Token }) {
+    if (!t) return null
+    if (t.chain == story.id) return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
         Get {t.symbol} on
         <Link target="_blank" className="underline" href={`https://app.piperx.xyz/#/swap?token1=0xF1815bd50389c46847f0Bda824eC8da914045D14&token2=${t.address}`}>
             Piperx
@@ -42,4 +42,11 @@ export function GetByStoryHunt({ t }: { t: Token }) {
             StoryHunt
         </Link>
     </div>
+    if (t.chain == monadTestnet.id) return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
+        Get {t.symbol} on
+        <Link target='_blank' className='underline' href={`https://stake.apr.io/`}>
+            aPriori
+        </Link>
+    </div>
+    return null
 }

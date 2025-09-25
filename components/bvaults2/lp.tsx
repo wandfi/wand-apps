@@ -14,7 +14,7 @@ import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
 import { AssetInput } from "../asset-input"
 import { CoinAmount } from "../coin-amount"
-import { GetByStoryHunt, GetvIP } from "../get-lp"
+import { GetByThird, GetvIP } from "../get-lp"
 import { CoinIcon } from "../icons/coinicon"
 import { SimpleTabs } from "../simple-tabs"
 import { SwapDown } from "../ui/bbtn"
@@ -75,7 +75,7 @@ function LPAdd({ vc }: { vc: BVault2Config }) {
         </div>
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetByStoryHunt t={asset} />
+            <GetByThird t={asset} />
         </div>
         <AssetInput asset={lp.symbol} disable amount={fmtBn(lpAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         {
@@ -146,7 +146,7 @@ function LPRemove({ vc }: { vc: BVault2Config }) {
         </div> */}
         <div className="flex justify-between items-center">
             <div className="font-bold">Receive</div>
-            <GetByStoryHunt t={asset} />
+            <GetByThird t={asset} />
         </div>
         <AssetInput asset={bt.symbol} disable amount={fmtBn(btAmount, lp.decimals)} loading={isFetchingOut && inputAssetBn > 0n} />
         <div className="text-center opacity-60 text-xs font-medium">And</div>

@@ -2,7 +2,7 @@ import { isLNT, isPROD } from '@/constants'
 import { providers } from 'ethers'
 import _ from 'lodash'
 import { Address, Chain, defineChain } from 'viem'
-import { hashkeyTestnet } from 'viem/chains'
+import { hashkeyTestnet, monadTestnet as _monadTestnet } from 'viem/chains'
 
 export const sepolia = defineChain({
   id: 11_155_111,
@@ -99,12 +99,17 @@ export const story = defineChain({
   },
 })
 
+export const monadTestnet = defineChain({
+  ..._monadTestnet,
+  iconUrl: '/monadnetwork.png'
+})
+
 export const apiBatchConfig = { batchSize: 5, wait: 300 }
 export const multicallBatchConfig = { batchSize: 5, wait: 300 }
 
 export const storyChains = [storyTestnet, story]
 export const lntChains = []
-export const SUPPORT_CHAINS: [Chain, ...Chain[]] = _.filter(isLNT ? [...lntChains] : [...storyChains, sepolia, hashkeyTestnet], (item) => (isPROD ? !(item as any).testnet : true)) as any
+export const SUPPORT_CHAINS: [Chain, ...Chain[]] = _.filter([...storyChains, sepolia, hashkeyTestnet, monadTestnet], (item) => (isPROD ? !(item as any).testnet : true)) as any
 
 export const refChainId: { id: number } = { id: isPROD ? story.id : storyTestnet.id }
 export const getCurrentChainId = () => {

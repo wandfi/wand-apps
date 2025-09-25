@@ -3,7 +3,7 @@
 import { Token } from '@/config/tokens'
 import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import _ from 'lodash'
+import _, { isNil } from 'lodash'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMeasure } from 'react-use'
 import { formatUnits } from 'viem'
@@ -36,6 +36,7 @@ export function TokenInput({
   balanceClassName = '',
   loading,
   error = '',
+  otherInfo,
   onTokenChange
 }: {
   tokens: Token[],
@@ -53,6 +54,7 @@ export function TokenInput({
   loading?: boolean
   balanceClassName?: string
   error?: string
+  otherInfo?: React.ReactNode
   onTokenChange?: (token: Token) => void
 }) {
   const options = useMemo(() => {
@@ -125,26 +127,29 @@ export function TokenInput({
           readOnly={readonly}
         />
         {loading && <Spinner className='absolute right-24 top-[1.125rem]' />}
+        {isError && <div className='text-sm text-white bg-red-400 rounded right-0 bottom-0 absolute px-1 translate-y-1/4'>{error || 'Insufficient account balance'}</div>}
       </div>
 
-      <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
-        {mShowBalance && <div className={balanceClassName}>
-          <span>
-            {balanceTit}: {displayBalance(balance, undefined, token.decimals)}
-          </span>
-          <button
-            className='text-primary ml-2'
-            onClick={() => {
-              const fmtAmount = formatUnits(balance, token.decimals)
-              setAmount(fmtAmount)
-              onClick && !disable && onClick()
-            }}
-          >
-            Max
-          </button>
-        </div>}
-        {isError && <div className='text-sm text-red-400'>{error || 'Insufficient account balance'}</div>}
-      </div>
+      {(mShowBalance || !isNil(otherInfo)) && (
+        <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
+          {mShowBalance && <div className={balanceClassName}>
+            <span>
+              {balanceTit}: {displayBalance(balance, undefined, token.decimals)}
+            </span>
+            {!disable && <button
+              className='text-primary ml-2'
+              onClick={() => {
+                const fmtAmount = formatUnits(balance, token.decimals)
+                setAmount(fmtAmount)
+                onClick && !disable && onClick()
+              }}
+            >
+              Max
+            </button>}
+          </div>}
+          {!isNil(otherInfo) && <div className='ml-auto'>{otherInfo}</div>}
+        </div>
+      )}
 
     </div>
   )

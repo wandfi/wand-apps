@@ -10,7 +10,7 @@ import { getPC } from '@/providers/publicClient'
 import { withTokenApprove } from '@/components/approve-and-tx'
 const address: Address = '0x5E8291e5799277429eb26da2Ff0364f6C39701CD'
 export async function withIfAiraSign({ pc, wc, token, user }: { pc: PublicClient; wc: WalletClient; token: Token; user: Address }) {
-  if (token.symbol === 'APL' && token.chain.includes(story.id)) {
+  if (token.symbol === 'APL' && token.chain == story.id) {
     const alreadySign = await pc.readContract({ abi: abiAriaLegal, address, functionName: 'hasSignedCurrentLicense', args: [user] })
     if (alreadySign) return
     const { licenseURI, contentURIHash, userNonce } = await promiseAll({
