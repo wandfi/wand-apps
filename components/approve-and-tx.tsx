@@ -98,7 +98,7 @@ export type TX = TxConfig | (() => Promise<TxConfig>)
 export const useTxsStore = create(() => ({ txs: [] as TxConfig[], progress: 0 }))
 
 export function Txs({
-  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls, disableProgress, skipSimulate = isPROD, onTxSuccess }:
+  className, tx, txs, disabled, busyShowTxet = true, toast = true, disableSendCalls = true, disableProgress, skipSimulate = isPROD, onTxSuccess }:
   {
     className?: string, tx: string, disabled?: boolean, txs: TX[] | ((args: { pc: PublicClient, wc: WalletClient<Transport, Chain, Account, RpcSchema> }) => Promise<TX[]> | TX[]), busyShowTxet?: boolean, toast?: boolean,
     disableSendCalls?: boolean
@@ -122,12 +122,12 @@ export function Txs({
         if (calls.length == 1) {
           throw new Error('calls length one wallet_sendCalls')
         }
-        if (!skipSimulate) {
-          await pc.simulateCalls({
-            account: wc.account.address,
-            calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
-          })
-        }
+        // if (!skipSimulate) {
+        //   await pc.simulateCalls({
+        //     account: wc.account.address,
+        //     calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
+        //   })
+        // }
         const { id } = await wc.sendCalls({
           account: wc.account.address,
           calls: calls.map(item => ({ data: encodeFunctionData({ abi: item.abi, functionName: item.functionName, args: item.args }), to: item.address })),
