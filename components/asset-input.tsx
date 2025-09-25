@@ -2,14 +2,14 @@
 
 import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import { useRef } from 'react'
+import { ReactNode, useRef } from 'react'
 import Select from 'react-select'
 import { formatUnits } from 'viem'
 import { CoinIcon } from './icons/coinicon'
 import { useThemeState } from './theme-mode'
 import { Spinner } from './spinner'
 import { useMeasure } from 'react-use'
-import _ from 'lodash'
+import _, { isNil } from 'lodash'
 
 export function AssetInput({
   asset = 'ETH',
@@ -34,6 +34,7 @@ export function AssetInput({
   loading,
   disableNegative,
   error = '',
+  otherInfo
 }: {
   asset: string
   assetIcon?: string
@@ -57,6 +58,7 @@ export function AssetInput({
   balanceClassName?: string
   disableNegative?: boolean
   error?: string
+  otherInfo?: ReactNode
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -148,26 +150,29 @@ export function AssetInput({
           readOnly={readonly}
         />
         {loading && <Spinner className='absolute right-24 top-[1.125rem]' />}
+        {isError && <div className='text-sm text-white bg-red-400 rounded right-0 bottom-0 absolute px-1 translate-y-1/4'>{error || 'Insufficient account balance'}</div>}
       </div>
 
-      <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
-        {balance != undefined && <div className={balanceClassName}>
-          <span>
-            {balanceTit}: {displayBalance(balance, 3, decimals)}
-          </span>
-          <button
-            className='text-primary ml-2'
-            onClick={() => {
-              const fmtAmount = formatUnits(balance, decimals)
-              setAmount(fmtAmount)
-              onClick && !disable && onClick()
-            }}
-          >
-            Max
-          </button>
-        </div>}
-        {isError && <div className='text-sm text-red-400'>{error || 'Insufficient account balance'}</div>}
-      </div>
+      { (!isNil(balance) || !isNil(otherInfo)) && (
+        <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
+          {!isNil(balance) && <div className={balanceClassName}>
+            <span>
+              {balanceTit}: {displayBalance(balance, 3, decimals)}
+            </span>
+            {!disable && <button
+              className='text-primary ml-2'
+              onClick={() => {
+                let fmtAmount = formatUnits(balance, decimals)
+                setAmount(fmtAmount)
+                onClick && !disable && onClick()
+              }}
+            >
+              Max
+            </button>}
+          </div>}
+          {!isNil(otherInfo) && <div className='ml-auto'>{otherInfo}</div>}
+        </div>
+      )}
 
     </div>
   )

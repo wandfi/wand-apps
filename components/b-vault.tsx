@@ -206,8 +206,15 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
       tab: 'Buy',
       content: (
         <div className='flex flex-col gap-1'>
-          <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
-          <GetvIP address={bvc.asset} />
+          <AssetInput
+            asset={bvc.assetSymbol}
+            amount={inputAsset}
+            balance={assetBalance}
+            setAmount={setInputAsset}
+            error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''}
+            otherInfo={<GetvIP address={bvc.asset} />}
+          />
+
           <div className='text-xs font-medium text-center'>{`Receive 1 ${pTokenSymbolShort} for every ${assetSymbolShort}`}</div>
           <ApproveAndTx
             className='mx-auto mt-4'
@@ -369,8 +376,15 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const { roi, roiChange } = useBvaultROI(bvc, outputYTokenForInput, afterYtAssetPrice)
   return (
     <div className='animitem card !p-4 flex flex-col h-[28rem] gap-1'>
-      <AssetInput asset={bvc.assetSymbol} amount={inputAsset} balance={assetBalance} setAmount={setInputAsset} error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''} />
-      <GetvIP address={bvc.asset} />
+      <AssetInput
+        asset={bvc.assetSymbol}
+        amount={inputAsset}
+        balance={assetBalance}
+        setAmount={setInputAsset}
+        error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''}
+        otherInfo={<GetvIP address={bvc.asset} />}
+      />
+      
       <div className='text-base font-bold my-2'>Receive</div>
       <AssetInput asset={bvc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
       <div className='text-xs font-medium  flex justify-between select-none'>

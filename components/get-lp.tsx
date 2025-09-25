@@ -24,7 +24,7 @@ export function GetvIP({ address }: { address: Address }) {
     if (token?.symbol !== 'vIP') return null
     return <div className='text-xs font-medium flex gap-2 justify-end items-center'>
         <CoinIcon symbol="verio" size={18} />
-        <Link target='_blank' className='underline' href={getBexPoolURL(address)}>
+        <Link target='_blank' className='underline text-primary' href={getBexPoolURL(address)}>
             Get vIP on Verio
         </Link>
     </div>
