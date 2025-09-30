@@ -67,7 +67,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                     txs={getTxs}
                     onTxSuccess={() => {
                         setInputAsset('')
-                        reFet(inputBalance.key, vdFS.key)
+                        reFet(inputBalance.key, vdFS.key, lpBalance.key)
                     }}
                 />
             </div>
