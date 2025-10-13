@@ -49,7 +49,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     return <div style={{ order: vc.bootsort }} className={cn("card bg-white animitem")}>
         <div className="flex items-center gap-2 text-xl font-medium">
             <BsFire className='text-[#ff0000]' />
-            {vc.tit}
+            {vc.tit}{" "}{vc.testnet && "(Testnet)"}
             {/* <Tip>
                 Verio is the liquid staking and IP asset restaking platform for Story. Users stake IP to receive vIP, a yield bearing LSD.
                 vIP can be restaked on multiple IP Assets to earn profits, while YT holders can leverage profits through the vIP-Verio Vault.

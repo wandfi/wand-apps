@@ -200,11 +200,15 @@ export function LP({ vc }: { vc: BVault2Config }) {
                     <div className='text-xs leading-none text-black/60 dark:text-white/60 font-medium'>Provides liquidity for PT and YT transactions.</div>
                 </div>
             </div>
-            <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>
-                <div className="text-lg font-medium">{formatPercent(apy)}</div>
-                <div className="text-xs font-semibold opacity-60">APY</div>
-                <div className="text-xs font-semibold opacity-60 ml-auto">LP amount</div>
-                <div className="text-lg font-medium">{displayBalance(lpc.result)}</div>
+            <div className='flex justify-between px-2.5 pt-2 gap-2.5 flex-wrap'>
+                <div className="flex whitespace-nowrap items-baseline justify-between gap-2.5">
+                    <div className="text-lg font-medium">{formatPercent(apy)}</div>
+                    <div className="text-xs font-semibold opacity-60">APY</div>
+                </div>
+                <div className="flex whitespace-nowrap items-baseline justify-between gap-2.5">
+                    <div className="text-xs font-semibold opacity-60 ml-auto">LP amount</div>
+                    <div className="text-lg font-medium">{displayBalance(lpc.result)}</div>
+                </div>
             </div>
             <div className='flex px-2.5'>
                 <button className='btn-link ml-auto text-primary text-xs underline-offset-2' onClick={onAddPToken}>
@@ -213,7 +217,7 @@ export function LP({ vc }: { vc: BVault2Config }) {
             </div>
             <div className="pb-4 px-3 text-xs flex flex-col gap-2">
                 <span className="opacity-60">LP Positions</span>
-                <div className="flex justify-between items-center gap-5">
+                <div className="flex justify-between items-center gap-x-5 gap-y-2 flex-wrap">
                     <CoinAmount token={bt} amount={logs?.BTnet ?? 0n} />
                     <CoinAmount token={pt} amount={ytc.result > ptc.result ? ytc.result - ptc.result : 0n} />
                     <CoinAmount token={yt} amount={ptc.result > ytc.result ? ptc.result - ytc.result : 0n} />

@@ -81,7 +81,7 @@ export function Header() {
               <TbChevronDown />
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
-              <DropdownMenu.Content className='z-50 bg-white p-1 border border-slate-200 shadow-lg rounded-md dark:bg-gray-800 dark:border-gray-700'>
+              <DropdownMenu.Content className='z-[101] bg-white p-1 border border-slate-200 shadow-lg rounded-md dark:bg-gray-800 dark:border-gray-700'>
                 {links.map(({ href, label, icon, disable }) => {
                   const Icon = icon
                   return (

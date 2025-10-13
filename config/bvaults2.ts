@@ -31,6 +31,7 @@ export type BVault2Config = {
   PIcon: string
   YIcon: string
   bootsort?: number
+  testnet?: boolean
 }
 const BTS = {
   APLVault: '0x773dd6686df237a7b3fe02632e91bd3664d81a0c' as Address,
@@ -41,7 +42,7 @@ const BTS = {
 }
 export const BVAULTS2CONIG: BVault2Config[] = [
   {
-    tit: 'APL-Aria Vault ',
+    tit: 'APL-Aria',
     subTitle: '2025/09/04 (30days)',
     vault: '0x1e46583d9da2f28cea5d075c57d71d919353b3d9',
     asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
@@ -60,7 +61,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     bootsort: 2,
   },
   {
-    tit: 'APL-Aria Vault',
+    tit: 'APL-Aria',
     subTitle: '2025/08/02 (30days)',
     vault: '0xd589836c3c031e2238c25ad5c6a910794c8827ad',
     asset: '0xfE82012eCcE57a188E5f9f3fC1Cb2D335C58F1f5',
@@ -79,7 +80,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     bootsort: 2,
   },
   {
-    tit: 'aprMON-aPrioir Vault(Testnet)',
+    tit: 'aprMON-aPrioir',
     subTitle: '2025/09/24 (30days)',
     vault: '0xc0bcd558df01a1464221b2bed239a31ade10cd38',
     asset: '0xb2f82D0f38dc453D596Ad40A37799446Cc89274A',
@@ -88,9 +89,10 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     protocal: '0x3197e1332cc522ea192f8288bbdd3da58b00ee89',
     protocalSettings: '0x85cd26a15f3e880232d56f11fbaa8e02ee405e4e',
     hook: '0xc9606aeccecc8b1fe6041cc9152cedde63e9ba88',
-    onEnv: ['test','prod'],
+    onEnv: ['test', 'prod'],
     chain: monadTestnet.id,
-    logs: true,
+    // logs: true,
+    testnet: true,
     PIcon: 'paprMON',
     YIcon: 'yaprMON',
     desc: `aPriori is the leading MEV-powered liquid staking platform on Monad. We provide a simple way for users to earn MEV-boosted rewards on their Monad tokens. Users that stake with aPriori can use liquid tokens on a range of DeFi applications to gain extra rewards.`,

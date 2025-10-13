@@ -273,11 +273,15 @@ export function PT({ vc }: { vc: BVault2Config }) {
                     <div className='text-xs leading-none text-black/60 dark:text-white/60 font-medium'>1 {pt.symbol} is equal to1 {asset.symbol} at maturity</div>
                 </div>
             </div>
-            <div className='flex whitespace-nowrap items-baseline justify-between px-2.5 pt-2 gap-2.5'>
-                <div className="text-lg font-medium">{formatPercent(apy)}</div>
-                <div className="text-xs font-semibold opacity-60">Fixed APY</div>
-                <div className="text-xs font-semibold opacity-60 ml-auto">Circulation amount</div>
-                <div className="text-lg font-medium">{displayBalance(ptc.result, undefined, pt.decimals)}</div>
+            <div className='flex justify-between px-2.5 pt-2 gap-2.5 flex-wrap'>
+                <div className="flex whitespace-nowrap items-baseline justify-between gap-2.5">
+                    <div className="text-lg font-medium">{formatPercent(apy)}</div>
+                    <div className="text-xs font-semibold opacity-60">Fixed APY</div>
+                </div>
+                <div className="flex whitespace-nowrap items-baseline justify-between gap-2.5">
+                    <div className="text-xs font-semibold opacity-60 ml-auto">Circulation amount</div>
+                    <div className="text-lg font-medium">{displayBalance(ptc.result, undefined, pt.decimals)}</div>
+                </div>
             </div>
             <div className='flex px-2 pb-4'>
                 <button className='btn-link ml-auto text-primary text-xs underline-offset-2' onClick={onAddPToken}>

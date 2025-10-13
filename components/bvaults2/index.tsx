@@ -24,7 +24,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const asset = getTokenBy(vc.asset, vc.chain)!
     const tvl = useBvault2TVL(vc)
     return <div className="animitem card bg-white flex flex-col gap-10 shrink-0">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol={asset.symbol} />{vc.tit}</div>
             <div className="flex flex-col gap-2 mt-2">
                 <div className="font-semibold text-sm">Underlying Asset</div>
@@ -76,7 +76,8 @@ export function BVault2Card({ vc }: { vc: BVault2Config }) {
     const [roi] = useYTRoi(vc)
     const tvl = useBvault2TVL(vc)
     if (!asset) return null
-    return <div className={cn('animitem card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer', {})} >
+    return <div className={cn('animitem card !p-0 grid grid-cols-2 overflow-hidden cursor-pointer relative', {})} >
+        {vc.testnet && <div className="absolute top-0 right-0 rounded-l-full text-xs py-0.5 px-2 bg-red-500 text-white">Testnet</div>}
         <div className={cn(itemClassname, 'border-b', 'bg-black/10 dark:bg-white/10 col-span-2 flex-row px-4 md:px-5 py-4 items-center')}>
             <CoinIcon symbol={asset.symbol} size={44} />
             <div>
