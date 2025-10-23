@@ -144,7 +144,7 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
         }
         const allownce = await pc.readContract({ abi: erc20Abi, address: stoken.address, functionName: 'allowance', args: [address, bvc.vault] })
         if (allownce < inputBn) {
-          const hash = await wc.data.writeContract({ abi: erc20Abi, address: stoken.address, functionName: 'approve', args: [bvc.vault, inputBn - allownce] })
+          const hash = await wc.data.writeContract({ abi: erc20Abi, address: stoken.address, functionName: 'approve', args: [bvc.vault, inputBn] })
           await pc.waitForTransactionReceipt({ hash, confirmations: 3 })
         }
         const hash = await wc.data.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'addBribes', args: [stoken.address, inputBn] })
@@ -152,7 +152,7 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
       } else {
         const allownce = await pc.readContract({ abi: erc20Abi, address: stoken.address, functionName: 'allowance', args: [address, bvc.vault] })
         if (allownce < inputBn) {
-          const hash = await wc.data.writeContract({ abi: erc20Abi, address: stoken.address, functionName: 'approve', args: [bvc.vault, inputBn - allownce] })
+          const hash = await wc.data.writeContract({ abi: erc20Abi, address: stoken.address, functionName: 'approve', args: [bvc.vault, inputBn] })
           await pc.waitForTransactionReceipt({ hash, confirmations: 3 })
         }
         const hash = await wc.data.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'addAdhocBribes', args: [stoken.address, inputBn] })
