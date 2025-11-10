@@ -39,7 +39,7 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
                 trigger: 'axis',
                 valueFormatter: ct.format,
             },
-            grid: { top: 30, bottom: 30, right: 20, show: false },
+            grid: { left: 0, top: 0, right: 0, bottom: 0, show: false },
             toolbox: { show: false },
             xAxis: {
                 type: 'category',

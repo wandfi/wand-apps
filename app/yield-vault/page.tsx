@@ -179,6 +179,8 @@ export default function Vaults() {
     const mvcs = vcs.filter(item => item.type === 'BVault' || vd2.find(vd => vd.vc.vault === item.vault)?.current)
     if (currentFilter == 'All') return mvcs
     function isActive(vc: VCItem): boolean {
+      // const forceClosed = ['0xd589836c3c031e2238c25ad5c6a910794c8827ad']
+      //  && !forceClosed.includes(vc.vault)
       if (vc.type == 'BVault2') {
         const vd = vd2.find(vd => vd.vc.vault === vc.vault)
         return Boolean(vd && vd.current && (vd.current.startTime + vd.current.duration) > nowUnix())
