@@ -384,7 +384,7 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
         error={inputAssetBn > 0n && inputAssetBn < MinumAmount ? `Minimum amount is ${displayBalance(MinumAmount)}` : ''}
         otherInfo={<GetvIP address={bvc.asset} />}
       />
-      
+
       <div className='text-base font-bold my-2'>Receive</div>
       <AssetInput asset={bvc.yTokenSymbol} loading={isFetchingSwap && !!inputAsset} readonly disable checkBalance={false} amount={outputYTokenFmt} />
       <div className='text-xs font-medium  flex justify-between select-none'>
@@ -747,7 +747,10 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
         'Settlement Time',
         bvd.closed ? 'status-red' : 'status-green',
         bvd.closed ? (
-          'Closed'
+          <div className='relative'>
+            <span>Closed</span>
+            <div className='absolute top-full mt-1 left-0 text-[#64748B] dark:text-slate-50/60 text-xs font-semibold whitespace-nowrap'>{settleTime}</div>
+          </div>
         ) : (
           <div className='relative'>
             <div className='flex gap-2 items-end'>
