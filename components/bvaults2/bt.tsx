@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useDebounce, useToggle } from "react-use";
 import { Address, isAddressEqual } from "viem";
-import { useAccount, useWalletClient } from "wagmi";
+import { useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
 import { Txs, withTokenApprove } from "../approve-and-tx";
 import { GetByThird } from "../get-lp";
@@ -22,14 +22,14 @@ import { useUnderlingApy } from "./useDatas";
 
 export async function previewConvertBt(vc: BVault2Config, isToBt: boolean, token: Address, amount: bigint) {
     if (!isAddressEqual(token, vc.bt)) {
-        return vc.btConverts.find(tc => isAddressEqual(tc.tokens[0], token))!.previewConvert(isToBt, amount)
+        return vc.btConverts.find(tc => isAddressEqual(tc.token0, token))!.previewConvert(isToBt, amount)
     }
     return amount
 }
 
 export async function convertBt(vc: BVault2Config, isToBt: boolean, token: Address, amount: bigint, user: Address) {
     if (!isAddressEqual(token, vc.bt)) {
-        const tc = vc.btConverts.find(tc => isAddressEqual(tc.tokens[0], token))!
+        const tc = vc.btConverts.find(tc => isAddressEqual(tc.token0, token))!
         return promiseAll({
             txs: tc.convertTxs(isToBt, amount, user),
             out: tc.previewConvert(isToBt, amount),
@@ -41,8 +41,10 @@ export async function convertBt(vc: BVault2Config, isToBt: boolean, token: Addre
     }
 }
 
-export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true) {
-    return useMemo(() => [...vc.btConverts.map(tc => tc.tokens[0]), vc.bt].map(t => getTokenBy(t, vc.chain)!).filter(t => includeBt ? true : !isAddressEqual(t.address, vc.bt)), [vc, includeBt])
+export function useWrapBtTokens(vc: BVault2Config, includeBt: boolean = true, isToBT: boolean = true) {
+    return useMemo(() => [...vc.btConverts.filter(item => !item.onlyZeroToOne || (item.onlyZeroToOne && isToBT)).map(tc => tc.token0), vc.bt]
+        .map(t => getTokenBy(t, vc.chain)!).filter(item => includeBt || (!isAddressEqual(item.address, vc.bt))),
+        [vc, includeBt, isToBT])
 }
 
 
@@ -50,7 +52,8 @@ export function genBtConvert(chain: number, bt: Address, btinput: Address): Toke
     const input = getTokenBy(btinput, chain)!
     const BT = getTokenBy(bt, chain)!
     return {
-        tokens: [btinput, bt],
+        token0: btinput,
+        token1: bt,
         previewConvert: async (isZeroToOne, amount) =>
             getPC(chain).readContract({
                 abi: abiBT,

@@ -33,7 +33,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
     const [isToggled, toggle] = useToggle(false)
-    const tokens = useWrapBtTokens(vc)
+    const tokens = useWrapBtTokens(vc, true, !isToggled)
     const [ct, setCT] = useState(tokens[0])
     const inputs = isToggled ? [pt] : tokens
     const outputs = isToggled ? tokens : [pt]
@@ -199,7 +199,7 @@ export function PTYTMint({ vc }: { vc: BVault2Config }) {
 export function PTYTRedeem({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const asset = getTokenBy(vc.asset, vc.chain)!
-    const tokens = useWrapBtTokens(vc)
+    const tokens = useWrapBtTokens(vc, true, false)
     const [ct, setCT] = useState(tokens[0])
     const out = ct
     const pt = usePtToken(vc)!

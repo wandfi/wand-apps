@@ -46,7 +46,7 @@ export function useBTPriceConvertToken(vc: BVault2Config, token?: Address) {
     initResult: 0,
     fetfn: async () => {
       if (isAddressEqual(token!, vc.bt)) return 1
-      const tc = vc.btConverts.find((item) => isAddressEqual(item.tokens[0], token!))
+      const tc = vc.btConverts.find((item) => isAddressEqual(item.token0, token!))
       if (!tc) return 0
       const one = parseUnits('1', 6)
       const out = await tc.previewConvert(false, one)

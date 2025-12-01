@@ -4,9 +4,12 @@ import { genAplBtConvert } from '@/lib/aria'
 import { Address } from 'viem'
 import { TypeENV } from './env'
 import { monad, story } from './network'
+import { genMonBtConvert } from '@/lib/apr'
 
 export type TokenConvert = {
-  tokens: [Address, Address]
+  token0: Address,
+  token1: Address,
+  onlyZeroToOne?: boolean
   previewConvert: (isZeroToOne: boolean, amount: bigint) => Promise<bigint>
   convertTxs: (isZeroToOne: boolean, amount: bigint, user: Address) => Promise<TxConfig[]>
 }
@@ -67,7 +70,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     vault: '0xd6cab3255653399773a5fb0d55b7236c39f28b4e',
     asset: '0x0c65A0BC65a5D819235B71F554D210D3F80E0852',
     bt: BTS.APRMonadProd,
-    btConverts: [genBtConvert(monad.id, BTS.APRMonadProd, '0x0c65A0BC65a5D819235B71F554D210D3F80E0852')],
+    btConverts: [genMonBtConvert(BTS.APRMonadProd), genBtConvert(monad.id, BTS.APRMonadProd, '0x0c65A0BC65a5D819235B71F554D210D3F80E0852')],
     protocal: '0x840606225c454bc048f1620ff0a7ef2eb17e4e2a',
     protocalSettings: '0xf33aa073f7110f097fe41bbb2d581497084f9f5c',
     hook: '0xc9606aeccecc8b1fe6041cc9152cedde63e9ba88',
@@ -77,5 +80,5 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     PIcon: 'paprMON',
     YIcon: 'yaprMON',
     desc: `aPriori is the leading MEV-powered liquid staking platform on Monad. We provide a simple way for users to earn MEV-boosted rewards on their Monad tokens. Users that stake with aPriori can use liquid tokens on a range of DeFi applications to gain extra rewards.`,
-  }
+  },
 ]

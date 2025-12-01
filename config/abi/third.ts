@@ -13,3 +13,8 @@ export const abiAriaLegal = parseAbi([
   'function contentURIHash() external view returns (bytes32)',
   'function signLicense(bytes calldata signature) external',
 ])
+
+export const abiAprStakingMON = parseAbi([
+  'function previewDeposit(uint256 amount) external view returns(uint256)',
+  'function deposit(uint256 assets,address receiver) external payable',
+])

@@ -55,7 +55,8 @@ export function genAplBtConvert(bt: Address): TokenConvert {
   const chain = story.id
   const tc_BT_stAPL = genBtConvert(story.id, bt, stAPL)
   const tc_APL_stAPL: TokenConvert = {
-    tokens: [apl, stAPL],
+    token0: apl,
+    token1: stAPL,
     async previewConvert(isZeroToOne, amount) {
       const pc = getPC(chain)
       // ratio   stAPL:APL ratio - scaled by 10^27
@@ -79,7 +80,8 @@ export function genAplBtConvert(bt: Address): TokenConvert {
     },
   }
   return {
-    tokens: [apl, bt],
+    token0: apl,
+    token1: bt,
     async previewConvert(isZeroToOne, amount) {
       if (isZeroToOne) {
         return tc_BT_stAPL.previewConvert(isZeroToOne, await tc_APL_stAPL.previewConvert(isZeroToOne, amount))
