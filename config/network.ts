@@ -1,7 +1,7 @@
 import { isPROD } from '@/constants'
 import { providers } from 'ethers'
 import { Address, Chain, defineChain } from 'viem'
-import { monadTestnet as _monadTestnet } from 'viem/chains'
+import { monadTestnet as _monadTestnet, monad as _monad } from 'viem/chains'
 
 export const sepolia = defineChain({
   id: 11_155_111,
@@ -99,11 +99,15 @@ export const monadTestnet = defineChain({
   ..._monadTestnet,
   iconUrl: '/monadnetwork.png',
 })
+export const monad = defineChain({
+  ..._monad,
+  iconUrl: '/monadnetwork.png',
+})
 
 export const apiBatchConfig = { batchSize: 5, wait: 300 }
 export const multicallBatchConfig = { batchSize: 5, wait: 300 }
 
-export const SUPPORT_CHAINS: [Chain, ...Chain[]] = (isPROD ? [story, monadTestnet] : [story, storyTestnet, monadTestnet]) as any
+export const SUPPORT_CHAINS: [Chain, ...Chain[]] = (isPROD ? [story, monadTestnet, monad] : [story, storyTestnet, monadTestnet, monad]) as any
 
 export const refChainId: { id: number } = { id: isPROD ? story.id : storyTestnet.id }
 export const getCurrentChainId = () => {

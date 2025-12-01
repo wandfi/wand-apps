@@ -1,6 +1,6 @@
 import { Address, isAddressEqual, zeroAddress } from 'viem'
 import { hashkeyTestnet, mainnet, sepolia } from 'viem/chains'
-import { monadTestnet, story } from './network'
+import { monad, monadTestnet, story } from './network'
 
 export type Token = {
   chain: number
@@ -47,6 +47,9 @@ export const TOKENS: Token[] = [
   { address: zeroAddress, symbol: 'MON', decimals: 18, chain: monadTestnet.id },
   { address: '0xb2f82D0f38dc453D596Ad40A37799446Cc89274A', symbol: 'aprMON', decimals: 18, chain: monadTestnet.id },
   { address: '0xc0685bb397eca74763b8b90738abf868a3502c21', symbol: 'baprMON', decimals: 18, chain: monadTestnet.id },
+  { address: zeroAddress, symbol: 'MON', decimals: 18, chain: monad.id },
+  { address: '0x0c65A0BC65a5D819235B71F554D210D3F80E0852', symbol: 'aprMON', decimals: 18, chain: monad.id },
+  { address: '0x1aa50de111c4354f86816767b3f7a44d76b69c92', symbol: 'baprMON', decimals: 18, chain: monad.id },
 ]
 
 export const TOKENS_MAP: { [k: `${number}_${Address}`]: Token } = TOKENS.reduce((map, item) => {
