@@ -64,7 +64,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
   {
     tit: 'aprMON-aPrioir',
     subTitle: '2025/12/01 (30days)',
-    vault: '0xc0bcd558df01a1464221b2bed239a31ade10cd38',
+    vault: '0xd6cab3255653399773a5fb0d55b7236c39f28b4e',
     asset: '0x0c65A0BC65a5D819235B71F554D210D3F80E0852',
     bt: BTS.APRMonadProd,
     btConverts: [genBtConvert(monad.id, BTS.APRMonadProd, '0x0c65A0BC65a5D819235B71F554D210D3F80E0852')],
