@@ -1,5 +1,5 @@
 import { LP_TOKENS } from "@/config/lpTokens"
-import { getBexPoolURL, monadTestnet, story } from "@/config/network"
+import { getBexPoolURL, monad, monadTestnet, story } from "@/config/network"
 import { Address } from "viem"
 import Link from 'next/link'
 import { CoinIcon } from "./icons/coinicon"
@@ -42,7 +42,7 @@ export function GetByThird({ t }: { t: Token }) {
             StoryHunt
         </Link>
     </div>
-    if (t.chain == monadTestnet.id) return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
+    if (t.chain == monadTestnet.id || t.chain == monad.id) return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
         Get {t.symbol} on
         <Link target='_blank' className='underline' href={`https://stake.apr.io/`}>
             aPriori
