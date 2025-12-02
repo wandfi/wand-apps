@@ -44,10 +44,10 @@ export const TOKENS: Token[] = [
   { address: '0x1e0ca0e6bbf6b2e14c6e5360e430905759fd8677', symbol: 'bAPL', decimals: 18, chain: story.id },
   { address: '0x3bb7dc96832f8f98b8aa2e9f2cc88a111f96a118', symbol: 'bAPL', decimals: 18, chain: story.id },
 
-  { address: zeroAddress, symbol: 'MON', decimals: 18, chain: monadTestnet.id },
+  { address: zeroAddress, symbol: 'MON', decimals: 18, chain: monadTestnet.id, isNative: true },
   { address: '0xb2f82D0f38dc453D596Ad40A37799446Cc89274A', symbol: 'aprMON', decimals: 18, chain: monadTestnet.id },
   { address: '0xc0685bb397eca74763b8b90738abf868a3502c21', symbol: 'baprMON', decimals: 18, chain: monadTestnet.id },
-  { address: zeroAddress, symbol: 'MON', decimals: 18, chain: monad.id },
+  { address: zeroAddress, symbol: 'MON', decimals: 18, chain: monad.id, isNative: true },
   { address: '0x0c65A0BC65a5D819235B71F554D210D3F80E0852', symbol: 'aprMON', decimals: 18, chain: monad.id },
   { address: '0x1aa50de111c4354f86816767b3f7a44d76b69c92', symbol: 'baprMON', decimals: 18, chain: monad.id },
 ]
