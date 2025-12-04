@@ -74,7 +74,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     protocal: '0x840606225c454bc048f1620ff0a7ef2eb17e4e2a',
     protocalSettings: '0xf33aa073f7110f097fe41bbb2d581497084f9f5c',
     hook: '0x0d9476cb8f26e3fad5361b3952b38c63bde4fa88',
-    onEnv: ['test'],
+    onEnv: ['test', 'prod'],
     chain: monad.id,
     // logs: true,
     PIcon: 'paprMON',
