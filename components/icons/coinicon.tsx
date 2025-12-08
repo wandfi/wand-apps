@@ -77,6 +77,7 @@ const SupportICONS: { [k: string]: string } = {
   yaprMON: 'aprMON.svg',
   LPaprMON: 'LPaprMON.svg',
   baprMON: 'baprMON.svg',
+  APR: 'APR.svg',
 }
 
 export function CoinIcon({ symbol, size = 48, url, ...p }: { symbol: string; className?: string; style?: CSSProperties; size?: number; url?: string }) {

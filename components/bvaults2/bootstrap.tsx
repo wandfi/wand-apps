@@ -5,7 +5,7 @@ import { DECIMAL } from "@/constants";
 import { reFet } from "@/hooks/useFet";
 import { useBalance } from "@/hooks/useToken";
 import { withIfAiraSign } from "@/lib/aria";
-import { aarToNumber, cn, FMT, fmtDate, genDeadline, parseEthers } from "@/lib/utils";
+import { aarToNumber, bnMin, cn, FMT, fmtDate, fmtPercent, genDeadline, nowUnix, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
 import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -18,6 +18,11 @@ import { Tip } from "../ui/tip";
 import { convertBt, useWrapBtTokens } from "./bt";
 import { getLpToken } from "./getToken";
 import { getBvualt2BootTimes, useBvualt2Data } from "./useFets";
+import { CoinIcon } from "../icons/coinicon";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
+import { useBlocksPerHours } from "@/hooks/useBlocksPerHours";
+import { erc20Abi } from "viem";
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const tokens = useWrapBtTokens(vc)
@@ -46,6 +51,22 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
         })
         return [...txs, ...txsApprove]
     }
+    const { address } = useAccount()
+
+    const { data: bootLpBalance } = useQuery({
+        queryKey: ['bootstrap-lpBalance', address, vc.vault],
+        enabled: Boolean(address),
+        initialData: 0n,
+        queryFn: async () => {
+            const pc = getPC(vc.chain)
+            const blockLatest = await pc.getBlockNumber()
+            const bootLpBalance = await pc.readContract({ abi: erc20Abi, address: lp.address, functionName: 'balanceOf', args: [address!], blockNumber: vc.bootendblock && vc.bootendblock < blockLatest ? vc.bootendblock : blockLatest })
+            return bootLpBalance
+        }
+    })
+    const bootTotal = bnMin([currentAmount, targetAmount])
+    const share = bootTotal > 0n && bootLpBalance > 0n ? bootLpBalance * DECIMAL / bootTotal : 0n
+
     return <div style={{ order: vc.bootsort }} className={cn("card bg-white animitem")}>
         <div className="flex items-center gap-2 text-xl font-medium">
             <BsFire className='text-[#ff0000]' />
@@ -85,27 +106,34 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
                 <div className="font-medium text-sm flex items-center gap-2 mt-2">
                     Deposited: {displayBalance(lpBalance.result, undefined, lp?.decimals)} <Tip>The deposited assets will become LP after launch and users can withdraw deposited assets anytime.</Tip>
                 </div>
-                {/* <div className="font-medium text-sm justify-between flex items-center mt-4">
-                    <div>Pool Share: --.--%</div>
-                    <div className="flex items-start gap-2">Share a total rewards of ---- <CoinIcon size={20} symbol={asset.symbol} /></div>
-                </div>
-                <div className="font-medium text-sm flex items-center justify-center gap-2 my-auto">
-                    <CoinIcon symbol={asset.symbol} size={20} /> --.--
-                </div>
-                <Txs
-                    className='mx-auto'
-                    tx='Claim'
-                    disabled={true}
-                    txs={[{
-                        abi: abiBVault2,
-                        address: vc.vault,
-                        functionName: 'removeLiquidity',
-                        args: [inputAssetBn, 0n, genDeadline()],
-                    }]}
-                    onTxSuccess={() => {
-                        setInputAsset('')
-                    }}
-                /> */}
+                {vc.bootreward && <>
+                    <div className="font-medium text-sm justify-between flex items-center mt-4 gap-4 flex-wrap">
+                        <div className="flex items-center gap-2">
+                            <span className="w-fit whitespace-nowrap">Pool Share: {fmtPercent(share, 18, 2)}</span>
+                            <div className="flex items-center flex-nowrap">
+                                (
+                                <div className="font-medium text-sm flex items-center gap-1 my-auto">
+                                    <div>~{displayBalance(vc.bootreward.amount * share / DECIMAL)}</div>
+                                    <CoinIcon symbol={vc.bootreward.tokenSymbol} size={16} />
+                                </div>
+                                )
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">Share a total rewards of {displayBalance(vc.bootreward.amount)} <CoinIcon size={16} symbol={vc.bootreward.tokenSymbol} /> {vc.bootreward.tokenSymbol}</div>
+                    </div>
+                    <div className=" justify-end w-full items-center gap-5 pt-2 hidden">
+                        <div className="font-medium text-sm flex items-center justify-center gap-2 my-auto">
+                            <CoinIcon symbol={vc.bootreward.tokenSymbol} size={16} />
+                            <div>{displayBalance(vc.bootreward.amount * share / DECIMAL)}</div>
+                        </div>
+                        <Txs
+                            className='w-[6.25rem]'
+                            tx='Claim'
+                            disabled={true}
+                            txs={[]}
+                        />
+                    </div>
+                </>}
             </div>
         </div>
     </div>

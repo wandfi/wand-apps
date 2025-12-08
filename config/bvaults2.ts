@@ -1,14 +1,14 @@
 import { TxConfig } from '@/components/approve-and-tx'
 import { genBtConvert } from '@/components/bvaults2/bt'
 import { genAplBtConvert } from '@/lib/aria'
-import { Address } from 'viem'
+import { Address, parseEther } from 'viem'
 import { TypeENV } from './env'
 import { monad, story } from './network'
 import { genMonBtConvert } from '@/lib/apr'
 
 export type TokenConvert = {
-  token0: Address,
-  token1: Address,
+  token0: Address
+  token1: Address
   onlyZeroToOne?: boolean
   previewConvert: (isZeroToOne: boolean, amount: bigint) => Promise<bigint>
   convertTxs: (isZeroToOne: boolean, amount: bigint, user: Address) => Promise<TxConfig[]>
@@ -35,6 +35,11 @@ export type BVault2Config = {
   YIcon: string
   bootsort?: number
   testnet?: boolean
+  bootendblock?: bigint
+  bootreward?: {
+    amount: bigint
+    tokenSymbol: string
+  }
 }
 const BTS = {
   APLVault: '0x773dd6686df237a7b3fe02632e91bd3664d81a0c' as Address,
@@ -80,5 +85,10 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     PIcon: 'paprMON',
     YIcon: 'yaprMON',
     desc: `aPriori is the leading MEV-powered liquid staking platform on Monad. We provide a simple way for users to earn MEV-boosted rewards on their Monad tokens. Users that stake with aPriori can use liquid tokens on a range of DeFi applications to gain extra rewards.`,
+    bootendblock: 44514367n,
+    bootreward: {
+      amount: parseEther('1000'),
+      tokenSymbol: 'APR',
+    },
   },
 ]
