@@ -11,7 +11,7 @@ const YEAR_SECONDS = BigInt('31536000')
 
 const Day1 = 24 * 60 * 60 * 1000
 
-const DOC_LINK = () => `https://wand-1.gitbook.io/wand-protocol/`
+const DOC_LINK = () => `https://docs.wandfi.io/`
 
 const ENV: TypeENV = (process.env.NEXT_PUBLIC_ENV as any) || 'prod'
 
