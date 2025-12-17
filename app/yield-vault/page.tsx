@@ -156,7 +156,7 @@ export default function Vaults() {
   const chainId = useCurrentChainId()
   const vcs = useMemo(() => {
     const olds = BvcsByEnv.filter(item => item.chain === chainId).map(vc => ({ ...vc, type: 'BVault' }) as VCItem)
-    const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
+    const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV) && item.chain == chainId).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
     return [...v2vc, ...olds]
   }, [ENV, chainId])
   const params = useSearchParams()

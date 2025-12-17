@@ -101,6 +101,7 @@ export const monadTestnet = defineChain({
 })
 export const monad = defineChain({
   ..._monad,
+  
   iconUrl: '/monadnetwork.png',
 })
 
