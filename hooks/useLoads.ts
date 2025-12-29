@@ -30,8 +30,7 @@ export function useLoadBVaults() {
     [bvcs],
   )
   const { isLoading: isLoading2 } = useQuery({
-    queryKey: ['UpdateBvautlsTokens', tokens],
-    enabled: chainId == story.id,
+    queryKey: ['UpdateBvautlsTokens', tokens, chainId],
     queryFn: async () => {
       await Promise.all([useBoundStore.getState().sliceTokenStore.updateTokenTotalSupply(chainId,tokens), useBoundStore.getState().sliceTokenStore.updateTokenPrices()])
       return true

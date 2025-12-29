@@ -60,12 +60,13 @@ export const sliceTokenStore: SliceFun<TokenStore> = (set, get, init = {}) => {
   }
 
   const updateTokenPrices = async () => {
-    const prices = await getTokenPricesBySymbol(['IP'])
+    const prices = await getTokenPricesBySymbol(['IP', 'MON'])
     if (prices.length) {
       set({
         prices: {
           ...get().prices,
           '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD': prices[0].price,
+          '0x1aa50de111c4354f86816767b3f7a44d76b69c92': prices[1].price,
           '0x773dd6686df237a7b3fe02632e91bd3664d81a0c': DECIMAL,
           '0x1e0ca0e6bbf6b2e14c6e5360e430905759fd8677': DECIMAL,
           '0x3bb7dc96832f8f98b8aa2e9f2cc88a111f96a118': DECIMAL,
