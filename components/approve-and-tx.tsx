@@ -17,6 +17,7 @@ import { getTokenBy } from '@/config/tokens'
 import { SimpleDialog } from './simple-dialog'
 import { isPROD, isTEST } from '@/constants'
 import { Tip } from './ui/tip'
+import { getChain } from '@/config/network'
 
 export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()
@@ -113,6 +114,7 @@ export function Txs({
     mutationFn: async () => {
       if (!wc) return
       const pc = getPC(chainId);
+      const mConfirmations: number = (getChain(chainId)! as any).defConfirmations ?? 3;
       const calls = await promiseT(txs, { wc, pc }).then(items => Promise.all(items.map(promiseT)))
       console.info('calls:', wc.account.address, calls)
       try {
@@ -152,7 +154,7 @@ export function Txs({
           for (const item of calls) {
             !skipSimulate && (await pc.simulateContract({ ...item, account: wc.account.address }))
             const tx = await wc.writeContract(item)
-            const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: 2 })
+            const res = await pc.waitForTransactionReceipt({ hash: tx, confirmations: mConfirmations })
             if (res.status !== 'success') throw new Error('Transactions Reverted')
             progress++
             showTxsStat && useTxsStore.setState({ progress })

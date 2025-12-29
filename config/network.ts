@@ -34,6 +34,7 @@ export const sepolia = defineChain({
     baseFeeMultiplier: 1.2,
   },
   testnet: true,
+    defConfirmations: 3,
 })
 
 export const storyTestnet = defineChain({
@@ -61,6 +62,7 @@ export const storyTestnet = defineChain({
   fees: {
     baseFeeMultiplier: 1.2,
   },
+  defConfirmations: 3,
 })
 
 export const story = defineChain({
@@ -93,15 +95,17 @@ export const story = defineChain({
   fees: {
     baseFeeMultiplier: 1.4,
   },
+  defConfirmations: 3,
 })
 
 export const monadTestnet = defineChain({
   ..._monadTestnet,
+  defConfirmations: 3,
   iconUrl: '/monadnetwork.png',
 })
 export const monad = defineChain({
   ..._monad,
-  
+  defConfirmations: 3,
   iconUrl: '/monadnetwork.png',
 })
 
@@ -114,14 +118,11 @@ export const refChainId: { id: number } = { id: isPROD ? story.id : storyTestnet
 export const getCurrentChainId = () => {
   return refChainId.id
 }
-
-export const setCurrentChainId = (id: number) => {
-  if (SUPPORT_CHAINS.find((item) => item.id == id)) refChainId.id = id
-}
-
 export const getCurrentChain = () => {
   return SUPPORT_CHAINS.find((item) => item.id == getCurrentChainId())!
 }
+
+export const getChain = (id: number) => SUPPORT_CHAINS.find((item) => item.id == id)
 
 export const refEthersProvider: {
   provider?: providers.FallbackProvider | providers.JsonRpcProvider
