@@ -132,17 +132,13 @@ function DeleteIpAssets(props: { vault: Address }) {
   const getInfos = async () => {
     const pc = getPC(chainId)
     const data = await pc.readContract({ abi: abiBVault, address: props.vault, functionName: 'ipAssets' })
-
-    // 
-    // const apys = await getPC(chainId).
     const infos: any = {}
-    data.forEach(ipID => { infos[ipID] = ipAssetsTit[ipID] })
-    if (props.vault == '0xc0685Bb397ECa74763b8B90738ABf868a3502c21') {
-      const apys = await Promise.all(data.map(ipID => pc.readContract({ abi: parseAbi(['function ipAssetApy(address ipAsset) public view returns (uint256)']), address: props.vault, functionName: 'ipAssetApy', args: [ipID] })))
-      data.forEach((ipID, i) => {
-        infos[ipID] = `${fmtPercent(apys[i], 20, 2)} -- ${ipAssetsTit[ipID]}`
-      })
-    }
+    // data.forEach(ipID => { infos[ipID] = ipAssetsTit[ipID] })
+    const apys = await Promise.all(data.map(ipID => pc.readContract({ abi: parseAbi(['function ipAssetApy(address ipAsset) public view returns (uint256)']), address: '0xc0685Bb397ECa74763b8B90738ABf868a3502c21', functionName: 'ipAssetApy', args: [ipID] })))
+    data.forEach((ipID, i) => {
+      infos[ipID] = `${fmtPercent(apys[i], 20, 2)} -- ${ipAssetsTit[ipID]}`
+    })
+
     return infos
   }
   return <GeneralAction key={`b-vault-removeIpAsset`} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={getInfos} />
@@ -165,7 +161,7 @@ export default function AdminPage() {
           {current?.type == 'B-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={BVaultParams} protocoSettingAddress={current.data.protocolSettingsAddress} />
-              <DeleteIpAssets vault={current.data.vault} />
+              {current.data.compney == 'Verio' && <DeleteIpAssets vault={current.data.vault} />}
               {['addIpAsset', 'updateMaxIpAssets', 'updateC', 'close', 'pause', 'unpause', 'pauseRedeemPool', 'unpauseRedeemPool', 'addBribeToken', 'addBribes', 'setBriber'].map((functionName) => (
                 <GeneralAction key={`b-vault-${functionName}`} abi={abiBVault} functionName={functionName} address={current.data.vault} />
               ))}
