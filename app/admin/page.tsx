@@ -10,12 +10,12 @@ import { getTokenBy } from '@/config/tokens'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVaultsConfigs } from '@/hooks/useVaultsConfigs'
-import { cn, parseEthers, promiseAll } from '@/lib/utils'
+import { cn, fmtPercent, parseEthers, promiseAll } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useMemo } from 'react'
 import Select from 'react-select'
 import { useMeasure, useSetState } from 'react-use'
-import { Address, erc20Abi, formatUnits, isAddress, parseUnits, stringToHex } from 'viem'
+import { Address, erc20Abi, formatUnits, isAddress, parseAbi, parseUnits, stringToHex } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 type ParamItem = { label: string; value: string; units?: number /** def 10 */ }
@@ -130,9 +130,19 @@ function Erc20Approve() {
 function DeleteIpAssets(props: { vault: Address }) {
   const chainId = useCurrentChainId()
   const getInfos = async () => {
-    const data = await getPC(chainId).readContract({ abi: abiBVault, address: props.vault, functionName: 'ipAssets' })
+    const pc = getPC(chainId)
+    const data = await pc.readContract({ abi: abiBVault, address: props.vault, functionName: 'ipAssets' })
+
+    // 
+    // const apys = await getPC(chainId).
     const infos: any = {}
     data.forEach(ipID => { infos[ipID] = ipAssetsTit[ipID] })
+    if (props.vault == '0xc0685Bb397ECa74763b8B90738ABf868a3502c21') {
+      const apys = await Promise.all(data.map(ipID => pc.readContract({ abi: parseAbi(['function ipAssetApy(address ipAsset) public view returns (uint256)']), address: props.vault, functionName: 'ipAssetApy', args: [ipID] })))
+      data.forEach((ipID, i) => {
+        infos[ipID] = `${fmtPercent(apys[i], 20, 2)} -- ${ipAssetsTit[ipID]}`
+      })
+    }
     return infos
   }
   return <GeneralAction key={`b-vault-removeIpAsset`} abi={abiBVault} functionName={'removeIpAsset'} address={props.vault} infos={getInfos} />
