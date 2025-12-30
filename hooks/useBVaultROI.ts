@@ -5,7 +5,7 @@ import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
 import _ from 'lodash'
-import { Address, formatEther, parseAbi, parseEther, PublicClient, zeroAddress } from 'viem'
+import { Address, parseAbi, zeroAddress } from 'viem'
 
 export function useBVaultIPAssets(vc: BVaultConfig) {
   return useQuery({
@@ -79,22 +79,22 @@ const apys = useMemo(() => {
   ])
 */
 
-const cachedBlockTime: { value: number; timestamp: number } = { value: 2.5, timestamp: 0 }
-async function getBlockTime(pc: PublicClient, cacheTime: number = 30 * 60 * 1000) {
-  if (cachedBlockTime.timestamp > Date.now() - cacheTime) {
-    return cachedBlockTime.value
-  }
-  const blockCount = 500
-  const blockNum = await pc.getBlockNumber({ cacheTime: 5 * 60 * 1000 })
-  const [block, prevBlock] = await Promise.all([pc.getBlock({ blockNumber: blockNum }), pc.getBlock({ blockNumber: blockNum - BigInt(blockCount) })])
-  if (block?.timestamp && prevBlock?.timestamp) {
-    const timeDiff = Number(BigInt(block.timestamp) - BigInt(prevBlock.timestamp)) / blockCount
-    cachedBlockTime.value = timeDiff
-    cachedBlockTime.timestamp = Date.now()
-    return timeDiff
-  }
-  return cachedBlockTime.value
-}
+// const cachedBlockTime: { value: number; timestamp: number } = { value: 2.5, timestamp: 0 }
+// async function getBlockTime(pc: PublicClient, cacheTime: number = 30 * 60 * 1000) {
+//   if (cachedBlockTime.timestamp > Date.now() - cacheTime) {
+//     return cachedBlockTime.value
+//   }
+//   const blockCount = 500
+//   const blockNum = await pc.getBlockNumber({ cacheTime: 5 * 60 * 1000 })
+//   const [block, prevBlock] = await Promise.all([pc.getBlock({ blockNumber: blockNum }), pc.getBlock({ blockNumber: blockNum - BigInt(blockCount) })])
+//   if (block?.timestamp && prevBlock?.timestamp) {
+//     const timeDiff = Number(BigInt(block.timestamp) - BigInt(prevBlock.timestamp)) / blockCount
+//     cachedBlockTime.value = timeDiff
+//     cachedBlockTime.timestamp = Date.now()
+//     return timeDiff
+//   }
+//   return cachedBlockTime.value
+// }
 // 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
 export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
   const vault = vc.vault
@@ -106,38 +106,42 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
     gcTime: 60 * 60 * 1000,
     queryFn: async () => {
       const pc = getPC(vc.chain, 1)
-      const multiplier = 4n
-      const ratio = await pc.readContract({ abi: abiIPA, address: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27', functionName: 'calculateIPWithdrawal', args: [parseEther('1')] })
-      const blockTime = parseEther(`${await getBlockTime(pc)}`)
-      const apyByIpAsset = async (ipAsset: Address, vaultStaked: bigint) => {
-        const [rewardPools, [totalStaked], totalStakedWeighted] = await Promise.all([
-          pc.readContract({ abi: abiIPA, functionName: 'getRewardPools', address: vc.ipAssetStaking, args: [ipAsset] }),
-          pc.readContract({ abi: abiIPA, functionName: 'getTotalStakeAmountForIP', address: vc.ipAssetStaking, args: [ipAsset, [vc.asset]] }),
-          pc.readContract({ abi: abiIPA, functionName: 'getTotalStakeWeightedInIPForIP', address: vc.ipAssetStaking, args: [ipAsset] }),
-        ])
-        const rewardsPerEpoch = rewardPools
-          .flat()
-          .filter((y) => y.totalDistributedRewards < y.totalRewards && y.rewardsPerEpoch > 0n)
-          .reduce((y, k) => y + k.rewardsPerEpoch, 0n)
-        // const rewardsPerEpoch = parseEther('0.000096450617284')
-        let baseApy = totalStakedWeighted > 0n ? (((rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime) * DECIMAL) / totalStakedWeighted : 0n
-        let apy = baseApy
-        if (totalStaked >= parseEther('100') && ratio > 0n && totalStakedWeighted > 0n) {
-          const stakedApy = baseApy + (((parseEther('3') * DECIMAL) / ratio) * ((totalStaked * DECIMAL) / totalStakedWeighted)) / DECIMAL / 100n
-          apy = stakedApy * multiplier
-        }
-        console.info(
-          'underlyingApy:',
-          vault,
-          ipAssetsTit[ipAsset],
-          formatEther(rewardsPerEpoch),
-          formatEther(ratio),
-          formatEther(apy),
-          formatEther(baseApy),
-          formatEther(blockTime),
-        )
-        return apy
-      }
+      // const multiplier = 4n
+      // const ratio = await pc.readContract({ abi: abiIPA, address: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27', functionName: 'calculateIPWithdrawal', args: [parseEther('1')] })
+      // const blockTime = parseEther(`${await getBlockTime(pc)}`)
+      // const apyByIpAsset = async (ipAsset: Address, vaultStaked: bigint) => {
+      //   const [rewardPools, [totalStaked], totalStakedWeighted] = await Promise.all([
+      //     pc.readContract({ abi: abiIPA, functionName: 'getRewardPools', address: vc.ipAssetStaking, args: [ipAsset] }),
+      //     pc.readContract({ abi: abiIPA, functionName: 'getTotalStakeAmountForIP', address: vc.ipAssetStaking, args: [ipAsset, [vc.asset]] }),
+      //     pc.readContract({ abi: abiIPA, functionName: 'getTotalStakeWeightedInIPForIP', address: vc.ipAssetStaking, args: [ipAsset] }),
+      //   ])
+      //   const rewardsPerEpoch = rewardPools
+      //     .flat()
+      //     .filter((y) => y.totalDistributedRewards < y.totalRewards && y.rewardsPerEpoch > 0n)
+      //     .reduce((y, k) => y + k.rewardsPerEpoch, 0n)
+      //   // const rewardsPerEpoch = parseEther('0.000096450617284')
+      //   let baseApy = totalStakedWeighted > 0n ? (((rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime) * DECIMAL) / totalStakedWeighted : 0n
+      //   let apy = baseApy
+      //   if (totalStaked >= parseEther('100') && ratio > 0n && totalStakedWeighted > 0n) {
+      //     const stakedApy = baseApy + (((parseEther('3') * DECIMAL) / ratio) * ((totalStaked * DECIMAL) / totalStakedWeighted)) / DECIMAL / 100n
+      //     apy = stakedApy * multiplier
+      //   }
+      //   console.info(
+      //     'underlyingApy:',
+      //     vault,
+      //     ipAssetsTit[ipAsset],
+      //     formatEther(rewardsPerEpoch),
+      //     formatEther(ratio),
+      //     formatEther(apy),
+      //     formatEther(baseApy),
+      //     formatEther(blockTime),
+      //   )
+      //   return apy
+      // }
+      // const apyByIpAsset = async (ipAsset: Address, vaultStaked: bigint) => {
+
+      //   return apy
+      // }
       const stakeed = await Promise.all(
         ipAssets.map((ipAsset) =>
           pc.readContract({
@@ -149,7 +153,18 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
         ),
       )
       const staked = stakeed.map((item) => item.find((s) => s.length)?.find((s) => !!s))
-      const apys = await Promise.all(ipAssets.map((ip, i) => apyByIpAsset(ip, staked?.[i]?.amount || 0n)))
+      const apys = await Promise.all(
+        ipAssets.map((ipID) =>
+          pc
+            .readContract({
+              abi: parseAbi(['function ipAssetApy(address ipAsset) public view returns (uint256)']),
+              address: '0xc0685Bb397ECa74763b8B90738ABf868a3502c21',
+              functionName: 'ipAssetApy',
+              args: [ipID],
+            })
+            .then((apy) => apy / 100n),
+        ),
+      )
 
       const stakedAll = staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
       const avrageApy = stakedAll > 0n ? apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / stakedAll : 0n
