@@ -13,6 +13,7 @@ import { useBalance, useTotalSupply } from '../../hooks/useToken'
 import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
+import { getTokenPriceBySymbol, getTokenPricesBySymbol } from '@/config/api'
 
 export function getLogs(vc: BVault2Config) {
   return getPC(vc.chain)
@@ -109,8 +110,8 @@ export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
 export function useBTPriceUsd(vc: BVault2Config) {
   return useFet({
     key: FetKEYS.BTPriceUsd(vc),
-    initResult: 1,
-    fetfn: async () => 1,
+    initResult: vc.btPriceSymbol ? 0 : 1,
+    fetfn: async () => (vc.btPriceSymbol ? getTokenPriceBySymbol(vc.btPriceSymbol) : 1),
   })
 }
 
@@ -146,8 +147,8 @@ export function useBTPriceYt(vc: BVault2Config) {
 export function useUnderlingApy(vc: BVault2Config) {
   return useFet({
     key: FetKEYS.UnderlingApy(vc),
-    initResult: 0.07,
-    fetfn: async () => 0.07,
+    initResult: vc.underlingApy ?? 0.07,
+    fetfn: async () => vc.underlingApy ?? 0.07,
   })
 }
 export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: bigint = 0n) {
@@ -170,7 +171,7 @@ export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
       priceimpact = ytPriceBT > 0 && nYtPriceBT > 0 ? Math.abs(nYtPriceBT - ytPriceBT) / ytPriceBT : 0
     }
   }
-  console.info('ytRoi:', ytPriceBT, Pyt, Y, roi, roito)
+  console.info('ytRoi:', ytPriceBT, btPrice, ytPriceBT, Pyt, Y, roi, roito)
   return [roi, roito, priceimpact]
 }
 

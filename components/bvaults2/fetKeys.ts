@@ -10,10 +10,10 @@ export const FetKEYS = {
   Bvault2YTRewards: (vc: BVault2Config, user?: Address, epochs: any[] = []) => (user && epochs.length > 0 ? `vault2Data:epochesRewardsForYT:${vc.vault}:${user}` : ''),
   Bvault2LPBTRewards: (vc: BVault2Config, user?: Address) => (user ? `vault2Data:RewardsForLPBT:${vc.vault}:${user}` : ''),
   BTPriceYt: (yt?: Address) => (yt ? `btPriceYt:${yt}` : ''),
-  BTPriceUsd: (vc: BVault2Config) => `btPrice:${vc.bt}`,
+  BTPriceUsd: (vc: BVault2Config) => `btPrice:${vc.bt}:${vc.chain}`,
   UnderlingApy: (vc: BVault2Config) => `underlingApy:${vc.asset}`,
   BTPriceConvertToken: (vc: BVault2Config, token?: Address) => (token ? `BTPriceConvertToken:${vc.bt}:${token}` : ''),
-  Bvault2TVL: (vc: BVault2Config) => `Bvualt2TVL:${vc.vault}`
+  Bvault2TVL: (vc: BVault2Config) => `Bvualt2TVL:${vc.vault}`,
 }
 
 export function reFetWithBvault2(vc: BVault2Config, ...keys: string[]) {

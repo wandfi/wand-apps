@@ -106,42 +106,6 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
     gcTime: 60 * 60 * 1000,
     queryFn: async () => {
       const pc = getPC(vc.chain, 1)
-      // const multiplier = 4n
-      // const ratio = await pc.readContract({ abi: abiIPA, address: '0xf6701A6A20639f0E765bA7FF66FD4f49815F1a27', functionName: 'calculateIPWithdrawal', args: [parseEther('1')] })
-      // const blockTime = parseEther(`${await getBlockTime(pc)}`)
-      // const apyByIpAsset = async (ipAsset: Address, vaultStaked: bigint) => {
-      //   const [rewardPools, [totalStaked], totalStakedWeighted] = await Promise.all([
-      //     pc.readContract({ abi: abiIPA, functionName: 'getRewardPools', address: vc.ipAssetStaking, args: [ipAsset] }),
-      //     pc.readContract({ abi: abiIPA, functionName: 'getTotalStakeAmountForIP', address: vc.ipAssetStaking, args: [ipAsset, [vc.asset]] }),
-      //     pc.readContract({ abi: abiIPA, functionName: 'getTotalStakeWeightedInIPForIP', address: vc.ipAssetStaking, args: [ipAsset] }),
-      //   ])
-      //   const rewardsPerEpoch = rewardPools
-      //     .flat()
-      //     .filter((y) => y.totalDistributedRewards < y.totalRewards && y.rewardsPerEpoch > 0n)
-      //     .reduce((y, k) => y + k.rewardsPerEpoch, 0n)
-      //   // const rewardsPerEpoch = parseEther('0.000096450617284')
-      //   let baseApy = totalStakedWeighted > 0n ? (((rewardsPerEpoch * YEAR_SECONDS * DECIMAL) / blockTime) * DECIMAL) / totalStakedWeighted : 0n
-      //   let apy = baseApy
-      //   if (totalStaked >= parseEther('100') && ratio > 0n && totalStakedWeighted > 0n) {
-      //     const stakedApy = baseApy + (((parseEther('3') * DECIMAL) / ratio) * ((totalStaked * DECIMAL) / totalStakedWeighted)) / DECIMAL / 100n
-      //     apy = stakedApy * multiplier
-      //   }
-      //   console.info(
-      //     'underlyingApy:',
-      //     vault,
-      //     ipAssetsTit[ipAsset],
-      //     formatEther(rewardsPerEpoch),
-      //     formatEther(ratio),
-      //     formatEther(apy),
-      //     formatEther(baseApy),
-      //     formatEther(blockTime),
-      //   )
-      //   return apy
-      // }
-      // const apyByIpAsset = async (ipAsset: Address, vaultStaked: bigint) => {
-
-      //   return apy
-      // }
       const stakeed = await Promise.all(
         ipAssets.map((ipAsset) =>
           pc.readContract({

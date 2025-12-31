@@ -21,6 +21,7 @@ export type BVault2Config = {
   vault: Address
   asset: Address
   bt: Address
+  btPriceSymbol?: string
   btConverts: TokenConvert[]
 
   protocal: Address
@@ -40,6 +41,7 @@ export type BVault2Config = {
     amount: bigint
     tokenSymbol: string
   }
+  underlingApy?: number
 }
 const BTS = {
   APLVault: '0x773dd6686df237a7b3fe02632e91bd3664d81a0c' as Address,
@@ -68,6 +70,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     points: { link: 'https://app.ariaprotocol.xyz/points' },
     desc: `$APL is an IPRWA (Intellectual Property Real-World Asset) fungible token backed by a portfolio of real-world IP assets.   $APL enables token holders exposure to various royalty streams associated with the works, ranging from digital streaming, synchronization, mechanical and / or public performance revenues.`,
     bootsort: 2,
+    underlingApy: 0.07
   },
   {
     tit: 'aprMON-aPrioir',
@@ -75,6 +78,7 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     vault: '0xd6cab3255653399773a5fb0d55b7236c39f28b4e',
     asset: '0x0c65A0BC65a5D819235B71F554D210D3F80E0852',
     bt: BTS.APRMonadProd,
+    btPriceSymbol: 'MON',
     btConverts: [genMonBtConvert(BTS.APRMonadProd), genBtConvert(monad.id, BTS.APRMonadProd, '0x0c65A0BC65a5D819235B71F554D210D3F80E0852')],
     protocal: '0x840606225c454bc048f1620ff0a7ef2eb17e4e2a',
     protocalSettings: '0xf33aa073f7110f097fe41bbb2d581497084f9f5c',
@@ -90,5 +94,6 @@ export const BVAULTS2CONIG: BVault2Config[] = [
       amount: parseEther('1000'),
       tokenSymbol: 'APR',
     },
+    underlingApy: 0.04
   },
 ]

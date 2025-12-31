@@ -34,7 +34,7 @@ export const sepolia = defineChain({
     baseFeeMultiplier: 1.2,
   },
   testnet: true,
-    defConfirmations: 3,
+  defConfirmations: 3,
 })
 
 export const storyTestnet = defineChain({

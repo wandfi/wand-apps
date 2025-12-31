@@ -90,3 +90,16 @@ export const getTokenPricesBySymbol = (symbols: string[] = ['IP']) => {
     )
     .then((res) => res.data.data.filter((item) => item.prices.length).map((item) => ({ symbol: item.symbol, price: parseEther(item.prices[0].value) })))
 }
+
+export const getTokenPriceBySymbol = (symbols: string) => {
+  // https://api.g.alchemy.com/prices/v1/7UXJgo01vxWHLJDk09Y0qZct8Y3zMDbX/tokens/by-symbol?symbols=IP
+  return axios
+    .get<{ data: { symbol: string; prices: { currency: string; value: string; lastUpdatedAt: string }[] }[] }>(
+      `https://api.g.alchemy.com/prices/v1/7UXJgo01vxWHLJDk09Y0qZct8Y3zMDbX/tokens/by-symbol?symbols=${symbols}`,
+    )
+    .then((res) => res.data.data.filter((item) => item.prices.length).map((item) => ({ symbol: item.symbol, price: item.prices[0].value })))
+    .then((list) => {
+      if (list.length == 0) throw new Error('getTokenPriceBySymbol')
+      return Number(list[0].price)
+    })
+}
