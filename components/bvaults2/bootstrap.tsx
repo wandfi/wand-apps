@@ -1,28 +1,27 @@
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { abiBVault2 } from "@/config/abi/BVault2";
-import { BVault2Config } from "@/config/bvaults2";
+import { type BVault2Config } from "@/config/bvaults2";
 import { getTokenBy } from "@/config/tokens";
-import { DECIMAL } from "@/constants";
 import { reFet } from "@/hooks/useFet";
 import { useBalance } from "@/hooks/useToken";
 import { withIfAiraSign } from "@/lib/aria";
-import { aarToNumber, bnMin, cn, FMT, fmtDate, fmtPercent, genDeadline, nowUnix, parseEthers } from "@/lib/utils";
+import { aarToNumber, bnMin, cn, FMT, fmtDate, fmtPercent, genDeadline, parseEthers } from "@/lib/utils";
 import { getPC } from "@/providers/publicClient";
+import { DECIMAL } from "@/src/constants";
 import { displayBalance } from "@/utils/display";
-import { ProgressBar } from "@/components/ui/progress-bar";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { BsFire } from "react-icons/bs";
+import { erc20Abi } from "viem";
+import { useAccount } from "wagmi";
 import { Txs, withTokenApprove } from "../approve-and-tx";
 import { GetByThird } from "../get-lp";
+import { CoinIcon } from "../icons/coinicon";
 import { TokenInput } from "../token-input";
 import { Tip } from "../ui/tip";
 import { convertBt, useWrapBtTokens } from "./bt";
 import { getLpToken } from "./getToken";
 import { getBvualt2BootTimes, useBvualt2Data } from "./useFets";
-import { CoinIcon } from "../icons/coinicon";
-import { useQuery } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
-import { useBlocksPerHours } from "@/hooks/useBlocksPerHours";
-import { erc20Abi } from "viem";
 
 export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const tokens = useWrapBtTokens(vc)
@@ -67,7 +66,7 @@ export function BVault2Bootstrap({ vc }: { vc: BVault2Config }) {
     const bootTotal = bnMin([currentAmount, targetAmount])
     const share = bootTotal > 0n && bootLpBalance > 0n ? bootLpBalance * DECIMAL / bootTotal : 0n
 
-    return <div style={{ order: vc.bootsort }} className={cn("card bg-white animitem")}>
+    return <div style={{ order: vc.bootsort }} className={cn("card  animitem")}>
         <div className="flex items-center gap-2 text-xl font-medium">
             <BsFire className='text-[#ff0000]' />
             {vc.tit}{" "}{vc.testnet && "(Testnet)"}

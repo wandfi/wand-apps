@@ -1,11 +1,11 @@
 import { getBvault2ChartsData } from "@/config/api";
-import { BVault2Config } from "@/config/bvaults2";
+import { type BVault2Config } from "@/config/bvaults2";
 import { useQuery } from "@tanstack/react-query";
 import EChartsReact from "echarts-for-react";
-import { ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { useBvualt2Data } from "./bvaults2/useFets";
 import { SimpleSelect } from "./ui/select";
-import { FMT, fmtDate, formatPercent, UnPromise } from "@/lib/utils";
+import { FMT, fmtDate, formatPercent, type UnPromise } from "@/lib/utils";
 import { round, toNumber } from "lodash";
 import { formatUnits } from "viem";
 import { graphic } from "echarts";
@@ -92,7 +92,7 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
             ],
         }
     }, [data, ct])
-    return <div className='animitem card flex flex-col gap-5 w-full min-w-0 bg-white'>
+    return <div className='animitem card flex flex-col gap-5 w-full min-w-0'>
         <div className='flex justify-between gap-2 items-center'>
             <span className='text-base font-bold'>Chart</span>
             <SimpleSelect className="text-sm" options={chartTypes} value={ct} onChange={setCT} />

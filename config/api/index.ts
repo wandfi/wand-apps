@@ -1,4 +1,4 @@
-import { Address, parseEther } from 'viem'
+import { type Address, parseEther } from 'viem'
 import api from '../../utils/api'
 import axios from 'axios'
 import { parseEthers } from '@/lib/utils'

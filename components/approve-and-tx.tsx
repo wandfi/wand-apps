@@ -2,22 +2,23 @@ import { useApproves } from '@/hooks/useApprove'
 import { useWrapContractWrite } from '@/hooks/useWrapContractWrite'
 import { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, encodeFunctionData, erc20Abi, PublicClient, RpcSchema, SimulateContractParameters, WalletClient, zeroAddress } from 'viem'
+import type { Abi, Account, Address, Chain, ContractFunctionArgs, ContractFunctionName, PublicClient, RpcSchema, SimulateContractParameters, WalletClient, } from 'viem'
+import { encodeFunctionData, erc20Abi, zeroAddress } from 'viem'
 
+import { getChain } from '@/config/network'
+import { getTokenBy } from '@/config/tokens'
+import { isPROD } from '@/src/constants'
 import { useCurrentChainId, useNetworkWrong } from '@/hooks/useCurrentChainId'
 import { cn, getErrorMsg, handleError, promiseT } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useMutation } from '@tanstack/react-query'
+import { FaCheck, FaSpinner } from "react-icons/fa6"
 import { toast as tos } from 'sonner'
-import { Transport, useSwitchChain, useWalletClient } from 'wagmi'
-import { BBtn } from './ui/bbtn'
+import { type Transport, useSwitchChain, useWalletClient } from 'wagmi'
 import { create } from 'zustand'
-import { FaCheck, FaSpinner } from "react-icons/fa6";
-import { getTokenBy } from '@/config/tokens'
 import { SimpleDialog } from './simple-dialog'
-import { isPROD, isTEST } from '@/constants'
+import { BBtn } from './ui/bbtn'
 import { Tip } from './ui/tip'
-import { getChain } from '@/config/network'
 
 export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()

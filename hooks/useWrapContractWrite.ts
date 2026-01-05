@@ -2,7 +2,7 @@ import { getErrorMsg } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { SimulateContractParameters, WalletClient } from 'viem'
+import type { SimulateContractParameters, WalletClient } from 'viem'
 import { useWalletClient } from 'wagmi'
 
 export function useWrapContractWrite(

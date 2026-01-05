@@ -1,11 +1,11 @@
 import { abiAdhocBribesPool, abiBVault } from '@/config/abi'
-import { BVaultConfig } from '@/config/bvaults'
-import { DECIMAL, YEAR_SECONDS } from '@/constants'
+import { type BVaultConfig } from '@/config/bvaults'
+import { DECIMAL, YEAR_SECONDS } from '@/src/constants'
 import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
 import _ from 'lodash'
-import { Address, parseAbi, zeroAddress } from 'viem'
+import { type Address, parseAbi, zeroAddress } from 'viem'
 
 export function useBVaultIPAssets(vc: BVaultConfig) {
   return useQuery({
@@ -145,7 +145,7 @@ export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
 }
 
 export function useYTPoints(vc: BVaultConfig) {
-  const bvd = useBVault(vc.vault)
+  const bvd = useBVault(vc)
   return useQuery({
     initialData: 0n,
     gcTime: 60 * 60 * 1000,
@@ -188,8 +188,7 @@ export function calcAdditionalApy2(ytPointsMaxTotalSupply: bigint, remainTime: b
 }
 
 export function useBvaultROI(vc: BVaultConfig, ytchange: bigint = 0n, afterYtPriceBn: bigint = 0n) {
-  const vault = vc.vault
-  const bvd = useBVault(vault)
+  const bvd = useBVault(vc)
   // restaking incomes
   const {
     data: { avrageApy },

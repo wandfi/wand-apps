@@ -1,12 +1,11 @@
 import { SUPPORT_CHAINS } from "@/config/network"
 import { DomainRef } from "@/hooks/useConfigDomain"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useRef, useState } from "react"
 import { FiX } from "react-icons/fi"
 import { useClickAway } from "react-use"
-import { Chain } from "viem"
+import { type Chain } from "viem"
 import { useAccount, useSwitchChain } from "wagmi"
 
 
@@ -32,12 +31,12 @@ export function SwitchChain() {
     const ct = types.find(item => item.chain?.id == chainId)
     const [show, setShow] = useState(false)
     const { switchChain } = useSwitchChain()
-    const r = useRouter()
+    const r = useNavigate()
     const onClickItem = (item: ItemType) => {
         if (item.chain && (item !== ct || chainError)) {
             switchChain({ chainId: item.chain.id })
         } else if (item.toUrl) {
-            r.push(item.toUrl)
+            r({ to: item.toUrl })
         }
     }
     const modalRef = useRef<HTMLDivElement>(null)
@@ -57,7 +56,7 @@ export function SwitchChain() {
                 className='flex items-center gap-2 text-sm font-medium rounded-lg cursor-pointer relative px-2 h-10'
                 onClick={() => setShow(true)}
             >
-                <Image width={24} height={24} src={ct.icon} alt='' />
+                <img width={24} height={24} src={ct.icon} alt='' />
                 <div className='hidden sm:block'>{ct.name}</div>
             </div>
         }
@@ -73,7 +72,7 @@ export function SwitchChain() {
                     </div>
                     <div className="mt-4">
                         {types.map(item => <div key={item.name} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${(item == ct && !chainError) ? "bg-indigo-400" : ''}`} onClick={() => onClickItem(item)}>
-                            <Image width={24} height={24} src={item.icon} alt='' />
+                            <img width={24} height={24} src={item.icon} alt='' />
                             <div className=''>{item.name}</div>
                         </div>)}
                     </div>

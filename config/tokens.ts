@@ -1,4 +1,4 @@
-import { Address, isAddressEqual, zeroAddress } from 'viem'
+import { type Address, isAddressEqual, zeroAddress } from 'viem'
 import { hashkeyTestnet, mainnet, sepolia } from 'viem/chains'
 import { monad, monadTestnet, story } from './network'
 

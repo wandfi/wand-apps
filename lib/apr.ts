@@ -1,10 +1,10 @@
 import { withTokenApprove } from '@/components/approve-and-tx'
 import { genBtConvert } from '@/components/bvaults2/bt'
 import { abiAprStakingMON } from '@/config/abi/third'
-import { TokenConvert } from '@/config/bvaults2'
+import { type TokenConvert } from '@/config/bvaults2'
 import { monad } from '@/config/network'
 import { getPC } from '@/providers/publicClient'
-import { Address, zeroAddress } from 'viem'
+import { type Address, zeroAddress } from 'viem'
 export function genMonBtConvert(bt: Address): TokenConvert {
   const mon: Address = zeroAddress
   const aprMON: Address = '0x0c65A0BC65a5D819235B71F554D210D3F80E0852'

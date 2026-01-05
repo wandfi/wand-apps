@@ -1,11 +1,9 @@
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit'
-import { useWindowSize } from 'react-use'
 import { useAccount } from 'wagmi'
 import { BBtn } from './ui/bbtn'
 
 export default function ConnectBtn() {
-  const size = useWindowSize(1024)
-  const { isConnected, chainId } = useAccount()
+  const { isConnected } = useAccount()
   const showConnect = !isConnected
   const cm = useConnectModal()
   if (showConnect)

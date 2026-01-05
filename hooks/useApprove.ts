@@ -2,7 +2,7 @@ import { getBigint, getErrorMsg } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Address, erc20Abi, zeroAddress } from 'viem'
+import { type Address, erc20Abi, zeroAddress } from 'viem'
 import { useAccount, useWalletClient } from 'wagmi'
 import { useCurrentChainId } from './useCurrentChainId'
 

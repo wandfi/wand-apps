@@ -1,6 +1,7 @@
 import { abiBvault2Query, abiHook } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
-import { BVault2Config } from '@/config/bvaults2'
+import { getTokenPriceBySymbol } from '@/config/api'
+import { type BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet, useFets } from '@/hooks/useFet'
@@ -8,12 +9,11 @@ import { aarToNumber, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import _, { toNumber } from 'lodash'
 import { useMemo, useRef } from 'react'
-import { Address, formatEther, formatUnits, isAddressEqual, parseUnits } from 'viem'
+import { type Address, formatEther, formatUnits, isAddressEqual, parseUnits } from 'viem'
 import { useBalance, useTotalSupply } from '../../hooks/useToken'
 import { FetKEYS } from './fetKeys'
 import { getLpToken, usePtToken, useYtToken } from './getToken'
 import { useBvualt2Data } from './useFets'
-import { getTokenPriceBySymbol, getTokenPricesBySymbol } from '@/config/api'
 
 export function getLogs(vc: BVault2Config) {
   return getPC(vc.chain)

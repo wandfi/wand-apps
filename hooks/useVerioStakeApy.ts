@@ -1,6 +1,6 @@
 import { abiVerioStakePool } from '@/config/abi'
 import { VerioStakePool } from '@/config/bvaults'
-import { DECIMAL, DECIMAL_10 } from '@/constants'
+import { DECIMAL, DECIMAL_10 } from '@/src/constants'
 import { getPC } from '@/providers/publicClient'
 import { useQuery } from '@tanstack/react-query'
 import { useCurrentChainId } from './useCurrentChainId'

@@ -1,6 +1,6 @@
 import { abiBVault2 } from "@/config/abi/BVault2"
-import { BVault2Config } from "@/config/bvaults2"
-import { getTokenBy, Token } from "@/config/tokens"
+import { type BVault2Config } from "@/config/bvaults2"
+import { getTokenBy, type Token } from "@/config/tokens"
 import { withIfAiraSign } from "@/lib/aria"
 import { logUserAction } from "@/lib/logs"
 import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/lib/utils"

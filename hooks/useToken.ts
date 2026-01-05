@@ -1,7 +1,7 @@
-import { Token } from '@/config/tokens'
+import { type Token } from '@/config/tokens'
 import { useFet, useFets } from '@/hooks/useFet'
 import { getPC } from '@/providers/publicClient'
-import { Address, erc20Abi } from 'viem'
+import { type Address, erc20Abi } from 'viem'
 import { useAccount } from 'wagmi'
 import { useCurrentChainId } from './useCurrentChainId'
 

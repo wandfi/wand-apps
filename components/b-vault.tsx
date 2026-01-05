@@ -1,24 +1,24 @@
 import { toBVault } from '@/app/routes'
+import { ProgressBar } from "@/components/ui/progress-bar"
 import { abiAdhocBribesPool, abiBVault, abiRedeemPool, abiStakingBribesPool } from '@/config/abi'
-import { BVaultConfig } from '@/config/bvaults'
+import { type BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
-import { DECIMAL } from '@/constants'
+import { DECIMAL } from '@/src/constants'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { useBalance } from '@/hooks/useToken'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleError, parseEthers, shortStr } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import { useStore } from '@/providers/useBoundStore'
-import { useBVault, useBVaultApy, useBVaultBoost, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
+import { useTokenPrices } from '@/providers/sliceTokenStore'
+import { useBVault, useBVaultApy, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { ProgressBar } from "@/components/ui/progress-bar"
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import _ from 'lodash'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
+import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useMeasure, useToggle } from 'react-use'
-import { List, ListRowProps } from 'react-virtualized'
+import { List, type ListRowProps } from 'react-virtualized'
 import { toast } from 'sonner'
 import { zeroAddress } from 'viem'
 import { useWalletClient } from 'wagmi'
@@ -27,7 +27,6 @@ import { AssetInput } from './asset-input'
 import BvaultEpochYtPrices from './bvault-epoch-ytprices'
 import { GetvIP } from './get-lp'
 import { CoinIcon } from './icons/coinicon'
-import STable from './simple-table'
 import { SimpleTabs } from './simple-tabs'
 import { BBtn } from './ui/bbtn'
 import { Switch } from './ui/switch'
@@ -48,9 +47,9 @@ const MinumAmount = BigInt(1e16)
 export function BVaultRedeem({ bvc }: { bvc: BVaultConfig }) {
   const [inputPToken, setInputPToken] = useState('')
   const inputPTokenBn = parseEthers(inputPToken)
-  const bvd = useBVault(bvc.vault)
-  const epoch = useEpochesData(bvc.vault)[0]
-  const pTokenBalance = useStore((s) => s.sliceTokenStore.balances[bvc.pToken] || 0n, [`sliceTokenStore.balances.${bvc.pToken}`])
+  const bvd = useBVault(bvc)
+  const epoch = useEpochesData(bvc)[0]
+  const pTokenBalance = useBalance({ chain: bvc.chain, address: bvc.pToken } as any).result
   const upForUserAction = useUpBVaultForUserAction(bvc)
   const waitTimeFmt = bvd.current.duration > 0n ? `Waiting Time: ~${fmtDuration((bvd.current.duration + bvd.current.startTime) * 1000n - BigInt(_.now()))}` : ''
   return (
@@ -83,10 +82,10 @@ export function BVaultRedeem({ bvc }: { bvc: BVaultConfig }) {
 }
 
 export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
-  const pTokenBalance = useStore((s) => s.sliceTokenStore.balances[bvc.pToken] || 0n, [`sliceTokenStore.balances.${bvc.pToken}`])
+  const pTokenBalance = useBalance({ address: bvc.pToken, chain: bvc.chain } as any).result
   const upForUserAction = useUpBVaultForUserAction(bvc)
   const { data: wc } = useWalletClient()
-  const { ids, claimable } = useCalcClaimable(bvc.vault)
+  const { ids, claimable } = useCalcClaimable(bvc)
   const { mutate, isPending } = useMutation({
     mutationKey: ['readeemAll', pTokenBalance, claimable, ids],
     mutationFn: async () => {
@@ -121,10 +120,10 @@ export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
 }
 
 export function BVaultClaim({ bvc }: { bvc: BVaultConfig }) {
-  const bvd = useBVault(bvc.vault)
-  const epoch = useEpochesData(bvc.vault)[0]
+  const bvd = useBVault(bvc)
+  const epoch = useEpochesData(bvc)[0]
   const redeemingBalance = epoch?.redeemingBalance || 0n
-  const { ids, claimable } = useCalcClaimable(bvc.vault)
+  const { ids, claimable } = useCalcClaimable(bvc)
   const upForUserAction = useUpBVaultForUserAction(bvc)
   return (
     <div>
@@ -180,8 +179,8 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
   const isLP = !!lp
   const pTokenSymbolShort = isLP ? 'PT' : bvc.pTokenSymbol
   const assetSymbolShort = isLP ? 'LP' : bvc.assetSymbol
-  const bvd = useBVault(bvc.vault)
-  const assetBalance = useStore((s) => s.sliceTokenStore.balances[bvc.asset] || 0n, [`sliceTokenStore.balances.${bvc.asset}`])
+  const bvd = useBVault(bvc)
+  const assetBalance = useBalance({ chain: bvc.chain, address: bvc.asset } as any).result
   // const [fmtApy] = useBVaultApy(bvc.vault)
   const { data: walletClient } = useWalletClient()
   const upForUserAction = useUpBVaultForUserAction(bvc)
@@ -198,9 +197,8 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
       .catch(handleError)
   }
 
-  const params = useSearchParams()
-  const subtab = params.get('subtab') as string
-  const r = useRouter()
+  const { subtab } = useSearch({ from: '/yield-vault'})
+  const r = useNavigate()
   const data = [
     {
       tab: 'Buy',
@@ -281,11 +279,10 @@ export function BVaultYInfo({ bvc }: { bvc: BVaultConfig }) {
   const yTokenSymbolShort = isLP ? 'YT' : bvc.yTokenSymbol
   const assetSymbolShort = isLP ? 'LP token' : bvc.assetSymbol
 
-  const bvd = useBVault(bvc.vault)
+  const bvd = useBVault(bvc)
   const epoch = bvd.current
 
   const oneYTYieldOfAsset = bvd.current.yTokenAmountForSwapYT > 0n ? (bvd.lockedAssetTotal * DECIMAL) / bvd.current.yTokenAmountForSwapYT : 0n
-  const [fmtBoost] = useBVaultBoost(bvc.vault)
 
   const calcProgress = (ep: typeof epoch) => {
     const now = BigInt(Math.floor(new Date().getTime() / 1000))
@@ -349,11 +346,10 @@ function BVaultYTrans({ bvc }: { bvc: BVaultConfig }) {
   const assetSymbolShort = isLP ? 'LP token' : bvc.assetSymbol
   const [inputAsset, setInputAsset] = useState('')
   const inputAssetBn = parseEthers(inputAsset)
-  const bvd = useBVault(bvc.vault)
-  const assetBalance = useStore((s) => s.sliceTokenStore.balances[bvc.asset] || 0n, [`sliceTokenStore.balances.${bvc.asset}`])
-  const chainId = useCurrentChainId()
-  const [calcSwapKey, setCalcSwapKey] = useState(['calcSwap', bvc.vault, inputAssetBn, chainId])
-  useDebounce(() => setCalcSwapKey(['calcSwap', bvc.vault, inputAssetBn, chainId]), 300, ['calcSwap', bvc.vault, inputAssetBn, chainId])
+  const bvd = useBVault(bvc)
+  const assetBalance = useBalance({ chain: bvc.chain, address: bvc.asset } as any).result
+  const [calcSwapKey, setCalcSwapKey] = useState(['calcSwap', bvc.vault, inputAssetBn, bvc.chain])
+  useDebounce(() => setCalcSwapKey(['calcSwap', bvc.vault, inputAssetBn, bvc.chain]), 300, ['calcSwap', bvc.vault, inputAssetBn, bvc.chain])
   const { data: result, isFetching: isFetchingSwap } = useQuery({
     queryKey: calcSwapKey,
     queryFn: () => getPC(bvc.chain).readContract({ abi: abiBVault, address: bvc.vault, functionName: 'calcSwap', args: [inputAssetBn] }),
@@ -430,118 +426,9 @@ function BribeTit(p: { name: string }) {
   )
 }
 
-function BVaultPoolsOld({ bvc }: { bvc: BVaultConfig }) {
-  const [onlyMy, setOnlyMy] = useState(false)
-  const epochesData = useEpochesData(bvc.vault)
-  const epoches = useMemo(() => {
-    const myFilter = (item: (typeof epochesData)[number]) => item.bribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n
-    return onlyMy ? epochesData.filter(myFilter) : epochesData
-  }, [epochesData, onlyMy])
-  const viewMax = 6
-  const itemHeight = 56
-  const itemSpaceY = 20
-  const [mesRef, mes] = useMeasure<HTMLDivElement>()
-  const valueClassname = 'text-black/60 dark:text-white/60 text-sm'
-  const [currentEpochId, setCurrentEpochId] = useState<bigint | undefined>(epoches[0]?.epochId)
-  const current = useMemo(() => (!currentEpochId ? epoches[0] : epoches.find((e) => e.epochId == currentEpochId)), [epoches, currentEpochId])
-  const userBalanceYToken = current?.userBalanceYToken || 0n
-  const userBalanceYTokenSyntyetic = current?.userBalanceYTokenSyntyetic || 0n
-  const onRowClick = (index: number) => {
-    setCurrentEpochId(epoches[index]?.epochId)
-  }
-  const bribes = current?.bribes || []
-  const myShare = useMemo(() => {
-    const fb = bribes.find((b) => b.bribeAmount > 0n)
-    if (!fb || fb.bribeTotalAmount == 0n) return fmtPercent(0n, 0n)
-    return fmtPercent((fb.bribeAmount * DECIMAL) / fb.bribeTotalAmount, 18)
-  }, [bribes])
-  const upForUserAction = useUpBVaultForUserAction(bvc)
-  function rowRender({ key, style, index }: ListRowProps) {
-    const itemEpoch = epoches[index]
-    const fTime = `${fmtDate(itemEpoch.startTime * 1000n)}-${fmtDate((itemEpoch.startTime + itemEpoch.duration) * 1000n)}`
-    return (
-      <div key={key} style={style} className='cursor-pointer' onClick={() => onRowClick(index)}>
-        <div className={cn('h-[56px] card !rounded-lg !px-5 !py-2 font-semibold', index < epoches.length - 1 ? 'mb-[20px]' : '')}>
-          <div className='text-sm'>Epoch {epoches[index].epochId.toString()}</div>
-          <div className='text-xs dark:text-white/60 mt-1'>{fTime}</div>
-        </div>
-      </div>
-    )
-  }
-  return (
-    <div className='animitem md:h-[28rem] card !p-4'>
-      <div className='font-bold text-base'>Harvest</div>
-      <div className={cn('flex flex-col md:flex-row gap-4 mt-2')}>
-        <div className='flex flex-col gap-4 shrink-0 w-full md:w-[14.375rem]' ref={mesRef}>
-          <div className='flex items-center gap-8 text-sm font-semibold'>
-            <span>My Pool Only</span>
-            <Switch checked={onlyMy} onChange={setOnlyMy as any} />
-          </div>
-          <List
-            className={epoches.length > viewMax ? 'pr-5' : ''}
-            width={mes.width}
-            height={280}
-            rowHeight={({ index }) => (index < epoches.length - 1 ? itemHeight + itemSpaceY : itemHeight)}
-            overscanRowCount={viewMax}
-            rowCount={epoches.length}
-            rowRenderer={rowRender}
-          />
-        </div>
-        <div className='flex flex-col gap-2 w-full'>
-          <div className='flex gap-6 items-end font-semibold'>
-            <span className='text-sm'>Accumulated Rewards</span>
-            <span className='text-xs dark:text-white/60'>Epoch {(current?.epochId || 1n).toString()}</span>
-          </div>
-          <div className='mt-2 rounded-lg border border-solid border-border px-4 py-1 h-[8.125rem] overflow-auto'>
-            <STable
-              headerClassName='text-center text-black/60 dark:text-white/60 border-b-0'
-              headerItemClassName='py-1'
-              rowClassName='text-center'
-              cellClassName='py-0'
-              header={['', '', 'Total', 'Mine', '']}
-              span={{ 1: 2, 2: 1, 3: 1 }}
-              data={bribes.map((item) => ['', <BribeTit name={item.bribeSymbol} key={'1'} />, displayBalance(item.bribeTotalAmount), displayBalance(item.bribeAmount), ''])}
-            />
-          </div>
-          <div className='rounded-lg border border-solid border-border px-4 py-2 flex justify-between items-center'>
-            <div className='font-semibold text-xs'>
-              <div>
-                My yToken: <span className={cn(valueClassname)}>{displayBalance(userBalanceYToken)}</span>
-              </div>
-              <div>
-                Time Weighted Points:{' '}
-                <span className={cn(valueClassname)}>
-                  {userBalanceYToken > 0n && userBalanceYTokenSyntyetic == 0n ? 'Reward received' : displayBalance(userBalanceYTokenSyntyetic)}
-                </span>
-              </div>
-            </div>
-            <div className='text-sm'>
-              My Share: <span className={cn(valueClassname, 'text-xl')}>{myShare}</span>
-            </div>
-          </div>
-          <span className='text-xs mx-auto'>You can harvest at the end of Epoch</span>
-          <ApproveAndTx
-            className='mx-auto mt-4'
-            tx='Harvest'
-            disabled={!current || !current?.settled}
-            config={{
-              abi: abiBVault,
-              address: bvc.vault,
-              functionName: 'claimBribes',
-              args: [current?.epochId!],
-            }}
-            onTxSuccess={() => {
-              upForUserAction()
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
 function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
   const [onlyMy, setOnlyMy] = useState(true)
-  const epochesData = useEpochesData(bvc.vault)
+  const epochesData = useEpochesData(bvc)
   const epoches = useMemo(() => {
     const myFilter = (item: (typeof epochesData)[number]) => item.userClaimableYTokenSyntyetic > 0n || item.sBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n || item.aBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n
     return onlyMy ? epochesData.filter(myFilter) : epochesData
@@ -693,35 +580,34 @@ export function BVaultApy({ bvc, showTip = false }: { bvc: BVaultConfig, showTip
 }
 
 export function BVaultB({ bvc }: { bvc: BVaultConfig }) {
-  const bvd = useBVault(bvc.vault)
+  const bvd = useBVault(bvc)
   return (
     <div className='grid grid-cols-1 md:grid-cols-[4fr_6fr] gap-5'>
       <BVaultYInfo bvc={bvc} />
       <BvaultEpochYtPrices bvc={bvc} epochId={bvd.epochCount} />
       <BVaultYTrans bvc={bvc} />
-      {bvc.isOld ? <BVaultPoolsOld bvc={bvc} /> : <BVaultPools bvc={bvc} />}
+      <BVaultPools bvc={bvc} />
     </div>
   )
 }
 
 export function BVaultCard({ vc }: { vc: BVaultConfig }) {
-  const r = useRouter()
+  const r = useNavigate()
   const [token1, token2] = vc.assetSymbol.split('-')
-  const bvd = useBVault(vc.vault)
+  const bvd = useBVault(vc)
   const lp = LP_TOKENS[vc.asset]
-  const prices = useStore((s) => s.sliceTokenStore.prices, ['sliceTokenStore.prices'])
-  const lpBasePrice = lp ? prices[lp.base] || 0n : 0n
-  const lpQuotePrice = lp ? prices[lp.quote] || 0n : 0n
-  const lpBase = bvd.lpBase || 0n
-  const lpQuote = bvd.lpQuote || 0n
+  const prices = useTokenPrices().data
+  const lpBasePrice = prices[lp?.base] ?? 0n
+  const lpQuotePrice = prices[lp?.quote] ?? 0n
+  const lpBase = bvd.lpBase ?? 0n
+  const lpQuote = bvd.lpQuote ?? 0n
   const lpBaseTvlBn = (lpBase * lpBasePrice) / DECIMAL
   const lpQuoteTvlBn = (lpQuote * lpQuotePrice) / DECIMAL
   // console.info('lpTypes', lpBaseTvlBn, lpQuoteTvlBn , lpQuoteTvlBn == lpBaseTvlBn)
   let lpTvlBn = lpBaseTvlBn + lpQuoteTvlBn
   if (lpTvlBn === 0n) {
-    lpTvlBn = (bvd.lockedAssetTotal || 0n) * (prices[vc.asset] || 0n) / DECIMAL;
+    lpTvlBn = (bvd.lockedAssetTotal ?? 0n) * (prices[vc.asset] ?? 0n) / DECIMAL;
   }
-  const [fmtBoost] = useBVaultBoost(vc.vault)
   // const [fmtApy] = useBVaultApy(vc.vault)
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)

@@ -1,12 +1,12 @@
 import { abiBVault2, abiRewardManager } from "@/config/abi/BVault2";
-import { BVault2Config } from "@/config/bvaults2";
-import { getTokenBy, Token } from "@/config/tokens";
+import { type BVault2Config } from "@/config/bvaults2";
+import { getTokenBy, type Token } from "@/config/tokens";
 import { reFet } from "@/hooks/useFet";
-import { cn, UnPromise, UnwrapPromise } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
 import _, { now } from "lodash";
-import { ReactNode, useMemo } from "react";
-import { Address } from "viem";
+import { type ReactNode, useMemo } from "react";
+import { type Address } from "viem";
 import { useAccount } from "wagmi";
 import { useBalance } from "../../hooks/useToken";
 import { ApproveAndTx, Txs } from "../approve-and-tx";
@@ -79,7 +79,7 @@ function PT({ vc }: { vc: BVault2Config }) {
     const redeems = useBvualt2PTRedeems(vc)
     const data = useMemo(() => getPTPositions(vc, redeems.result, () => reFet(redeems.key)), [vc, redeems.result])
     const header = ['PT', 'Value', 'Status', 'Redeemable', '']
-    return <div className="animitem card !p-4 bg-white overflow-x-auto">
+    return <div className="animitem card !p-4 overflow-x-auto">
         <STable
             headerClassName='text-left font-semibold border-b-0'
             headerItemClassName='py-1 px-4 text-base'
@@ -163,7 +163,7 @@ function YT({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const data = useMemo(() => !address ? [] : getYtPositions(vc, rewards.result, address!, () => reFet(rewards.key)), [rewards.result, address])
     const header = ['YT', 'Value', 'Status', 'Yield', 'Airdrops', '']
-    return <div className="animitem card !p-4 bg-white overflow-x-auto">
+    return <div className="animitem card !p-4 overflow-x-auto">
         <STable
             headerClassName='text-left font-semibold border-b-0'
             headerItemClassName='py-1 px-4 text-base'
@@ -196,7 +196,7 @@ function LPBT({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
     const data = useMemo(() => address ? getLPBTPositons(vc, rewards.result, address, () => reFet(rewards.key)) : [], [rewards.result, address])
     const header = ['LP/BT', 'Value', '', 'Yield', 'Airdrops', '']
-    return <div className="animitem card !p-4 bg-white overflow-x-auto">
+    return <div className="animitem card !p-4 overflow-x-auto">
         <STable
             headerClassName='text-left font-semibold border-b-0'
             headerItemClassName='py-1 px-4 text-base'

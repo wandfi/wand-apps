@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import _ from 'lodash'
-import React, { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 export interface TableProps {
   header: ReactNode[]

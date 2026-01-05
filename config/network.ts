@@ -1,6 +1,5 @@
-import { isPROD } from '@/constants'
-import { providers } from 'ethers'
-import { Address, Chain, defineChain } from 'viem'
+import { isPROD } from '@/src/constants'
+import { type Address, type Chain, defineChain } from 'viem'
 import { monadTestnet as _monadTestnet, monad as _monad } from 'viem/chains'
 
 export const sepolia = defineChain({
@@ -123,10 +122,6 @@ export const getCurrentChain = () => {
 }
 
 export const getChain = (id: number) => SUPPORT_CHAINS.find((item) => item.id == id)
-
-export const refEthersProvider: {
-  provider?: providers.FallbackProvider | providers.JsonRpcProvider
-} = {}
 
 export const BEX_URLS: { [k: number]: string } = {
   [storyTestnet.id]: 'https://www.verio.network/staking',

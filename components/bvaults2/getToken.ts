@@ -1,6 +1,6 @@
-import { BVault2Config } from '@/config/bvaults2'
-import { Token, getTokenBy } from '@/config/tokens'
-import { Address } from 'viem'
+import { type BVault2Config } from '@/config/bvaults2'
+import { type Token, getTokenBy } from '@/config/tokens'
+import { type Address } from 'viem'
 import { useBvualt2Data } from './useFets'
 
 const cacheTokens: { [k: string]: Token } = {}

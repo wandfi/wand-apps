@@ -4,7 +4,7 @@ import { Noti } from "@/components/noti"
 import { PageWrap } from "@/components/page-wrap"
 import { ConfigChainsProvider } from "@/components/support-chains"
 import { BVAULTS2CONIG } from "@/config/bvaults2"
-import { ENV } from "@/constants"
+import { ENV } from "@/src/constants"
 
 
 export default function BootstrapPage() {

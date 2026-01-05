@@ -1,4 +1,4 @@
-import { BVault2Config } from "@/config/bvaults2";
+import { type BVault2Config } from "@/config/bvaults2";
 import { reFet } from "@/hooks/useFet";
 import { flatten } from "lodash";
 import { useMemo } from "react";
@@ -26,7 +26,7 @@ export function PTs({ vcs }: { vcs: BVault2Config[] }) {
     const redeems = useBvualt2sPTRedeems(vcs)
     const data = useMemo(() => flatten(vcs.map((vc, i) => getPTPositions(vc, redeems.result[i], () => reFet(redeems.key[i])))), [vcs, redeems.result])
     const header = ['PT', 'Value', 'Status', 'Redeemable', '']
-    return <div className="animitem card !p-4 bg-white">
+    return <div className="animitem card !p-4">
         <IconTitle tit='Principal Token (v2)' icon='PToken' />
         <div className='my-4 h-[1px] bg-border/60 dark:bg-border'></div>
         <div className='w-full overflow-x-auto'>
@@ -49,7 +49,7 @@ export function YTs({ vcs }: { vcs: BVault2Config[] }) {
     const { address } = useAccount()
     const data = useMemo(() => !address ? [] : flatten(vcs.map((vc, i) => getYtPositions(vc, rewards.result[i], address, () => reFet(rewards.key[i])))), [rewards.result, address])
     const header = ['YT', 'Value', 'Status', 'Yield', 'Airdrops', '']
-    return <div className="animitem card !p-4 bg-white">
+    return <div className="animitem card !p-4">
         <IconTitle tit='Yield Token (v2)' icon='YToken' />
         <div className='my-4 h-[1px] bg-border/60 dark:bg-border'></div>
         <div className='w-full overflow-x-auto'>
@@ -71,7 +71,7 @@ export function LPBTs({ vcs }: { vcs: BVault2Config[] }) {
     const { address } = useAccount()
     const data = useMemo(() => !address ? [] : flatten(vcs.map((vc, i) => getLPBTPositons(vc, rewards.result[i], address, () => reFet(rewards.key[i])))), [rewards.result, address])
     const header = ['LP/BT', 'Value', '', 'Yield', 'Airdrops', '']
-    return <div className="animitem card !p-4 bg-white">
+    return <div className="animitem card !p-4">
         <IconTitle tit='LP/BT' />
         <div className='my-4 h-[1px] bg-border/60 dark:bg-border'></div>
         <div className='w-full overflow-x-auto'>

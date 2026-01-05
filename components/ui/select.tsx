@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { useClickAway } from "react-use";
 

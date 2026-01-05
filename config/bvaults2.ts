@@ -1,8 +1,8 @@
-import { TxConfig } from '@/components/approve-and-tx'
+import { type TxConfig } from '@/components/approve-and-tx'
 import { genBtConvert } from '@/components/bvaults2/bt'
 import { genAplBtConvert } from '@/lib/aria'
-import { Address, parseEther } from 'viem'
-import { TypeENV } from './env'
+import { type Address, parseEther } from 'viem'
+import { type TypeENV } from './env'
 import { monad, story } from './network'
 import { genMonBtConvert } from '@/lib/apr'
 

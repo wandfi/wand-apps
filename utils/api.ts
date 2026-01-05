@@ -1,7 +1,7 @@
 import { getCurrentChainId, SUPPORT_CHAINS } from '@/config/network'
-import { isPROD } from '@/constants'
+import { isPROD } from '@/src/constants'
 import { DomainRef } from '@/hooks/useConfigDomain'
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 
 let api: AxiosInstance
 

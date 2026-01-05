@@ -1,6 +1,6 @@
 import { abiBT } from "@/config/abi/BVault2";
-import { BVault2Config, TokenConvert } from "@/config/bvaults2";
-import { getTokenBy, Token } from "@/config/tokens";
+import { type BVault2Config, type TokenConvert } from "@/config/bvaults2";
+import { getTokenBy, type Token } from "@/config/tokens";
 import { useCurrentChainId } from "@/hooks/useCurrentChainId";
 import { reFet } from "@/hooks/useFet";
 import { withIfAiraSign } from "@/lib/aria";
@@ -10,7 +10,7 @@ import { displayBalance } from "@/utils/display";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useDebounce, useToggle } from "react-use";
-import { Address, isAddressEqual } from "viem";
+import { type Address, isAddressEqual } from "viem";
 import { useWalletClient } from "wagmi";
 import { useBalance, useTotalSupply } from "../../hooks/useToken";
 import { Txs, withTokenApprove } from "../approve-and-tx";

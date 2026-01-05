@@ -1,4 +1,4 @@
-import { isLOCL, isTEST } from '@/constants'
+import { isLOCL, isTEST } from '@/src/constants'
 import { sleep } from '@/lib/utils'
 import EventEmitter from 'events'
 import { useEffect, useReducer, useRef } from 'react'

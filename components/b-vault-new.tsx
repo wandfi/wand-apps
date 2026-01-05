@@ -1,28 +1,27 @@
 import { toBVault } from '@/app/routes'
+import { ProgressBar } from "@/components/ui/progress-bar"
 import { abiAdhocBribesPool, abiBVault, abiStakingBribesPool } from '@/config/abi'
-import { BVaultConfig } from '@/config/bvaults'
+import { type BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
-import { getTokenBy, Token } from '@/config/tokens'
-import { DECIMAL } from '@/constants'
+import { getTokenBy, type Token } from '@/config/tokens'
+import { DECIMAL } from '@/src/constants'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useBalance } from '@/hooks/useToken'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
 import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleError, parseEthers } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import { useStore } from '@/providers/useBoundStore'
-import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData, useUpBVaultForUserAction, useUserBVaultEpoches } from '@/providers/useBVaultsData'
+import { useBVaultUserData } from '@/providers/sliceUserBVaults'
+import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
 import { displayBalance } from '@/utils/display'
 import { useQuery } from '@tanstack/react-query'
-import { ProgressBar } from "@/components/ui/progress-bar"
 import _, { union } from 'lodash'
-import { useRouter } from 'next/navigation'
-import { Fragment, ReactNode, useMemo, useState } from 'react'
+import { Fragment, type ReactNode, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
 import { useDebounce, useToggle } from 'react-use'
-import { Address, erc20Abi, erc4626Abi, isAddressEqual, zeroAddress } from 'viem'
+import { type Address, erc20Abi, erc4626Abi, isAddressEqual, zeroAddress } from 'viem'
 import { useAccount, useWalletClient } from 'wagmi'
-import { TX, Txs } from './approve-and-tx'
+import { type TX, Txs } from './approve-and-tx'
 import { AssetInput } from './asset-input'
 import { CoinAmount } from './coin-amount'
 import { GetvIP } from './get-lp'
@@ -32,6 +31,7 @@ import { SimpleTabs } from './simple-tabs'
 import { TokenInput } from './token-input'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
+import { useNavigate } from '@tanstack/react-router'
 
 
 async function wrapIfErc4626({ chainId, vc, token, inputBn, user }: { chainId: number, vc: BVaultConfig, token: Address, inputBn: bigint, user: Address }) {
@@ -79,9 +79,9 @@ export function BVaultApy({ bvc, showTip = false }: { bvc: BVaultConfig, showTip
 
 export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
-  const r = useRouter()
+  const r = useNavigate()
   const [token1, token2] = vc.assetSymbol.split('-')
-  const bvd = useBVault(vc.vault)
+  const bvd = useBVault(vc)
   const asset = getTokenBy(vc.asset, chainId)!
   const [tvl, lpBaseTvlBn, lpQuoteTvlBn] = useBvaultTVL(vc)
   const lp = LP_TOKENS[vc.asset]
@@ -190,7 +190,7 @@ export function BVaultCardComming({ symbol = '' }: { symbol?: string }) {
 export function Info({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
   const asset = getTokenBy(vc.asset, chainId)!
-  const vd = useBVault(vc.vault)
+  const vd = useBVault(vc)
   const epoch = vd.current;
   const [tvl] = useBvaultTVL(vc)
   const calcProgress = (ep: typeof epoch) => {
@@ -244,7 +244,7 @@ function PT({ vc }: { vc: BVaultConfig }) {
   const isLP = !!lp
   const pTokenSymbolShort = isLP ? 'PT' : vc.pTokenSymbol
   const assetSymbolShort = isLP ? 'LP' : vc.assetSymbol
-  const vd = useBVault(vc.vault)
+  const vd = useBVault(vc)
   // const [fmtApy] = useBVaultApy(bvc.vault)
   const { data: walletClient } = useWalletClient()
   const chainId = useCurrentChainId()
@@ -335,9 +335,9 @@ function YT({ vc }: { vc: BVaultConfig }) {
   const assetSymbolShort = isLP ? 'LP token' : vc.assetSymbol
   const [inputAsset, setInputAsset] = useState('')
   const inputAssetBn = parseEthers(inputAsset, currentToken.decimals)
-  const vd = useBVault(vc.vault)
+  const vd = useBVault(vc)
 
-  const epoches = useUserBVaultEpoches(vc.vault)
+  const epoches = useBVaultUserData(vc).data ?? []
   const currentEpoch = epoches?.[0]
 
   const chainId = useCurrentChainId()
@@ -435,8 +435,8 @@ function YT({ vc }: { vc: BVaultConfig }) {
   )
 }
 export function PTYT({ vc, currentTab }: { vc: BVaultConfig, currentTab?: string }) {
-  const r = useRouter()
-  return <div className='card bg-white h-full'>
+  const r = useNavigate()
+  return <div className='card h-full'>
     <SimpleTabs
       listClassName="p-0 gap-8 mb-4 w-full"
       currentTab={currentTab}
@@ -466,13 +466,13 @@ const claimColSize = 1.3;
 const statuColSize = 1.6
 function PositonPT({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
-  const bvd = useBVault(vc.vault)
+  const bvd = useBVault(vc)
   const pt = getTokenBy(vc.pToken, chainId)!
   const asset = getTokenBy(vc.asset, chainId)!
-  const pTokenBalance = useStore((s) => s.sliceTokenStore.balances[vc.pToken] || 0n, [`sliceTokenStore.balances.${vc.pToken}`])
+  const pTokenBalance = useBalance({ chain: vc.chain, address: vc.pToken } as any).result
   const upForUserAction = useUpBVaultForUserAction(vc)
   const { data: wc } = useWalletClient()
-  const { ids, claimable } = useCalcClaimable(vc.vault)
+  const { ids, claimable } = useCalcClaimable(vc)
   const txs = () => {
     const mtxs: TX[] = []
     if (pTokenBalance > 10n) {
@@ -485,7 +485,7 @@ function PositonPT({ vc }: { vc: BVaultConfig }) {
   }
   const disableRedeemAll = !Boolean(wc) || bvd.closed !== true || (pTokenBalance + claimable) <= 100n
   const header = ['PT', 'Value', 'Status', 'Redeemable', '']
-  return <div className="animitem card !p-4 bg-white overflow-x-auto">
+  return <div className="animitem card !p-4 overflow-x-auto">
     <STable
       className='min-w-[750px] w-full'
       headerClassName='text-left font-semibold border-b-0'
@@ -509,8 +509,8 @@ function PositonPT({ vc }: { vc: BVaultConfig }) {
 function PositonYT({ vc }: { vc: BVaultConfig }) {
   const chainId = useCurrentChainId()
   const asset = getTokenBy(vc.asset, chainId)!
-  const epochesData = useEpochesData(vc.vault)
-  const vd = useBVault(vc.vault)
+  const epochesData = useEpochesData(vc)
+  const vd = useBVault(vc)
   const upForUserAction = useUpBVaultForUserAction(vc)
   const data = useMemo(() => {
     // const myFilter = (item: (typeof epochesData)[number]) => item.userClaimableYTokenSyntyetic > 0n || item.sBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n || item.aBribes.reduce((sum, b) => sum + b.bribeAmount, 0n) > 0n
@@ -588,7 +588,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
   }, [epochesData, vd])
 
   const header = ['YT', 'Value', 'Status', 'Yield', 'Airdrops', '']
-  return <div className="animitem card !p-4 bg-white overflow-x-auto">
+  return <div className="animitem card !p-4 overflow-x-auto">
     <STable
       className='min-w-[750px] w-full'
       headerClassName='text-left font-semibold border-b-0'

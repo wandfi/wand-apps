@@ -1,10 +1,7 @@
-import { animate, createSpring, stagger } from 'animejs'
+import gsap from 'gsap'
 import { useEffect, useRef } from 'react'
-const staggerdelay = 70
-const animduration = 400
 export function useInitAnimRoot(classname: string = 'animitem') {
-  const root = useRef<HTMLDivElement>(null)
-  const id = useRef<number>(0)
+  const root = useRef<HTMLDivElement>(document.body as any)
   useEffect(() => {
     console.info('useInitAnimRoot::', Boolean(root.current))
     if (!root.current) return () => {}
@@ -20,25 +17,23 @@ export function useInitAnimRoot(classname: string = 'animitem') {
         }
         lastTargets = [...nTargets]
         if (targets.length) {
-          const anim = animate(targets, {
-            id: 'anim' + id.current,
-            opacity: { from: 0, to: 1 },
-            translateY: { from: 100, to: 0 },
-            scale: { from: 0.8, to: 1 },
-            // rotate: { from: 30 },
-            // skewX: { from: 30 },
-            delay: stagger(staggerdelay),
-            ease: createSpring({ stiffness: 70 }),
-            duration: stagger(staggerdelay, { start: animduration }),
-          })
-
-          anim.onPause = (ja) => {
-            ja.targets as Element[]
-            lastTargets = lastTargets.filter((item) => !ja.targets.find((el) => el == item))
-            // console.info('AnimPause:', ja.id, ja.targets, lastTargets)
-            onChange(data) // recheck
-          }
-          id.current++
+          gsap.fromTo(
+            targets,
+            {
+              y: 100,
+              scale: 0.8,
+              opacity: 0,
+            },
+            {
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              stagger: 0.07,
+              duration: 0.5,
+              ease: 'back.out(1.4)',
+              lazy: true,
+            },
+          )
         }
       }
     }

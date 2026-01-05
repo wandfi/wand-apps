@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import _ from 'lodash';
-import { ButtonHTMLAttributes, HTMLAttributes, useEffect, useRef, useState } from 'react';
+import { type ButtonHTMLAttributes, type HTMLAttributes, useEffect, useRef, useState } from 'react';
 import { AiOutlineSwap } from 'react-icons/ai';
 import { IoIosArrowDown } from 'react-icons/io';
 import { Spinner } from '../spinner';

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react'
 import { CoinIcon } from './icons/coinicon'
 import { BBtn } from './ui/bbtn'
 

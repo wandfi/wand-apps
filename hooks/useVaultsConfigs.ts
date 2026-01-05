@@ -1,9 +1,9 @@
-import { BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
-import { BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
-import { ENV } from '@/constants'
+import { type BVaultConfig, BVAULTS_CONFIG } from '@/config/bvaults'
+import { type BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
+import { ENV } from '@/src/constants'
 import { useMemo } from 'react'
 import { useSetState } from 'react-use'
-import { Address } from 'viem'
+import { type Address } from 'viem'
 import { useCurrentChainId } from './useCurrentChainId'
 
 type OptionItem<T, type> = { label: string; value: Address; data: T; type: type }

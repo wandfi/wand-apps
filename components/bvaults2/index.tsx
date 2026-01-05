@@ -1,11 +1,10 @@
 
 import { toBVault } from "@/app/routes";
-import { BVault2Config } from "@/config/bvaults2";
+import { type BVault2Config } from "@/config/bvaults2";
 import { getTokenBy } from "@/config/tokens";
 import { cn, FMT, fmtDate, fmtDuration, formatPercent } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { useRouter } from "next/navigation";
 import { CoinIcon } from "../icons/coinicon";
 import { SimpleTabs } from "../simple-tabs";
 import { itemClassname, renderChoseSide, renderStat } from "../vault-card-ui";
@@ -16,6 +15,7 @@ import { usePTApy, useYTRoi } from "./useDatas";
 import { getBvault2EpochTimes, getBvualt2Times, useBvault2TVL, useBvualt2Data } from "./useFets";
 import { YT } from "./yt";
 import { Points } from "./points";
+import { useNavigate } from "@tanstack/react-router";
 
 export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const vdFS = useBvualt2Data(vc)
@@ -23,7 +23,7 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
     const { startTime, endTime, reamin, progress } = getBvault2EpochTimes(vd)
     const asset = getTokenBy(vc.asset, vc.chain)!
     const tvl = useBvault2TVL(vc)
-    return <div className="animitem card bg-white flex flex-col gap-10 shrink-0">
+    return <div className="animitem card flex flex-col gap-10 shrink-0">
         <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center font-semibold text-2xl mr-auto"><CoinIcon size={30} symbol={asset.symbol} />{vc.tit}</div>
             <div className="flex flex-col gap-2 mt-2">
@@ -49,8 +49,8 @@ export function BVault2Info({ vc }: { vc: BVault2Config }) {
 
 
 export function BVault2Swaps({ vc, currentTab }: { vc: BVault2Config, currentTab?: string }) {
-    const r = useRouter()
-    return <div className="card bg-white h-full min-h-[49.25rem]">
+    const r = useNavigate()
+    return <div className="card h-full min-h-[49.25rem]">
         <SimpleTabs
             listClassName="p-0 gap-8 mb-4 w-full"
             currentTab={currentTab}
@@ -67,7 +67,7 @@ export function BVault2Swaps({ vc, currentTab }: { vc: BVault2Config, currentTab
 }
 
 export function BVault2Card({ vc }: { vc: BVault2Config }) {
-    const r = useRouter()
+    const r = useNavigate()
     const asset = getTokenBy(vc.asset, vc.chain)!
     const vdFS = useBvualt2Data(vc)
     const vd = vdFS.result

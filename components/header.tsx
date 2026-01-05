@@ -1,17 +1,17 @@
 'use client'
 
-import { DISCORD_LINK, DOC_LINK, isLOCL, isTEST, TWITTER_LINK } from '@/constants'
+import { DISCORD_LINK, DOC_LINK, TWITTER_LINK } from '@/src/constants'
 
 import { abiVault } from '@/config/abi'
 import { BvcsByEnv } from '@/config/bvaults'
 import { DomainRef } from '@/hooks/useConfigDomain'
+import { cn } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useQuery } from '@tanstack/react-query'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useMemo } from 'react'
-import { LuBox, LuChartLine, LuSettings, LuCircleUser, LuSquareSquare } from 'react-icons/lu'
+import { LuBox, LuChartLine, LuCircleUser, LuSettings, LuSquareSquare } from 'react-icons/lu'
 import { TbBook2, TbBrandDiscordFilled, TbBrandX, TbChevronDown } from 'react-icons/tb'
 import { useWindowSize } from 'react-use'
 import { isAddressEqual } from 'viem'
@@ -21,7 +21,6 @@ import { CoinIcon } from './icons/coinicon'
 import { SwitchChain } from './switch-chain'
 import { ThemeMode } from './theme-mode'
 import { Tip } from './ui/tip'
-import { cn } from '@/lib/utils'
 
 export function useShowAdmin() {
   const { address } = useAccount()
@@ -36,8 +35,8 @@ export function useShowAdmin() {
 
 
 export function Header() {
-  const pathname = usePathname()
-  const { width } = useWindowSize(window.innerWidth, window.innerHeight)
+  const pathname = useRouterState().location.pathname
+  const { width } = useWindowSize({ initialWidth: window.innerWidth, initialHeight: window.innerHeight })
   const hiddenTitle = width < 1024
   const showAdmin = useShowAdmin()
   const links = useMemo(() => {
@@ -65,7 +64,7 @@ export function Header() {
     <div className='h-[72px] fixed w-full flex bg-slate-50/30 backdrop-blur-lg dark:text-slate-50 dark:bg-slate-900/30 z-[100]'>
       <header className='h-[72px] w-full max-w-[1300px] inset-0 mx-auto flex items-center justify-between px-4   z-30 ml-[calc(100vw - 100%)] '>
         <div className='flex items-center'>
-          <Link href={'/'} className='font-semibold flex pr-1 items-center text-base leading-7'>
+          <Link to={'/'} className='font-semibold flex pr-1 items-center text-base leading-7'>
             <CoinIcon symbol='logo-alt' size={52} />
             <span className='font-poppins' style={{ display: hiddenTitle ? 'none' : 'inline-block' }}>
               Wand
@@ -90,7 +89,7 @@ export function Header() {
                         <Tip node={
                           <Link
                             className='flex items-center text-slate-500 text-sm font-medium gap-1 px-3 py-2 rounded-sm hover:bg-slate-50 dark:text-slate-50 dark:hover:bg-gray-700/30'
-                            href={'javascript:void(0);'}
+                            to={'javascript:void(0);' as string}
                           >
                             <Icon />
                             {label}
@@ -100,7 +99,7 @@ export function Header() {
                         </Tip>
                         : <Link
                           className='flex items-center text-slate-500 text-sm font-medium gap-1 px-3 py-2 rounded-sm hover:bg-slate-50 dark:text-slate-50 dark:hover:bg-gray-700/30'
-                          href={href}
+                          to={href}
                         >
                           <Icon />
                           {label}
@@ -121,7 +120,7 @@ export function Header() {
               if (disable) return <Tip node={
                 <Link
                   className='text-sm font-medium flex gap-1 items-center transition-all active:translate-y-1 text-slate-700 dark:text-slate-50 opacity-50'
-                  href={'javascript:void(0);'}
+                  to={'javascript:void(0);' as string}
                 >
                   <Icon />
                   {label}
@@ -137,7 +136,7 @@ export function Header() {
                     pathname === href ? 'text-slate-700 dark:text-slate-50' : 'text-slate-500 dark:text-slate-50/50',
                   )}
                   key={href}
-                  href={href}
+                  to={href}
                 >
                   <Icon />
                   {label}
@@ -154,7 +153,7 @@ export function Header() {
             {social_networks.map(({ url, icon, name }) => {
               const Icon = icon
               return (
-                <Link key={name} href={url} className='text-slate-300 hover:text-primary'>
+                <Link key={name} to={url} className='text-slate-300 hover:text-primary'>
                   <Icon />
                 </Link>
               )

@@ -1,6 +1,6 @@
 import { abiBVault2, abiBvault2Query } from "@/config/abi/BVault2"
 import { codeBvualt2Query } from "@/config/abi/codes"
-import { BVault2Config } from "@/config/bvaults2"
+import { type BVault2Config } from "@/config/bvaults2"
 import { getTokenBy } from "@/config/tokens"
 import { isSuccess } from "@/hooks/useFet"
 import { logUserAction } from "@/lib/logs"
@@ -193,7 +193,7 @@ export function LP({ vc }: { vc: BVault2Config }) {
 
     return <div className="flex flex-col gap-4 w-full">
         <div className='card !p-0 overflow-hidden w-full'>
-            <div className='flex p-5 bg-[#E8E8FD] gap-5'>
+            <div className='flex p-5 bg-[#6366F1]/30 gap-5'>
                 <CoinIcon size={48} symbol={lp.symbol} />
                 <div className='flex flex-col gap-3'>
                     <div className='text-xl leading-6 text-black dark:text-white font-semibold'>{lp.symbol}</div>

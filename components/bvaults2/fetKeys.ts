@@ -1,6 +1,6 @@
-import { BVault2Config } from '@/config/bvaults2'
+import { type BVault2Config } from '@/config/bvaults2'
 import { reFet } from '@/hooks/useFet'
-import { Address } from 'viem'
+import { type Address } from 'viem'
 
 export const FetKEYS = {
   Logs: (vc: BVault2Config) => `Logs:${vc.chain}:${vc.vault}`,

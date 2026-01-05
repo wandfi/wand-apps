@@ -1,13 +1,14 @@
-import { abiBQuery, abiBQueryOld } from '@/config/abi'
-import { BVaultConfig } from '@/config/bvaults'
-import { Address } from 'viem'
+import { abiBQuery } from '@/config/abi'
+import { type BVaultConfig } from '@/config/bvaults'
+import { useQuery } from '@tanstack/react-query'
+import { range, toNumber } from 'lodash'
+import { type Address } from 'viem'
+import { useAccount } from 'wagmi'
 import { getPC } from './publicClient'
-import { BVaultEpochDTO } from './sliceBVaultsStore'
-import { SliceFun } from './types'
+import { useBVaultData } from './sliceBVaultsStore'
 
 export type BVaultUserDTO = {
   epochId: bigint
-  bribes: { bribeTotalAmount: bigint; bribeSymbol: string; epochId: bigint; bribeToken: Address; bribeAmount: bigint }[] // for old BVault
   sBribes: { bribeTotalAmount: bigint; bribeSymbol: string; epochId: bigint; bribeToken: Address; bribeAmount: bigint }[]
   aBribes: { bribeTotalAmount: bigint; bribeSymbol: string; epochId: bigint; bribeToken: Address; bribeAmount: bigint }[]
   userBalanceYToken: bigint
@@ -17,29 +18,18 @@ export type BVaultUserDTO = {
   redeemingBalance: bigint
 }
 
-export type UserBVaultsStore = {
-  epoches: {
-    [k: Address]: BVaultUserDTO[] | undefined
-  }
-
-  updateEpoches: (bvc: BVaultConfig, user: Address, epoches: BVaultEpochDTO[]) => Promise<UserBVaultsStore['epoches']>
-  reset: () => void
-}
-
-export const sliceUserBVaults: SliceFun<UserBVaultsStore> = (set, get, init) => {
-  const updateEpoches = async (bvc: BVaultConfig, user: Address, _epoches: BVaultEpochDTO[]) => {
-    const epoches = _epoches.filter((e) => e.epochId > 0n)
-    if (epoches.length == 0) return {}
-    const pc = getPC(bvc.chain)
-    const endEpoches = await Promise.all(
-      epoches.map((e) =>
-        pc.readContract({ abi: bvc.isOld ? abiBQueryOld : abiBQuery, address: bvc.bQueryAddres, functionName: 'queryBVaultEpochUser', args: [bvc.vault, e.epochId, user] }),
-      ),
-    )
-    console.info('sliceUserBVaults', user, endEpoches)
-    set({ epoches: { ...get().epoches, [bvc.vault]: endEpoches } })
-    return endEpoches
-  }
-
-  return { epoches: {}, ...init, updateEpoches, reset: () => set({ epoches: {} }) }
+export function useBVaultUserData(vc: BVaultConfig) {
+  const { address } = useAccount()
+  const vd = useBVaultData(vc)
+  return useQuery({
+    enabled: Boolean(address) && vd.data && vd.data.epochCount > 0n,
+    queryKey: ['queryBVaultUserData', vc.chain, vc.vault, address],
+    refetchOnMount: 'always',
+    staleTime: 1000,
+    queryFn: async () => {
+      const pc = getPC(vc.chain)
+      const ids = range(toNumber(vd.data!.epochCount.toString()) + 1).map((n) => BigInt(n))
+      return Promise.all(ids.map((id) => pc.readContract({ abi: abiBQuery, address: vc.bQueryAddres, functionName: 'queryBVaultEpochUser', args: [vc.vault, id, address!] })))
+    },
+  })
 }

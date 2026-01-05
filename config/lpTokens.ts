@@ -1,4 +1,4 @@
-import { Address } from 'viem'
+import { type Address } from 'viem'
 
 export const LP_TOKENS: { [k: Address]: { poolType: bigint; base: Address; quote: Address; poolId?: Address; baseDecimal?: number; quoteDecimal?: number, isStable?: boolean } } = {
   // '0xD69ADb6FB5fD6D06E6ceEc5405D95A37F96E3b96': { poolType: 36000n, base: '0x0e4aaf1351de4c0264c5c7056ef3777b41bd8e03', quote: '0xd6d83af58a19cd14ef3cf6fe848c9a4d21e5727c' },

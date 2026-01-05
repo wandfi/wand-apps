@@ -1,25 +1,14 @@
 import { tabToSearchParams } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
-import { Address } from 'viem'
+import { useNavigate } from '@tanstack/react-router'
+import { type Address } from 'viem'
 
-export function toBVault(r: ReturnType<typeof useRouter>, vault?: Address, tab?: string, subTab?: string) {
-  if (!vault) return r.push('/yield-vault')
-  let path = `/yield-vault?vault=${vault}`
-  tab && (path += `&tab=${tabToSearchParams(tab)}`)
-  subTab && (path += `&subtab=${tabToSearchParams(subTab)}`)
-  r.push(path)
-}
-
-export function toLVault(r: ReturnType<typeof useRouter>, vault?: Address, tab?: string) {
-  if (!vault) return r.push('/l-vaults')
-  let path = `/l-vaults?vault=${vault}`
-  tab && (path += `&tab=${tabToSearchParams(tab)}`)
-  r.push(path)
-}
-
-export function toLntVault(r: ReturnType<typeof useRouter>, vault?: Address, tab?: string) {
-  if (!vault) return r.push('/lnt-vaults')
-  let path = `/lnt-vaults?vault=${vault}`
-  tab && (path += `&tab=${tabToSearchParams(tab)}`)
-  r.push(path)
+export function toBVault(to: ReturnType<typeof useNavigate>, vault?: Address, tab?: string, subtab?: string) {
+  to({
+    to: '/yield-vault',
+    search: {
+      vault,
+      tab: tab ? tabToSearchParams(tab) : undefined,
+      subtab: subtab ? tabToSearchParams(subtab) : undefined,
+    },
+  })
 }

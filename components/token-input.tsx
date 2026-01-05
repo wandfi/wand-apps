@@ -1,6 +1,6 @@
 'use client'
 
-import { Token } from '@/config/tokens'
+import { type Token } from '@/config/tokens'
 import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
 import _, { isNil } from 'lodash'

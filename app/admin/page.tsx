@@ -15,7 +15,7 @@ import { getPC } from '@/providers/publicClient'
 import { useMemo } from 'react'
 import Select from 'react-select'
 import { useMeasure, useSetState } from 'react-use'
-import { Address, erc20Abi, formatUnits, isAddress, parseAbi, parseUnits, stringToHex } from 'viem'
+import { type Address, erc20Abi, formatUnits, isAddress, parseAbi, parseUnits, stringToHex } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 type ParamItem = { label: string; value: string; units?: number /** def 10 */ }
@@ -61,7 +61,7 @@ function UpdateVaultParams({ paramList, vault, protocoSettingAddress }: { paramL
 
   return (
     <Expandable tit='Vault Param Vaule'>
-      <Select classNames={selectClassNames} maxMenuHeight={infoMeasure.height + 110} value={param} options={params} onChange={(e) => setState({ param: e as any })} />
+      <Select classNames={selectClassNames} maxMenuHeight={infoMeasure.height + 110} value={param} options={params} onChange={(e: any) => setState({ param: e as any })} />
       <input
         value={value.toString()}
         onChange={(e) => {
@@ -157,7 +157,7 @@ export default function AdminPage() {
               'Decimal18': '000000000000000000'
             }, undefined, 2)}
           </div>
-          <Select classNames={selectClassNames} defaultValue={options[0]} options={options} onChange={(e) => e && setState({ current: e as any })} />
+          <Select classNames={selectClassNames} defaultValue={options[0]} options={options} onChange={(e: any) => e && setState({ current: e as any })} />
           {current?.type == 'B-Vault' && (
             <>
               <UpdateVaultParams vault={current.data.vault} paramList={BVaultParams} protocoSettingAddress={current.data.protocolSettingsAddress} />

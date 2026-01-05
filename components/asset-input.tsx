@@ -2,7 +2,7 @@
 
 import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import { ReactNode, useRef } from 'react'
+import { type ReactNode, useRef } from 'react'
 import Select from 'react-select'
 import { formatUnits } from 'viem'
 import { CoinIcon } from './icons/coinicon'
@@ -98,20 +98,20 @@ export function AssetInput({
                     padding: '0px',
                     background: 'transparent',
                   }),
-                  singleValue: (base, state) => ({ ...base, color: isDark ? '#fff' : '#000' }),
+                  singleValue: (base: any, state: any) => ({ ...base, color: isDark ? '#fff' : '#000' }),
                   valueContainer: (provided: any, state: any) => ({
                     ...provided,
                     padding: '0px',
                   }),
-                  menu: (base, props) => ({
+                  menu: (base: any, props: any) => ({
                     ...base,
                     margin: 0,
                     background: isDark ? '#444' : '#fff',
                   }),
-                  option(base, props) {
+                  option(base: any, props: any) {
                     return { ...base, color: isDark ? '#fff' : '#000', background: isDark ? 'transparent' : '#fff' }
                   },
-                  menuPortal: (base, props) => ({
+                  menuPortal: (base: any, props: any) => ({
                     ...base,
                     margin: 0,
                   }),

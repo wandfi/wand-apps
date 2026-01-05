@@ -1,5 +1,5 @@
 import { getBvaultEpochYtPrices } from '@/config/api'
-import { BVaultConfig } from '@/config/bvaults'
+import { type BVaultConfig } from '@/config/bvaults'
 import { useQuery } from '@tanstack/react-query'
 import EChartsReact from 'echarts-for-react'
 
@@ -94,7 +94,7 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
   }, [prices, isLOG])
 
   return (
-    <div className='animitem card p-4 mx-auto max-w-4xl w-full min-w-0 bg-white'>
+    <div className='animitem card p-4 mx-auto max-w-4xl w-full min-w-0'>
       <div className='flex justify-between gap-2 items-center'>
         <span className='text-base font-bold'>YT Price Chart</span>
         <span className='text-xs font-medium dark:text-[#FBECEC]'></span>

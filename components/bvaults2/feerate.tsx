@@ -1,8 +1,8 @@
-import { BVault2Config } from "@/config/bvaults2";
+import { type BVault2Config } from "@/config/bvaults2";
 import { Fees } from "../fees";
 import { useLogs } from "./useDatas";
 import { fmtPercent } from "@/lib/utils";
-import { DECIMAL } from "@/constants";
+import { DECIMAL } from "@/src/constants";
 
 export function Bvault2Feerate({ vc }: { vc: BVault2Config }) {
     const logs = useLogs(vc)

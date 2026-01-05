@@ -5,6 +5,7 @@ import * as BVaultN from '@/components/b-vault-new'
 import { BVaultAddReward } from '@/components/bvault-add-reward'
 import BvaultEpochYtPrices from '@/components/bvault-epoch-ytprices'
 import { BVault2Card, BVault2Info, BVault2Swaps } from '@/components/bvaults2'
+import { FetKEYS } from '@/components/bvaults2/fetKeys'
 import { MyPositions } from '@/components/bvaults2/positions'
 import { getBvaut2Data, useBvualt2Data } from '@/components/bvaults2/useFets'
 import { BVault2Chart } from '@/components/bvaut2-chart'
@@ -15,50 +16,28 @@ import { Spinner } from '@/components/spinner'
 import { ConfigChainsProvider } from '@/components/support-chains'
 import { SimpleSelect } from '@/components/ui/select'
 import { abiBVault } from '@/config/abi'
-import { BVaultConfig, BvcsByEnv } from '@/config/bvaults'
-import { BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
-import { ENV } from '@/constants'
-import { useCurrentChainId } from '@/hooks/useCurrentChainId'
+import { type BVaultConfig, BvcsByEnv } from '@/config/bvaults'
+import { type BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
+import { ENV } from '@/src/constants'
 import { isError, isLoading, isSuccess, useFets } from '@/hooks/useFet'
-import { useLoadBVaults } from '@/hooks/useLoads'
+import { nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import { useBoundStore, useStore } from '@/providers/useBoundStore'
-import { useBVault, useBVaultEpoches } from '@/providers/useBVaultsData'
+import { useBVaultsData } from '@/providers/sliceBVaultsStore'
+import { useBVault } from '@/providers/useBVaultsData'
 import { useQuery } from '@tanstack/react-query'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Fragment, ReactNode, useMemo, useState } from 'react'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { Fragment, type ReactNode, useMemo, useState } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
-import { Address, isAddressEqual } from 'viem'
+import { type Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
-import { FetKEYS } from '@/components/bvaults2/fetKeys'
-import { nowUnix } from '@/lib/utils'
 function StrongSpan({ children }: { children: ReactNode }) {
   return <span className='font-extrabold'>{children}</span>
 }
 
 function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: string }) {
   const { address } = useAccount()
-  const bvd = useBVault(bvc.vault)
-
-  useQuery({
-    queryKey: ['UpdateVaultDetails', bvc, bvd],
-    queryFn: async () => {
-      if (bvd.epochCount == 0n) return false
-      await useBoundStore.getState().sliceBVaultsStore.updateEpoches(bvc)
-      return true
-    },
-  })
-  const epoches = useBVaultEpoches(bvc.vault)
-  useQuery({
-    queryKey: ['UpdateUserData', bvc, epoches, address],
-    queryFn: async () => {
-      if (epoches.length == 0 || !address) return false
-      console.info('epochesOld:', epoches)
-      await useBoundStore.getState().sliceUserBVaults.updateEpoches(bvc, address!, epoches)
-      return true
-    },
-  })
+  const bvd = useBVault(bvc)
   const { data: showAddReward } = useQuery({
     queryKey: ['checkIsBriber', address, bvc],
     queryFn: async () => {
@@ -71,7 +50,7 @@ function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: strin
       return passes.includes(true) || isAddressEqual(address, '0xFE18Aa1EFa652660F36Ab84F122CD36108f903B6')
     },
   })
-  const r = useRouter()
+  const r = useNavigate()
 
   if (bvc.newUI) {
     return <>
@@ -152,18 +131,19 @@ function Bvualt2Page({ vc, currentTab }: { vc: BVault2Config, currentTab?: strin
 const vaultsFilters = ['Active', 'All', 'Closed'] as const
 
 type VCItem = (BVault2Config & { type: 'BVault2' }) | (BVaultConfig & { type: 'BVault' })
+
+
 export default function Vaults() {
-  const chainId = useCurrentChainId()
   const vcs = useMemo(() => {
-    const olds = BvcsByEnv.filter(item => item.chain === chainId).map(vc => ({ ...vc, type: 'BVault' }) as VCItem)
-    const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV) && item.chain == chainId).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
+    const olds = BvcsByEnv.map(vc => ({ ...vc, type: 'BVault' }) as VCItem)
+    const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
     return [...v2vc, ...olds]
-  }, [ENV, chainId])
-  const params = useSearchParams()
-  const paramsVault = params.get('vault') as Address
-  const currentTab = params.get('tab') as string
+  }, [ENV])
+  const params = useSearch({ strict: false })
+  const paramsVault = params.vault
+  const currentTab = params.tab
   const currentVc = vcs.findLast((item) => item.vault.toLowerCase() == (paramsVault ?? '').toLowerCase())
-  const { loading } = useLoadBVaults()
+
   const [currentFilter, setFilter] = useState(vaultsFilters.find(item => item === sessionStorage.getItem('bvualts-filter')) ?? vaultsFilters[0])
   const wrapSetFilter = (nf: (typeof vaultsFilters)[number]) => {
     setFilter(nf)
@@ -172,8 +152,8 @@ export default function Vaults() {
   const vc2 = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
   const vd2Res = useFets(...vc2.map(vc => ({ key: FetKEYS.Bvault2Data(vc), fetfn: async () => getBvaut2Data(vc) })))
   const vd2 = vd2Res.result.map((vd, i) => ({ vc: vc2[i], ...(vd ?? {}) }))
-  const mloading = loading || isLoading(vd2Res)
-  const bvaults = useStore(s => s.sliceBVaultsStore.bvaults, ['sliceBVaultsStore.bvaults'])
+  const bvaults = useBVaultsData(BvcsByEnv)
+  const mloading = bvaults.some(item => item.isLoading) || isLoading(vd2Res)
   const fVcs = (() => {
     console.info('vd2', vd2)
     const mvcs = vcs.filter(item => item.type === 'BVault' || vd2.find(vd => vd.vc.vault === item.vault)?.current)
@@ -185,7 +165,8 @@ export default function Vaults() {
         const vd = vd2.find(vd => vd.vc.vault === vc.vault)
         return Boolean(vd && vd.current && (vd.current.startTime + vd.current.duration) > nowUnix())
       } else {
-        const vd = bvaults[vc.vault]
+        const vcIndex = BvcsByEnv.findIndex(item => item.vault == vc.vault && item.chain == vc.chain)
+        const vd = bvaults[vcIndex]?.data
         return Boolean(vd && !vd.closed)
       }
     }

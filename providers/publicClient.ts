@@ -1,7 +1,7 @@
-import { apiBatchConfig, getCurrentChainId, multicallBatchConfig, SUPPORT_CHAINS } from '@/config/network'
+import { apiBatchConfig, multicallBatchConfig, SUPPORT_CHAINS } from '@/config/network'
 import { useReadingCountStore } from '@/hooks/useWrapPublicClient'
 import _ from 'lodash'
-import { Chain, createPublicClient, http, PublicClient } from 'viem'
+import { type Chain, createPublicClient, http, type PublicClient } from 'viem'
 
 const pcMaps: { [id: number]: { pcs: PublicClient[]; current: number } } = {}
 function getRpcurls(chain: Chain) {

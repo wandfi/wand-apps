@@ -1,4 +1,4 @@
-import { Token } from "@/config/tokens";
+import { type Token } from "@/config/tokens";
 import { CoinIcon } from "./icons/coinicon";
 import { displayBalance } from "@/utils/display";
 import { cn } from "@/lib/utils";

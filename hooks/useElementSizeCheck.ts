@@ -1,5 +1,5 @@
 import { useMeasure } from 'react-use'
-import { UseMeasureRef } from 'react-use/lib/useMeasure'
+import { type UseMeasureRef } from 'react-use/lib/useMeasure'
 
 // 用于检测元素尺寸变化的hook
 export function useElementSizeCheck(

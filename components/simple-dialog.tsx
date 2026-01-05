@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import * as Dialog from '@radix-ui/react-dialog'
-import { Ref } from 'react'
+import { type Ref } from 'react'
 import { IoIosCloseCircleOutline } from 'react-icons/io'
 
 export function SimpleDialog({

@@ -1,6 +1,6 @@
 import { BASE_PATH } from '@/config/env'
 import { cn } from '@/lib/utils'
-import { CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 
 const SupportICONS: { [k: string]: string } = {
   BERA: 'BERA.svg',

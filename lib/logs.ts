@@ -1,10 +1,10 @@
 import { abiBvault2Query } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
-import { BVault2Config } from '@/config/bvaults2'
-import { isPROD } from '@/constants'
+import type { BVault2Config } from '@/config/bvaults2'
+import { isPROD } from '@/src/constants'
 import { getPC } from '@/providers/publicClient'
 import { mapValues } from 'lodash'
-import { Address, erc20Abi } from 'viem'
+import { type Address, erc20Abi } from 'viem'
 import { fmtBn, retry } from './utils'
 
 export function saveLogs(item: any, key: string = 'logs') {

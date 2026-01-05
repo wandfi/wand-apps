@@ -44,22 +44,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.7
 
-      - name: Set pnpm
-        uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 8
+          bun-version: 1.3.0
 
       - name: Install dependencies & build
         run: |
-          pnpm install --frozen-lockfile    
-          pnpm build
+          bun install --frozen-lockfile    
+          bun run build
 
       - name: Deploy Gh-Pages 🚀
         uses: XueMoMo/actions-gh-pages@v4.0.1
         with:
           deploy_key: ${{ secrets.DK_PROD2 }}
           external_repository: wandfi/wand-apps-site-prod2
-          publish_dir: ./out
+          publish_dir: ./dist
           cname: app.wandfi.io
   test:
     if: contains(github.event.head_commit.message, '[test]') || contains(github.event.head_commit.message, '[all]') || github.event.inputs.job == 'test' || github.event.inputs.job == 'all'
@@ -70,22 +69,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.7
 
-      - name: Set pnpm
-        uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 8
+          bun-version: 1.3.0
 
       - name: Install dependencies & build
         env:
-          NEXT_PUBLIC_ENV: 'test'
+          VITE_PUBLIC_ENV: 'test'
         run: |
-          pnpm install --frozen-lockfile    
-          pnpm build
+          bun install --frozen-lockfile    
+          bun run build
 
       - name: Deploy Gh-Pages 🚀
         uses: XueMoMo/actions-gh-pages@v4.0.1
         with:
           deploy_key: ${{ secrets.DK_TEST1 }}
-          publish_dir: ./out
+          publish_dir: ./dist
           external_repository: wandfi/wand-apps-site-test
           cname: test-app.wandfi.io

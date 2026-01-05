@@ -1,17 +1,17 @@
 import { cn, parseEthers, promiseT } from '@/lib/utils'
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Collapse } from 'react-collapse'
 import { FiArrowDown, FiArrowUp } from 'react-icons/fi'
 import Select from 'react-select'
 import { useSetState } from 'react-use'
-import { Abi, AbiFunction, AbiParameter, Address, stringToHex } from 'viem'
-import { ApproveAndTx, Txs } from './approve-and-tx'
-import { useQuery } from '@tanstack/react-query'
+import { stringToHex, type Abi, type AbiFunction, type AbiParameter, type Address } from 'viem'
+import { Txs } from './approve-and-tx'
 import { Spinner } from './spinner'
 
 export const selectClassNames: Parameters<Select>[0]['classNames'] = {
   menu: () => cn('bg-white dark:bg-black dark:border'),
-  option: (props) => cn({ '!bg-primary/50': props.isFocused, '!bg-primary': props.isSelected }),
+  option: (props: any) => cn({ '!bg-primary/50': props.isFocused, '!bg-primary': props.isSelected }),
   control: () => 'bg-white dark:bg-black !min-h-[58px] !border-primary/70 !shadow-none',
   singleValue: () => 'dark:text-white',
 }

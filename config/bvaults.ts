@@ -1,7 +1,7 @@
-import { Address } from 'viem'
-import { TypeENV } from './env'
+import { type Address } from 'viem'
+import { type TypeENV } from './env'
 import { story, storyTestnet } from './network'
-import { ENV } from '@/constants'
+import { ENV } from '@/src/constants'
 
 export type BVaultConfig = {
   chain: number

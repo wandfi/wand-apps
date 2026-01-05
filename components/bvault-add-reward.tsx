@@ -1,19 +1,16 @@
 import { abiBVault } from '@/config/abi'
-import { BVaultConfig } from '@/config/bvaults'
+import { type BVaultConfig } from '@/config/bvaults'
+import { useBalance } from '@/hooks/useToken'
 import { cn, handleError, parseEthers } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import { TokenItem } from '@/providers/sliceTokenStore'
-import { useBoundStore, useStore } from '@/providers/useBoundStore'
 import { useBVault } from '@/providers/useBVaultsData'
-import { useBalances } from '@/providers/useTokenStore'
 import { displayBalance } from '@/utils/display'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import _ from 'lodash'
 import { useMemo, useRef, useState } from 'react'
 import { FiArrowDown } from 'react-icons/fi'
 import { useDebounce } from 'react-use'
 import { toast } from 'sonner'
-import { Address, erc20Abi, isAddress, zeroAddress } from 'viem'
+import { type Address, erc20Abi, isAddress, zeroAddress } from 'viem'
 import { useAccount, useWalletClient } from 'wagmi'
 import { AssetInput } from './asset-input'
 import { CoinIcon } from './icons/coinicon'
@@ -21,22 +18,33 @@ import { PulseTokenItem } from './pulse-ui'
 import { SimpleDialog } from './simple-dialog'
 import { BBtn } from './ui/bbtn'
 
+type TokenItem = {
+  symbol: string,
+  name: string,
+  address: Address,
+  decimals: number
+}
 const defTokens: TokenItem[] = [
   { symbol: 'vIP', name: 'Verio IP', address: '0x5267F7eE069CEB3D8F1c760c215569b79d0685aD', decimals: 18, },
   { symbol: 'WIP', name: 'Wrapped IP', address: '0x1514000000000000000000000000000000000000', decimals: 18, },
 ]
 
+
+function TokenBalance({ chain, address, decimals }: { chain: number, address: Address, decimals?: number }) {
+  const balance = useBalance({ chain, address } as any).result
+  return <>
+    {displayBalance(balance, undefined, decimals)}
+  </>
+
+}
 function TokenSelect({ tokens, onSelect, hiddenNative, chainId }: { chainId: number, tokens?: TokenItem[]; hiddenNative?: boolean; onSelect?: (item: TokenItem) => void }) {
-  const defTokenList = useStore((s) => s.sliceTokenStore.defTokenList)
   const originTokens = useMemo(() => {
-    const list = !_.isEmpty(tokens) ? tokens! : !_.isEmpty(defTokenList) ? defTokenList! : defTokens
+    const list = defTokens
     if (hiddenNative) return list.filter((item) => item.address !== zeroAddress)
     return list
-  }, [tokens, defTokenList, hiddenNative])
+  }, [tokens, hiddenNative])
 
   const [input, setInput] = useState('')
-  const balances = useBalances()
-  const { address: user } = useAccount()
   const [queryKey, updateQueryKey] = useState(['searchTokens', input, originTokens, chainId])
   useDebounce(() => updateQueryKey(['searchTokens', input, originTokens, chainId]), 300, [input, originTokens, chainId])
   const { data: searchdTokens, isFetching } = useQuery({
@@ -51,7 +59,6 @@ function TokenSelect({ tokens, onSelect, hiddenNative, chainId }: { chainId: num
           pc.readContract({ abi: erc20Abi, address, functionName: 'symbol' }),
           pc.readContract({ abi: erc20Abi, address, functionName: 'decimals' }),
         ])
-        user && useBoundStore.getState().sliceTokenStore.updateTokensBalance(chainId, [address], user)
         return [{ symbol, address, decimals }] as TokenItem[]
       } else {
         if (!input) return originTokens
@@ -66,16 +73,6 @@ function TokenSelect({ tokens, onSelect, hiddenNative, chainId }: { chainId: num
     queryKey: queryKey,
   })
   const showTokens = searchdTokens || originTokens
-
-  useQuery({
-    queryKey: ['updateBalancesForUnknowToken', originTokens],
-    enabled: !!user,
-    queryFn: () =>
-      useBoundStore.getState().sliceTokenStore.updateTokensBalance(chainId,
-        originTokens.map((item) => item.address),
-        user!,
-      ),
-  })
 
   return (
     <div className='flex flex-col gap-4 p-5'>
@@ -107,9 +104,9 @@ function TokenSelect({ tokens, onSelect, hiddenNative, chainId }: { chainId: num
                   onSelect?.(t)
                 }}
               >
-                <CoinIcon className='rounded-full' size={40} symbol={t.symbol} url={t.url} />
+                <CoinIcon className='rounded-full' size={40} symbol={t.symbol} />
                 <span>{t.symbol}</span>
-                <span className='ml-auto'>{displayBalance(balances[t.address], 3, t.decimals)}</span>
+                <span className='ml-auto'><TokenBalance chain={chainId} address={t.address} decimals={t.decimals} /></span>
               </div>
             ))}
           </>
@@ -120,13 +117,10 @@ function TokenSelect({ tokens, onSelect, hiddenNative, chainId }: { chainId: num
 }
 
 export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
-  const balances = useBalances()
-  const bvd = useBVault(bvc.vault)
-  const defTokenList = useStore((s) => s.sliceTokenStore.defTokenList)
-  const defToken = !_.isEmpty(defTokenList) ? defTokenList[0] : defTokens[0]
-  const [stoken, setStoken] = useState(defToken)
+  const bvd = useBVault(bvc)
+  const [stoken, setStoken] = useState(defTokens[0])
   const [input, setInput] = useState('')
-  const balance = balances[stoken.address]
+  const balance = useBalance({ chain: bvc.chain, address: stoken.address } as any).result
   const inputBn = parseEthers(input, stoken.decimals)
   const triggerRef = useRef<HTMLDivElement>(null)
   const wc = useWalletClient()
@@ -158,7 +152,7 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
         const hash = await wc.data.writeContract({ abi: abiBVault, address: bvc.vault, functionName: 'addAdhocBribes', args: [stoken.address, inputBn] })
         await pc.waitForTransactionReceipt({ hash, confirmations: 3 })
       }
-      useBoundStore.getState().sliceTokenStore.updateTokensBalance(bvc.chain, [stoken.address], address)
+
       setInput('')
       toast.success('Transaction success')
     },
@@ -167,9 +161,9 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
   })
   const disableAdd = !wc.data || !address || inputBn == 0n || inputBn > balance || isPending || bvd.epochCount == 0n
   return (
-    <div className='animitem max-w-4xl mx-auto mt-8 card'>
+    <div className='animitem max-w-[500px] w-full mx-auto mt-8 card'>
       <div className='relative'>
-        <AssetInput decimals={stoken.decimals} asset={stoken.symbol} assetURL={stoken.url} balance={balances[stoken.address]} amount={input} setAmount={setInput} />
+        <AssetInput decimals={stoken.decimals} asset={stoken.symbol} balance={balance} amount={input} setAmount={setInput} />
         <SimpleDialog
           trigger={
             <div ref={triggerRef} className='absolute left-0 top-0 flex cursor-pointer justify-end items-center py-4'>

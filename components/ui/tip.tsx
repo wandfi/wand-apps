@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { ReactNode, useRef, useState } from 'react'
+import { type ReactNode, useRef, useState } from 'react'
 import { RxQuestionMarkCircled } from 'react-icons/rx'
 import { useClickAway } from 'react-use'
 export function Tip({

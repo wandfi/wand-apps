@@ -1,10 +1,10 @@
-import { DECIMAL } from '@/constants'
+import { DECIMAL } from '@/src/constants'
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import _, { get, now, round } from 'lodash'
 import { toast } from 'sonner'
 import { twMerge } from 'tailwind-merge'
-import { parseEther as _parseEther, Address, etherUnits, formatUnits, isAddressEqual, parseUnits } from 'viem'
+import { parseEther as _parseEther, type Address, etherUnits, formatUnits, isAddressEqual, parseUnits } from 'viem'
 
 export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer S> ? S : T
 export type UnPromise<T extends ((...args: any[]) => Promise<any>) | Promise<any>> = T extends (...args: any[]) => Promise<infer U> ? U : T extends Promise<infer M> ? M : never
