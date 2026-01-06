@@ -1,7 +1,6 @@
 import { SUPPORT_CHAINS } from "@/config/network"
 import { DomainRef } from "@/hooks/useConfigDomain"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
-import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useRef, useState } from "react"
 import { FiX } from "react-icons/fi"
 import { useClickAway } from "react-use"
@@ -31,12 +30,11 @@ export function SwitchChain() {
     const ct = types.find(item => item.chain?.id == chainId)
     const [show, setShow] = useState(false)
     const { switchChain } = useSwitchChain()
-    const r = useNavigate()
     const onClickItem = (item: ItemType) => {
         if (item.chain && (item !== ct || chainError)) {
             switchChain({ chainId: item.chain.id })
         } else if (item.toUrl) {
-            r({ to: item.toUrl })
+            open(item.toUrl)
         }
     }
     const modalRef = useRef<HTMLDivElement>(null)
