@@ -5,7 +5,7 @@ import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/c
 import { PageWrap } from '@/components/page-wrap'
 import { abiBVault, abiMockERC20, abiProtocolSettings, abiZooProtocol } from '@/config/abi'
 import { abiBVault2, abiHook, abiMockInfraredVault, abiProtocol } from '@/config/abi/BVault2'
-import { getCurrentChain } from '@/config/network'
+import { getChain } from '@/config/network'
 import { getTokenBy } from '@/config/tokens'
 import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
@@ -147,7 +147,7 @@ function DeleteIpAssets(props: { vault: Address }) {
 export default function AdminPage() {
   const chainId = useCurrentChainId()
   const { current, setState, options } = useVaultsConfigs()
-  const chain = getCurrentChain()
+  const chain = getChain(chainId)
   return (
     <PageWrap>
       <div className='w-full flex'>

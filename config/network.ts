@@ -1,108 +1,46 @@
-import { isPROD } from '@/src/constants'
-import { type Address, type Chain, defineChain } from 'viem'
-import { monadTestnet as _monadTestnet, monad as _monad } from 'viem/chains'
+import { type Assign, type Chain, type ChainFormatters, defineChain, type Prettify } from 'viem'
+import { monad as _monad, story as _story } from 'viem/chains'
 
-export const sepolia = defineChain({
-  id: 11_155_111,
-  name: 'Sepolia',
-  nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ['https://eth-sepolia.public.blastapi.io', 'https://eth-sepolia.api.onfinality.io/public'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Etherscan',
-      url: 'https://sepolia.etherscan.io',
-      apiUrl: 'https://api-sepolia.etherscan.io/api',
-    },
-  },
-  contracts: {
-    multicall3: {
-      address: '0xca11bde05977b3631167028862be2a173976ca11',
-      blockCreated: 751532,
-    },
-    ensRegistry: { address: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e' },
-    ensUniversalResolver: {
-      address: '0xc8Af999e38273D658BE1b921b88A9Ddf005769cC',
-      blockCreated: 5_317_080,
-    },
-  },
-  fees: {
-    baseFeeMultiplier: 1.2,
-  },
-  testnet: true,
-  defConfirmations: 3,
-})
 
-export const storyTestnet = defineChain({
-  id: 1315,
-  name: 'Story Aeneid Testnet',
+const ankrPubMap: { [k: number]: string } = {
+  [_story.id]: 'story-mainnet',
+  [_monad.id]: 'monad-mainnet',
+}
+const alchemyMap: { [k: number]: string } = {
+  [_story.id]: 'story-mainnet',
+  [_monad.id]: 'monad-mainnet',
+}
+function mconfigChain<
+  formatters extends ChainFormatters,
+  const chain extends Chain<formatters>
+>(chain: chain): Prettify<Assign<Chain<undefined>, chain>> {
+  const rpcUrls: Chain<formatters>['rpcUrls'] = {
+    ...chain.rpcUrls,
+  }
+  if (process.env.ALCHEMY_API_KEY && alchemyMap[chain.id]) {
+    rpcUrls.alchemy = {
+      http: [`https://${alchemyMap[chain.id]}.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`]
+    }
+  }
+  if (ankrPubMap[chain.id]) {
+    rpcUrls.publicAnkr = {
+      http: [`https://rpc.ankr.com/${ankrPubMap[chain.id]}`]
+    }
+  }
+  return defineChain({
+    ...chain,
+    rpcUrls,
+  }) as unknown as Assign<Chain<undefined>, chain>
+}
+
+
+export const story = mconfigChain({
+  ..._story,
   iconUrl: '/storynetwork.png',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'IP',
-    symbol: 'IP',
-  },
-  rpcUrls: {
-    default: { http: ['https://aeneid.storyrpc.io'] },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Blockscout',
-      url: 'https://aeneid.storyscan.xyz',
-    },
-  },
-  contracts: {
-    multicall3: { address: '0xcA11bde05977b3631167028862bE2a173976CA11', blockCreated: 1792 },
-  },
-  testnet: true,
-  fees: {
-    baseFeeMultiplier: 1.2,
-  },
   defConfirmations: 3,
 })
 
-export const story = defineChain({
-  id: 1514,
-  name: 'Story',
-  iconUrl: '/storynetwork.png',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'IP',
-    symbol: 'IP',
-  },
-
-  rpcUrls: {
-    default: { http: ['https://mainnet.storyrpc.io'] },
-    // "https://berachain-mainnet.g.alchemy.com/v2/-yCJ0Aq6OmJoAtLknbSiImqfoPCzQCxe"
-    public: {
-      http: ['https://story-mainnet.g.alchemy.com/v2/7UXJgo01vxWHLJDk09Y0qZct8Y3zMDbX', 'https://rpc.ankr.com/story_mainnet'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Blockscout',
-      url: 'https://storyscan.xyz/',
-    },
-  },
-  contracts: {
-    multicall3: { address: '0xcA11bde05977b3631167028862bE2a173976CA11', blockCreated: 340998 },
-  },
-  testnet: false,
-  fees: {
-    baseFeeMultiplier: 1.4,
-  },
-  defConfirmations: 3,
-})
-
-export const monadTestnet = defineChain({
-  ..._monadTestnet,
-  defConfirmations: 3,
-  iconUrl: '/monadnetwork.png',
-})
-export const monad = defineChain({
+export const monad = mconfigChain({
   ..._monad,
   defConfirmations: 3,
   iconUrl: '/monadnetwork.png',
@@ -111,27 +49,7 @@ export const monad = defineChain({
 export const apiBatchConfig = { batchSize: 5, wait: 300 }
 export const multicallBatchConfig = { batchSize: 5, wait: 300 }
 
-export const SUPPORT_CHAINS: [Chain, ...Chain[]] = (isPROD ? [story, monadTestnet, monad] : [story, storyTestnet, monadTestnet, monad]) as any
-
-export const refChainId: { id: number } = { id: isPROD ? story.id : storyTestnet.id }
-export const getCurrentChainId = () => {
-  return refChainId.id
-}
-export const getCurrentChain = () => {
-  return SUPPORT_CHAINS.find((item) => item.id == getCurrentChainId())!
-}
+export const SUPPORT_CHAINS: [Chain, ...Chain[]] = [story, monad]
 
 export const getChain = (id: number) => SUPPORT_CHAINS.find((item) => item.id == id)
 
-export const BEX_URLS: { [k: number]: string } = {
-  [storyTestnet.id]: 'https://www.verio.network/staking',
-  [story.id]: 'https://www.verio.network/staking',
-}
-export const getBexPoolURL = (pool?: Address) => {
-  // if (getCurrentChainId() == storyTestnet.id) {
-  //   return `${BEX_URLS[getCurrentChainId()]}/pool/${pool}`
-  // } else if (story.id) {
-  //   return `${BEX_URLS[getCurrentChainId()]}/pools/${LP_TOKENS[pool].poolId}/deposit/`
-  // }
-  return 'https://www.verio.network/staking'
-}

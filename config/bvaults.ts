@@ -1,7 +1,7 @@
+import { ENV } from '@/src/constants'
 import { type Address } from 'viem'
 import { type TypeENV } from './env'
-import { story, storyTestnet } from './network'
-import { ENV } from '@/src/constants'
+import { story } from './network'
 
 export type BVaultConfig = {
   chain: number
@@ -31,24 +31,19 @@ export type BVaultConfig = {
 }
 
 export const ZooProtocolAddress: { [k: number]: Address } = {
-  [storyTestnet.id]: '0x8685CE9Db06D40CBa73e3d09e6868FE476B5dC89',
   [story.id]: '0x555ad3261c0eD6119Ab291b8dC383111d83C67c7',
 }
 export const ZooProtocolSettingsAddress: { [k: number]: Address } = {
-  [storyTestnet.id]: '0x97d82C639835F4EfaCC366fdE78CA0c4EC2a2A83',
   [story.id]: '0xa6802e65C764712841330E58814Be43b6A4C3496',
 }
 export const CrocQueryAddress: { [k: number]: Address } = {
-  [storyTestnet.id]: '0x8685CE9Db06D40CBa73e3d09e6868FE476B5dC89',
   [story.id]: '0x8685CE9Db06D40CBa73e3d09e6868FE476B5dC89',
 }
 
 export const HONEY_Address: { [k: number]: Address } = {
-  [storyTestnet.id]: '0x0e4aaf1351de4c0264c5c7056ef3777b41bd8e03',
   [story.id]: '0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce',
 }
 export const BQueryAddress: { [k: number]: Address } = {
-  [storyTestnet.id]: '0xDf1126d3627b7f5D2a44d978A7180AcbD3c34aB6',
   [story.id]: '0x413a55fe2CFD42799af68Cbd3514a55439B7cf5c',
 }
 

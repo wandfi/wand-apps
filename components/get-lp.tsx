@@ -1,22 +1,10 @@
-import { LP_TOKENS } from "@/config/lpTokens"
-import { getBexPoolURL, monad, monadTestnet, story } from "@/config/network"
-import { type Address } from "viem"
-import { CoinIcon } from "./icons/coinicon"
+import { monad, story } from "@/config/network"
 import { getTokenBy, type Token } from "@/config/tokens"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { Link } from "@tanstack/react-router"
+import { type Address } from "viem"
+import { CoinIcon } from "./icons/coinicon"
 
-export function GetLP({ address }: { address: Address }) {
-    const lp = LP_TOKENS[address]
-    const isLP = Boolean(lp)
-    if (!isLP) return null
-    return <div className='text-xs font-medium flex gap-2 justify-end items-center'>
-        <CoinIcon symbol="berahub" size={18} />
-        <Link target='_blank' className='underline' to={getBexPoolURL(address)}>
-            Get LP on Beraswap
-        </Link>
-    </div>
-}
 
 export function GetvIP({ address }: { address: Address }) {
     const chainId = useCurrentChainId()
@@ -24,7 +12,7 @@ export function GetvIP({ address }: { address: Address }) {
     if (token?.symbol !== 'vIP') return null
     return <div className='text-xs font-medium flex gap-2 justify-end items-center'>
         <CoinIcon symbol="verio" size={18} />
-        <Link to={getBexPoolURL(address)} target='_blank' className='underline text-primary' >
+        <Link to={'https://www.verio.network/staking' as string} target='_blank' className='underline text-primary' >
             Get vIP on Verio
         </Link>
     </div>
@@ -42,7 +30,7 @@ export function GetByThird({ t }: { t: Token }) {
             StoryHunt
         </Link>
     </div>
-    if (t.chain == monadTestnet.id || t.chain == monad.id) return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
+    if (t.chain == monad.id) return <div className='text-xs text-primary font-medium flex gap-1 justify-end items-center'>
         Get {t.symbol} on
         <Link target='_blank' className='underline' to={`https://stake.apr.io/` as string}>
             aPriori

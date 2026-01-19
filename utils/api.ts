@@ -1,16 +1,9 @@
-import { getCurrentChainId, SUPPORT_CHAINS } from '@/config/network'
-import { isPROD } from '@/src/constants'
-import { DomainRef } from '@/hooks/useConfigDomain'
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 
 let api: AxiosInstance
 
 const instance = () => {
-  // const baseurl = isLOCL ? 'http://127.0.0.1:4000' : `https://beta-api.${DomainRef.value}`
-
-  const chain = SUPPORT_CHAINS.find((item) => item.id == getCurrentChainId())
-
-  const baseurl = (isPROD || !chain?.testnet) ? `https://story-api.${DomainRef.value}` : `https://story-api.${DomainRef.value}`
+  const baseurl = `https://api.wandfi.io`
   if (!api || api.defaults.baseURL !== baseurl) {
     api = axios.create({
       baseURL: baseurl,
@@ -28,24 +21,6 @@ export type Res<T> = {
   message: string
   data: T
 }
-
-// instance.interceptors.request.use(
-//   (config) => {
-//     return config
-//   },
-//   (error) => {
-//     return Promise.reject(error)
-//   },
-// )
-
-// instance.interceptors.response.use(
-//   (response) => {
-//     return response.data
-//   },
-//   (error) => {
-//     return Promise.reject(error)
-//   },
-// )
 
 export async function get<T>(url: `/${string}`, params: any = {}, config: AxiosRequestConfig = {}) {
   if (url.startsWith('/auth')) {

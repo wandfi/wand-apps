@@ -48,54 +48,6 @@ export const ipAssetsTit: { [k: Address]: string } = {
   '0x816453EbC9b9E55b4faF326614BfFf915e5dCc3d': 'DoubleUp',
 }
 
-/*
-
-const apys = useMemo(() => {
-    let baseApy = 0
-    if (totalStakeWeighted && totalStaked) {
-      baseApy =
-        (((Number(rewardsPerEpoch) / totalStakeWeighted) * 60 * 60 * 24 * 365) /
-          blockTime) *
-        100
-
-      if (totalStaked >= 100) {
-        baseApy += (3 / Number(ratio)) * (totalStaked / totalStakeWeighted)
-      }
-    }
-
-    return lockups.map((lockup) => {
-      return {
-        ...lockup,
-        apy: baseApy * Number(lockup.multiplier),
-      }
-    })
-  }, [
-    totalStakeWeighted,
-    rewardsPerEpoch,
-    blockTime,
-    totalStaked,
-    lockups,
-    ratio,
-  ])
-*/
-
-// const cachedBlockTime: { value: number; timestamp: number } = { value: 2.5, timestamp: 0 }
-// async function getBlockTime(pc: PublicClient, cacheTime: number = 30 * 60 * 1000) {
-//   if (cachedBlockTime.timestamp > Date.now() - cacheTime) {
-//     return cachedBlockTime.value
-//   }
-//   const blockCount = 500
-//   const blockNum = await pc.getBlockNumber({ cacheTime: 5 * 60 * 1000 })
-//   const [block, prevBlock] = await Promise.all([pc.getBlock({ blockNumber: blockNum }), pc.getBlock({ blockNumber: blockNum - BigInt(blockCount) })])
-//   if (block?.timestamp && prevBlock?.timestamp) {
-//     const timeDiff = Number(BigInt(block.timestamp) - BigInt(prevBlock.timestamp)) / blockCount
-//     cachedBlockTime.value = timeDiff
-//     cachedBlockTime.timestamp = Date.now()
-//     return timeDiff
-//   }
-//   return cachedBlockTime.value
-// }
-// 导出一个函数 useBVaultUnderlyingAPY，用于获取特定vault的底层资产年化收益率（APY）
 export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
   const vault = vc.vault
   const { data: ipAssets } = useBVaultIPAssets(vc)
