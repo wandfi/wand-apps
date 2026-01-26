@@ -17,6 +17,7 @@ import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 import { isPlainObject } from 'es-toolkit';
 import { ENV } from '@/config/env';
+import { AnimRoot } from '@/components/ui/anim-root';
 
 
 export function getContext() {
@@ -88,12 +89,13 @@ function Devtools() {
 function Root({ children }: Readonly<{ children: ReactNode }>) {
   // useInitAnimRoot()
   return (
-    <html>
+    <html className='bg-white dark:bg-stone-950 text-black dark:text-white'>
       <head>
         <HeadContent />
       </head>
       <body>
         <Scripts />
+        <AnimRoot />
         <Providers>
           <Header />
           {children}

@@ -1,10 +1,10 @@
 import gsap from 'gsap'
 import { useEffect, useRef } from 'react'
 export function useInitAnimRoot(classname: string = 'animitem') {
-  const root = useRef<HTMLDivElement>(document.body as any)
+  const root = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    console.info('useInitAnimRoot::', Boolean(root.current))
-    if (!root.current) return () => {}
+    if (!root.current) root.current = document.body as any
+    if (!root.current) return () => { }
     let lastTargets: Element[] = []
     const onChange = (data?: MutationRecord[]) => {
       const added = !data || data.find((item) => item.type === 'childList' && item.addedNodes.length)

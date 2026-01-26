@@ -202,7 +202,7 @@ export function Info({ vc }: { vc: BVaultConfig }) {
   }
   return <div style={{
     backdropFilter: 'blur(20px)'
-  }} className="animitem card bg-white flex flex-col h-full gap-10" >
+  }} className="animitem card flex flex-col h-full gap-10" >
     <div className="flex flex-wrap gap-5 items-center">
       {/* <NodeLicenseImage icon={nlImages[data.name] ? <img {...nlImages[data.name]} className="invert" /> : null} /> */}
       <CoinIcon symbol={vc.icon ?? vc.assetSymbol} size={35} />
@@ -603,7 +603,7 @@ function PositonYT({ vc }: { vc: BVaultConfig }) {
 }
 export function MyPositions({ vc }: { vc: BVaultConfig }) {
   return <div className='mt-4 lg:mt-6 flex flex-col gap-4'>
-    <div className='animitem text-left w-full font-semibold text-2xl'>My Positions</div>
+    <div className='animitem text-left w-full font-semibold text-2xl dark:text-white'>My Positions</div>
     <PositonPT vc={vc} />
     <PositonYT vc={vc} />
   </div>
