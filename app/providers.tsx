@@ -1,7 +1,4 @@
 'use client'
-  ; (BigInt.prototype as any).toJSON = function () {
-    return this.toString()
-  }
 import * as React from 'react';
 
 import { SUPPORT_CHAINS, apiBatchConfig, multicallBatchConfig } from '@/config/network';
@@ -52,9 +49,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeState((s) => s.theme)
   return (
     <WagmiProvider config={config}>
-        <RainbowKitProvider locale='en-US' modalSize='compact' theme={theme === 'dark' ? darkTheme({ accentColor: 'green' }) : lightTheme()}>
-          {children}
-        </RainbowKitProvider>
+      <RainbowKitProvider locale='en-US' modalSize='compact' theme={theme === 'dark' ? darkTheme({ accentColor: 'green' }) : lightTheme()}>
+        {children}
+      </RainbowKitProvider>
     </WagmiProvider>
   )
 }

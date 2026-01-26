@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils'
-import _ from 'lodash'
 import type { CSSProperties, ReactNode } from 'react'
-
+import { floor } from 'es-toolkit/compat'
 export interface TableProps {
   header: ReactNode[]
   data: ReactNode[][]
@@ -57,7 +56,7 @@ export const STable = ({
           {header.map((head, i) => {
             return (
               <th
-                style={{ width: `${_.floor(baseSize * (span[i] ?? 1), 2)}%` }}
+                style={{ width: `${floor(baseSize * (span[i] ?? 1), 2)}%` }}
                 key={i}
                 scope='col'
                 className={cn(span[i] == 0 ? 'p-0 w-0' : 'p-3 font-normal text-sm', headerItemClassName)}

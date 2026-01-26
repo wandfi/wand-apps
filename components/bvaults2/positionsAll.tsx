@@ -1,6 +1,6 @@
 import { type BVault2Config } from "@/config/bvaults2";
 import { reFet } from "@/hooks/useFet";
-import { flatten } from "lodash";
+import { flatten } from "es-toolkit";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { CoinIcon } from "../icons/coinicon";

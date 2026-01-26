@@ -1,7 +1,4 @@
 'use client'
-  ; (BigInt.prototype as any).toJSON = function () {
-    return this.toString()
-  }
 
 import { type IconProps } from '@/components/icons/types';
 import React from 'react';

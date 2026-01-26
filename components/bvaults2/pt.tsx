@@ -7,9 +7,8 @@ import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/l
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
-import _ from "lodash"
 import { useState } from "react"
-import { useDebounce, useToggle } from "react-use"
+import { useDebounce, useToggle } from "react-use/esm";
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"
@@ -24,6 +23,7 @@ import { Bvault2Feerate } from "./feerate"
 import { reFetWithBvault2 } from "./fetKeys"
 import { usePtToken, useYtToken } from "./getToken"
 import { useBT2PTPrice, useBTPriceConvertToken, usePTApy } from "./useDatas"
+import { round } from "es-toolkit"
 
 function PTSwap({ vc }: { vc: BVault2Config }) {
     const { address } = useAccount()
@@ -44,7 +44,7 @@ function PTSwap({ vc }: { vc: BVault2Config }) {
     const { result: btPricePT } = useBT2PTPrice(vc)
     const { result: btPriceCT } = useBTPriceConvertToken(vc, ct.address)
     const ctPricePT = btPriceCT !== 0 ? btPricePT / btPriceCT : 0;
-    const price = isToggled ? (ctPricePT !== 0 ? _.round(1 / ctPricePT, 2) : 0) : _.round(ctPricePT, 2)
+    const price = isToggled ? (ctPricePT !== 0 ? round(1 / ctPricePT, 2) : 0) : round(ctPricePT, 2)
     const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
     const [calcPtSwapKey, setCalcPtSwapKey] = useState<any[]>(['calcPTSwapOut'])
     useDebounce(() => setCalcPtSwapKey(['calcPTSwapOut', isToggled, inputAssetBn, input, output]), 300, [isToggled, inputAssetBn, input, output])

@@ -13,7 +13,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { LuBox, LuChartLine, LuCircleUser, LuSettings, LuSquareSquare } from 'react-icons/lu'
 import { TbBook2, TbBrandDiscordFilled, TbBrandX, TbChevronDown } from 'react-icons/tb'
-import { useWindowSize } from 'react-use'
+import { useWindowSize } from 'react-use/esm'
 import { isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import ConnectBtn from './connet-btn'
@@ -36,7 +36,7 @@ export function useShowAdmin() {
 
 export function Header() {
   const pathname = useRouterState().location.pathname
-  const { width } = useWindowSize({ initialWidth: window.innerWidth, initialHeight: window.innerHeight })
+  const { width } = useWindowSize({ initialWidth: 0, initialHeight: 0 })
   const hiddenTitle = width < 1024
   const showAdmin = useShowAdmin()
   const links = useMemo(() => {

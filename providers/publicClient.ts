@@ -1,12 +1,13 @@
-import { apiBatchConfig, multicallBatchConfig, SUPPORT_CHAINS } from '@/config/network'
-import { useReadingCountStore } from '@/hooks/useWrapPublicClient'
-import _ from 'lodash'
-import { type Chain, createPublicClient, http, type PublicClient } from 'viem'
+import { apiBatchConfig, multicallBatchConfig, SUPPORT_CHAINS } from '@/config/network';
+import { useReadingCountStore } from '@/hooks/useWrapPublicClient';
+import { flatten } from 'es-toolkit';
+import { keys } from 'es-toolkit/compat';
+import { type Chain, createPublicClient, http, type PublicClient } from 'viem';
 
 const pcMaps: { [id: number]: { pcs: PublicClient[]; current: number } } = {}
 function getRpcurls(chain: Chain) {
-  const keys = _.keys(chain.rpcUrls)
-  return _.flatten(keys.map((item) => chain.rpcUrls[item].http))
+  const mkeys = keys(chain.rpcUrls)
+  return flatten(mkeys.map((item) => chain.rpcUrls[item].http))
 }
 function createPCS(chainId: number) {
   const chain = SUPPORT_CHAINS.find((c) => c.id == chainId)!

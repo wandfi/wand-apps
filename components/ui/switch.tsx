@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { useThemeState } from '../theme-mode';
-import { round } from 'lodash';
+import { round } from 'es-toolkit';
 
 export function Switch(p: { checked?: boolean; onChange?: (check?: boolean) => void }) {
   const ts = useThemeState()

@@ -4,7 +4,8 @@ import { getTokenBy, type Token } from "@/config/tokens";
 import { reFet } from "@/hooks/useFet";
 import { cn } from "@/lib/utils";
 import { displayBalance } from "@/utils/display";
-import _, { now } from "lodash";
+import { groupBy } from "es-toolkit";
+import { keys } from "es-toolkit/compat";
 import { type ReactNode, useMemo } from "react";
 import { type Address } from "viem";
 import { useAccount } from "wagmi";
@@ -34,8 +35,8 @@ const statuColSize = 1.6
 
 export function getPTPositions(vc: BVault2Config, redeems: ReturnType<typeof useBvualt2PTRedeems>['result'], onClaimSuccess?: () => void): ReactNode[][] {
     if (!redeems.length) return []
-    const groups = _.groupBy(redeems, item => {
-        const epochActive = (item.startTime + item.duration) * 1000n > BigInt(now())
+    const groups = groupBy(redeems, item => {
+        const epochActive = (item.startTime + item.duration) * 1000n > BigInt(Date.now())
         return epochActive ? 'active' : 'mature'
     })
     const res = []
@@ -104,8 +105,8 @@ export function getYtPositions(vc: BVault2Config, rewards: ReturnType<typeof use
         return []
     }
     const res = []
-    const groups = _.groupBy(rewards, (item) => {
-        const epochActive = (item.startTime + item.duration) * 1000n > BigInt(now())
+    const groups = groupBy(rewards, (item) => {
+        const epochActive = (item.startTime + item.duration) * 1000n > BigInt(Date.now())
         return epochActive ? 'active' : 'mature'
     })
     const active = groups['active']?.[0]
@@ -137,7 +138,7 @@ export function getYtPositions(vc: BVault2Config, rewards: ReturnType<typeof use
                 }
             })
         })
-        const sumRewards = _.keys(tokens).map(key => ([key, tokens[key as Address]] as [Address, bigint]))
+        const sumRewards = keys(tokens).map(key => ([key, tokens[key as Address]] as [Address, bigint]))
         res.push([
             '',
             '',

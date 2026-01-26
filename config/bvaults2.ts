@@ -2,7 +2,7 @@ import { type TxConfig } from '@/components/approve-and-tx'
 import { genBtConvert } from '@/components/bvaults2/bt'
 import { genAplBtConvert } from '@/lib/aria'
 import { type Address, parseEther } from 'viem'
-import { type TypeENV } from './env'
+import { ENV, type TypeENV } from './env'
 import { monad, story } from './network'
 import { genMonBtConvert } from '@/lib/apr'
 
@@ -97,3 +97,5 @@ export const BVAULTS2CONIG: BVault2Config[] = [
     underlingApy: 0.04
   },
 ]
+
+export const bvcs2ByEnv = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))

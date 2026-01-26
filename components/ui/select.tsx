@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { useClickAway } from "react-use";
+import { useClickAway } from 'react-use/esm';
 
 export type OptionBase = string | {
     key: string

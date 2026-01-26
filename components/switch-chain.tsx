@@ -3,7 +3,7 @@ import { DomainRef } from "@/hooks/useConfigDomain"
 import { useCurrentChainId } from "@/hooks/useCurrentChainId"
 import { useMemo, useRef, useState } from "react"
 import { FiX } from "react-icons/fi"
-import { useClickAway } from "react-use"
+import { useClickAway } from 'react-use/esm'
 import { type Chain } from "viem"
 import { useAccount, useSwitchChain } from "wagmi"
 

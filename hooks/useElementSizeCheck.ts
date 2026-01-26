@@ -1,4 +1,4 @@
-import { useMeasure } from 'react-use'
+import { useMeasure } from 'react-use/esm'
 import { type UseMeasureRef } from 'react-use/lib/useMeasure'
 
 // 用于检测元素尺寸变化的hook

@@ -8,9 +8,9 @@ import { fmtBn, formatPercent, genDeadline, handleError, parseEthers } from "@/l
 import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
-import _ from "lodash"
+import { round } from "es-toolkit"
 import { useState } from "react"
-import { useDebounce, useToggle } from "react-use"
+import { useDebounce, useToggle } from "react-use/esm";
 import { formatEther } from "viem"
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
@@ -48,7 +48,7 @@ function YTSwap({ vc }: { vc: BVault2Config }) {
     const { result: ytPriceBt } = useYTPriceBt(vc)
     const { result: btPriceCT } = useBTPriceConvertToken(vc, ct.address)
     const ytPriceCT = ytPriceBt * btPriceCT
-    const price = _.round(isToggled ? ytPriceCT : ytPriceCT > 0 ? 1 / ytPriceCT : 0, 2)
+    const price = round(isToggled ? ytPriceCT : ytPriceCT > 0 ? 1 / ytPriceCT : 0, 2)
     const swapPrice = `1 ${input.symbol} = ${price} ${output.symbol}`
     const onSwitch = () => {
         toggle()

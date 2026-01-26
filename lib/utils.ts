@@ -1,7 +1,8 @@
 import { DECIMAL } from '@/src/constants'
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
-import _, { get, now, round } from 'lodash'
+import { round, trimEnd, trimStart } from 'es-toolkit'
+import { get } from 'es-toolkit/compat'
 import { toast } from 'sonner'
 import { twMerge } from 'tailwind-merge'
 import { parseEther as _parseEther, type Address, etherUnits, formatUnits, isAddressEqual, parseUnits } from 'viem'
@@ -31,7 +32,7 @@ export function handleError(error: any) {
 
 let poIndex = 0
 export function genPromiseObj<T = void>() {
-  let resolve: (v: T) => void = () => {}
+  let resolve: (v: T) => void = () => { }
   const promise = new Promise<T>((_resolve) => {
     resolve = _resolve
   })
@@ -79,7 +80,7 @@ export function formatPercent(percet: number, decimals: number = 2, usemin: bool
       return `<${minValue * 100}%`
     }
   }
-  return `${_.round(percet * 100, decimals)} %`
+  return `${round(percet * 100, decimals)} %`
 }
 
 export function getBigint(result: any, path: string | (string | number)[], def: bigint = 0n) {
@@ -190,12 +191,12 @@ export const fmtBn = (bn: bigint, decimals: bigint | number = 18, autoDecimals?:
     if (r.length > 3) {
       let end = ''
       if (l == '0') {
-        const trim0 = _.trimStart(r, '0')
+        const trim0 = trimStart(r, '0')
         const trimd0Count = r.length - trim0.length
-        const sliced = _.trimEnd(trim0.slice(0, 3), '0')
+        const sliced = trimEnd(trim0.slice(0, 3), '0')
         end = '.' + sliced.padStart(trimd0Count + sliced.length, '0')
       } else {
-        const trim0 = _.trimEnd(r.slice(0, 3), '0')
+        const trim0 = trimEnd(r.slice(0, 3), '0')
         trim0 && (end = `.${trim0}`)
       }
       return `${l}${end}`
@@ -224,7 +225,7 @@ export async function retry<T>(fn: () => Promise<T>, count: number = 3, wait: nu
 export const tabToSearchParams = (tab: string) => tab.toLowerCase().replaceAll(' ', '_')
 
 export function genDeadline(duration: bigint = 60n * 60n) {
-  return BigInt(round(now() / 1000)) + duration
+  return BigInt(round(Date.now() / 1000)) + duration
 }
 
 export async function promiseAll<ObjTask extends { [k: string]: Promise<any> }>(objTask: ObjTask) {
@@ -246,7 +247,7 @@ export function bnRange(end: bigint, start = 1n, step = 1n) {
 }
 
 export function nowUnix() {
-  return BigInt(Math.round(now() / 1000))
+  return BigInt(Math.round(Date.now() / 1000))
 }
 
 type NonFunction<T> = T extends Function ? never : T

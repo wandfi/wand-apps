@@ -1,23 +1,19 @@
 import { getBvaultEpochYtPrices } from '@/config/api'
 import { type BVaultConfig } from '@/config/bvaults'
 import { useQuery } from '@tanstack/react-query'
-import EChartsReact from 'echarts-for-react'
+import EChartsReact, { type EChartsReactProps } from 'echarts-for-react'
 
 import { cn, FMT, fmtDate } from '@/lib/utils'
 import { graphic } from 'echarts'
-import _ from 'lodash'
+import { round } from 'es-toolkit'
 import { useMemo } from 'react'
-import { useToggle } from 'react-use'
+import { useToggle } from 'react-use/esm'
 import { formatEther } from 'viem'
 
-const bnToNum = (bn: string) => _.round(parseFloat(formatEther(BigInt(bn))), 5)
-
-// const absLog10 = (num: number) => Math.abs(Math.log10(num))
+const bnToNum = (bn: string) => round(parseFloat(formatEther(BigInt(bn))), 5)
 const multip = 90
-const logTrans = (num: number) => _.round(Math.log10(num * multip + 1), 5)
-const revertLog = (num: number) => _.round((Math.pow(10, num) - 1) / multip, 5)
-// const logTrans = (num: number) => _.round(Math.log10(num * 10000), 5)
-// const revertLog = (num: number) => _.round(Math.pow(10, num) / 10000, 5)
+const logTrans = (num: number) => round(Math.log10(num * multip + 1), 5)
+const revertLog = (num: number) => round((Math.pow(10, num) - 1) / multip, 5)
 export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfig; epochId: bigint }) {
   const { data: prices } = useQuery({
     queryKey: ['bvualt-epoch-yt-prices', bvc.vault, epochId],
@@ -92,7 +88,7 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
     }
     return { data, options }
   }, [prices, isLOG])
-
+  const EChartsReactCom = EChartsReact as unknown as React.FC<EChartsReactProps>
   return (
     <div className='animitem card p-4 mx-auto max-w-4xl w-full min-w-0'>
       <div className='flex justify-between gap-2 items-center'>
@@ -104,8 +100,7 @@ export default function BvaultEpochYtPrices({ bvc, epochId }: { bvc: BVaultConfi
           LOG
         </span>
       </div>
-
-      <EChartsReact option={options} style={{ height: 240 }}></EChartsReact>
+      <EChartsReactCom option={options} style={{ height: 240 }} />
     </div>
   )
 }

@@ -8,8 +8,8 @@ import { formatUnits } from 'viem'
 import { CoinIcon } from './icons/coinicon'
 import { useThemeState } from './theme-mode'
 import { Spinner } from './spinner'
-import { useMeasure } from 'react-use'
-import _, { isNil } from 'lodash'
+import { useMeasure } from 'react-use/esm'
+import { isNil, round } from 'es-toolkit'
 
 export function AssetInput({
   asset = 'ETH',
@@ -132,7 +132,7 @@ export function AssetInput({
           ref={inputRef}
           type='number'
           disabled={disable}
-          style={{ paddingLeft: `${_.round((coinSymbolWidth + 32) / 16, 3)}rem` }}
+          style={{ paddingLeft: `${round((coinSymbolWidth + 32) / 16, 3)}rem` }}
           className={cn(
             readonly ? 'bg-slate-50 cursor-not-allowed dark:bg-slate-800' : 'bg-white dark:bg-transparent',
             {
@@ -153,7 +153,7 @@ export function AssetInput({
         {isError && <div className='text-sm text-white bg-red-400 rounded right-0 bottom-0 absolute px-1 translate-y-1/4'>{error || 'Insufficient account balance'}</div>}
       </div>
 
-      { (!isNil(balance) || !isNil(otherInfo)) && (
+      {(!isNil(balance) || !isNil(otherInfo)) && (
         <div className='flex items-center justify-between mt-1 px-1 text-slate-400 dark:text-slate-50/70 text-sm'>
           {!isNil(balance) && <div className={balanceClassName}>
             <span>

@@ -4,7 +4,6 @@ import { abiAdhocBribesPool, abiBVault, abiStakingBribesPool } from '@/config/ab
 import { type BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { getTokenBy, type Token } from '@/config/tokens'
-import { DECIMAL } from '@/src/constants'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useBalance } from '@/hooks/useToken'
@@ -13,12 +12,14 @@ import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleErro
 import { getPC } from '@/providers/publicClient'
 import { useBVaultUserData } from '@/providers/sliceUserBVaults'
 import { useBVault, useBVaultApy, useBvaultTVL, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
+import { DECIMAL } from '@/src/constants'
 import { displayBalance } from '@/utils/display'
 import { useQuery } from '@tanstack/react-query'
-import _, { union } from 'lodash'
+import { useNavigate } from '@tanstack/react-router'
+import { uniq } from 'es-toolkit'
 import { Fragment, type ReactNode, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
-import { useDebounce, useToggle } from 'react-use'
+import { useDebounce, useToggle } from 'react-use/esm'
 import { type Address, erc20Abi, erc4626Abi, isAddressEqual, zeroAddress } from 'viem'
 import { useAccount, useWalletClient } from 'wagmi'
 import { type TX, Txs } from './approve-and-tx'
@@ -31,7 +32,6 @@ import { SimpleTabs } from './simple-tabs'
 import { TokenInput } from './token-input'
 import { Tip } from './ui/tip'
 import { itemClassname, renderChoseSide, renderStat, renderToken } from './vault-card-ui'
-import { useNavigate } from '@tanstack/react-router'
 
 
 async function wrapIfErc4626({ chainId, vc, token, inputBn, user }: { chainId: number, vc: BVaultConfig, token: Address, inputBn: bigint, user: Address }) {
@@ -50,7 +50,7 @@ function useTokens(vc: BVaultConfig) {
   const chainId = useCurrentChainId()
   return useMemo(() => {
     const tokenAdds = [...(vc.moreAssets || []), vc.asset]
-    const tokens: Token[] = union(tokenAdds.map(item => item.toLowerCase())).map(item => getTokenBy(item as Address, chainId)).filter(Boolean) as any
+    const tokens: Token[] = uniq(tokenAdds.map(item => item.toLowerCase())).map(item => getTokenBy(item as Address, chainId)).filter(Boolean) as any
     return tokens;
   }, [vc])
 }
@@ -91,7 +91,7 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   // const [fmtApy] = useBVaultApy(vc.vault)
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
-  const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
+  const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(Date.now()))
   const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc)
   const { roi } = useBvaultROI(vc)
   return (

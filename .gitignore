@@ -12,6 +12,7 @@
 /.next/
 /out/
 /dist/
+/.output/
 
 # production
 /build
@@ -38,3 +39,7 @@ next-env.d.ts
 
 # React Component Preview
 previewConfig.json
+
+# Tanstack
+
+.tanstack

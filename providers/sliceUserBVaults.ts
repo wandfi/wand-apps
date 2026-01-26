@@ -1,10 +1,9 @@
-import { abiBQuery } from '@/config/abi'
 import { type BVaultConfig } from '@/config/bvaults'
+import { fetRouter } from '@/lib/fetRouter'
+import type { fetUserBVault } from '@/lib/fetsBVault'
 import { useQuery } from '@tanstack/react-query'
-import { range, toNumber } from 'lodash'
 import { type Address } from 'viem'
 import { useAccount } from 'wagmi'
-import { getPC } from './publicClient'
 import { useBVaultData } from './sliceBVaultsStore'
 
 export type BVaultUserDTO = {
@@ -26,10 +25,6 @@ export function useBVaultUserData(vc: BVaultConfig) {
     queryKey: ['queryBVaultUserData', vc.chain, vc.vault, address],
     refetchOnMount: 'always',
     staleTime: 1000,
-    queryFn: async () => {
-      const pc = getPC(vc.chain)
-      const ids = range(toNumber(vd.data!.epochCount.toString()) + 1).map((n) => BigInt(n))
-      return Promise.all(ids.map((id) => pc.readContract({ abi: abiBQuery, address: vc.bQueryAddres, functionName: 'queryBVaultEpochUser', args: [vc.vault, id, address!] })))
-    },
+    queryFn: () => fetRouter('/api/bvault', { chain: vc.chain, vault: vc.vault, byUser: address!, fet: 'fetUserBVault' }) as ReturnType<typeof fetUserBVault>,
   })
 }

@@ -1,4 +1,4 @@
-import { isLOCL, isTEST } from '@/src/constants'
+import { isLOCL, isTEST } from '@/config/env'
 import { sleep } from '@/lib/utils'
 import EventEmitter from 'events'
 import { useEffect, useReducer, useRef } from 'react'
@@ -87,7 +87,7 @@ function sub<T>(fet: Fet<T>, onChange: (fs: FetStat<Fet<T>>) => void) {
       emiter.off(fet.key, onChange)
     }
   } else {
-    return () => {}
+    return () => { }
   }
 }
 
@@ -166,7 +166,7 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
   }
   useEffect(() => {
     if (isLOCL || isTEST) {
-      ;(window as any).fets = fets
+      ; (window as any).fets = fets
     }
     const unSub = sub(fet, (fs) => {
       console.info('onSub:', fet.key, fs)
@@ -185,7 +185,7 @@ export function useFet<FET extends Fet<any>>(fet: FET): FetStat<FET> {
 
 export function useFets<FET extends Fet<any>>(..._fets: FET[]) {
   const update = useUpdate()
-  const refFetsStat = useRef<FetsStat<FET[]>>()
+  const refFetsStat = useRef<FetsStat<FET[]>>(undefined)
   if (!refFetsStat.current || _fets.map((item) => item.key).join(',') !== refFetsStat.current.key.join(',')) {
     refFetsStat.current = initFSS(..._fets)
   }

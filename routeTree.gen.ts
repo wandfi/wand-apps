@@ -8,13 +8,16 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './../routes/__root'
-import { Route as YieldVaultRouteImport } from './../routes/yield-vault'
-import { Route as PortfolioRouteImport } from './../routes/portfolio'
-import { Route as DashboardRouteImport } from './../routes/dashboard'
-import { Route as BootstrapRouteImport } from './../routes/bootstrap'
-import { Route as AdminRouteImport } from './../routes/admin'
-import { Route as IndexRouteImport } from './../routes/index'
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as YieldVaultRouteImport } from './routes/yield-vault'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BootstrapRouteImport } from './routes/bootstrap'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiTokenRouteImport } from './routes/api/token'
+import { Route as ApiBvault2RouteImport } from './routes/api/bvault2'
+import { Route as ApiBvaultRouteImport } from './routes/api/bvault'
 
 const YieldVaultRoute = YieldVaultRouteImport.update({
   id: '/yield-vault',
@@ -46,6 +49,21 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTokenRoute = ApiTokenRouteImport.update({
+  id: '/api/token',
+  path: '/api/token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBvault2Route = ApiBvault2RouteImport.update({
+  id: '/api/bvault2',
+  path: '/api/bvault2',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBvaultRoute = ApiBvaultRouteImport.update({
+  id: '/api/bvault',
+  path: '/api/bvault',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +72,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/portfolio': typeof PortfolioRoute
   '/yield-vault': typeof YieldVaultRoute
+  '/api/bvault': typeof ApiBvaultRoute
+  '/api/bvault2': typeof ApiBvault2Route
+  '/api/token': typeof ApiTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +83,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/portfolio': typeof PortfolioRoute
   '/yield-vault': typeof YieldVaultRoute
+  '/api/bvault': typeof ApiBvaultRoute
+  '/api/bvault2': typeof ApiBvault2Route
+  '/api/token': typeof ApiTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +95,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/portfolio': typeof PortfolioRoute
   '/yield-vault': typeof YieldVaultRoute
+  '/api/bvault': typeof ApiBvaultRoute
+  '/api/bvault2': typeof ApiBvault2Route
+  '/api/token': typeof ApiTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +108,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/portfolio'
     | '/yield-vault'
+    | '/api/bvault'
+    | '/api/bvault2'
+    | '/api/token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +119,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/portfolio'
     | '/yield-vault'
+    | '/api/bvault'
+    | '/api/bvault2'
+    | '/api/token'
   id:
     | '__root__'
     | '/'
@@ -97,6 +130,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/portfolio'
     | '/yield-vault'
+    | '/api/bvault'
+    | '/api/bvault2'
+    | '/api/token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +142,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   PortfolioRoute: typeof PortfolioRoute
   YieldVaultRoute: typeof YieldVaultRoute
+  ApiBvaultRoute: typeof ApiBvaultRoute
+  ApiBvault2Route: typeof ApiBvault2Route
+  ApiTokenRoute: typeof ApiTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +191,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/token': {
+      id: '/api/token'
+      path: '/api/token'
+      fullPath: '/api/token'
+      preLoaderRoute: typeof ApiTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bvault2': {
+      id: '/api/bvault2'
+      path: '/api/bvault2'
+      fullPath: '/api/bvault2'
+      preLoaderRoute: typeof ApiBvault2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bvault': {
+      id: '/api/bvault'
+      path: '/api/bvault'
+      fullPath: '/api/bvault'
+      preLoaderRoute: typeof ApiBvaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,7 +222,19 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   PortfolioRoute: PortfolioRoute,
   YieldVaultRoute: YieldVaultRoute,
+  ApiBvaultRoute: ApiBvaultRoute,
+  ApiBvault2Route: ApiBvault2Route,
+  ApiTokenRoute: ApiTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

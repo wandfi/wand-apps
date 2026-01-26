@@ -3,7 +3,6 @@ import { ProgressBar } from "@/components/ui/progress-bar"
 import { abiAdhocBribesPool, abiBVault, abiRedeemPool, abiStakingBribesPool } from '@/config/abi'
 import { type BVaultConfig } from '@/config/bvaults'
 import { LP_TOKENS } from '@/config/lpTokens'
-import { DECIMAL } from '@/src/constants'
 import { useBvaultROI, useBVaultUnderlyingAPY } from '@/hooks/useBVaultROI'
 import { useBalance } from '@/hooks/useToken'
 import { useVerioStakeApy } from '@/hooks/useVerioStakeApy'
@@ -11,14 +10,14 @@ import { cn, FMT, fmtBn, fmtDate, fmtDuration, fmtPercent, getBigint, handleErro
 import { getPC } from '@/providers/publicClient'
 import { useTokenPrices } from '@/providers/sliceTokenStore'
 import { useBVault, useBVaultApy, useCalcClaimable, useEpochesData, useUpBVaultForUserAction } from '@/providers/useBVaultsData'
+import { DECIMAL } from '@/src/constants'
 import { displayBalance } from '@/utils/display'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import _ from 'lodash'
 import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
 import { RiLoopLeftFill } from 'react-icons/ri'
-import { useDebounce, useMeasure, useToggle } from 'react-use'
-import { List, type ListRowProps } from 'react-virtualized'
+import { useDebounce, useMeasure, useToggle } from 'react-use/esm';
+import { List, type ListProps, type ListRowProps } from 'react-virtualized'
 import { toast } from 'sonner'
 import { zeroAddress } from 'viem'
 import { useWalletClient } from 'wagmi'
@@ -51,7 +50,7 @@ export function BVaultRedeem({ bvc }: { bvc: BVaultConfig }) {
   const epoch = useEpochesData(bvc)[0]
   const pTokenBalance = useBalance({ chain: bvc.chain, address: bvc.pToken } as any).result
   const upForUserAction = useUpBVaultForUserAction(bvc)
-  const waitTimeFmt = bvd.current.duration > 0n ? `Waiting Time: ~${fmtDuration((bvd.current.duration + bvd.current.startTime) * 1000n - BigInt(_.now()))}` : ''
+  const waitTimeFmt = bvd.current.duration > 0n ? `Waiting Time: ~${fmtDuration((bvd.current.duration + bvd.current.startTime) * 1000n - BigInt(Date.now()))}` : ''
   return (
     <div className={cn('flex flex-col gap-1')}>
       <AssetInput asset={bvc.pTokenSymbol} amount={inputPToken} balance={pTokenBalance} setAmount={setInputPToken} />
@@ -163,7 +162,7 @@ export function BVaultClaim({ bvc }: { bvc: BVaultConfig }) {
             <span className='text-black/60 dark:text-white/60'>{displayBalance(redeemingBalance)}</span>
             <div className='ml-auto text-xs text-black/60 dark:text-white/60 '>
               Settlement Time : <span className='text-black dark:text-white font-semibold pr-2'>{fmtDate((bvd.current.duration + bvd.current.startTime) * 1000n, FMT.DATE2)}</span>{' '}
-              {fmtDuration((bvd.current.duration + bvd.current.startTime) * 1000n - BigInt(_.now()))}
+              {fmtDuration((bvd.current.duration + bvd.current.startTime) * 1000n - BigInt(Date.now()))}
             </div>
           </div>
         }
@@ -197,7 +196,7 @@ export function BVaultP({ bvc }: { bvc: BVaultConfig }) {
       .catch(handleError)
   }
 
-  const { subtab } = useSearch({ from: '/yield-vault'})
+  const { subtab } = useSearch({ from: '/yield-vault' })
   const r = useNavigate()
   const data = [
     {
@@ -464,6 +463,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
       </div>
     )
   }
+  const ListCom = List as unknown as React.FC<ListProps>
   return (
     <div className='animitem md:h-[28rem] card !p-4'>
       <div className='font-bold text-base'>Harvest</div>
@@ -473,7 +473,7 @@ function BVaultPools({ bvc }: { bvc: BVaultConfig }) {
             <span>My Pool Only</span>
             <Switch checked={onlyMy} onChange={setOnlyMy as any} />
           </div>
-          <List
+          <ListCom
             className={epoches.length > viewMax ? 'pr-5' : ''}
             width={mes.width}
             height={330}
@@ -593,25 +593,13 @@ export function BVaultB({ bvc }: { bvc: BVaultConfig }) {
 
 export function BVaultCard({ vc }: { vc: BVaultConfig }) {
   const r = useNavigate()
-  const [token1, token2] = vc.assetSymbol.split('-')
   const bvd = useBVault(vc)
-  const lp = LP_TOKENS[vc.asset]
   const prices = useTokenPrices().data
-  const lpBasePrice = prices[lp?.base] ?? 0n
-  const lpQuotePrice = prices[lp?.quote] ?? 0n
-  const lpBase = bvd.lpBase ?? 0n
-  const lpQuote = bvd.lpQuote ?? 0n
-  const lpBaseTvlBn = (lpBase * lpBasePrice) / DECIMAL
-  const lpQuoteTvlBn = (lpQuote * lpQuotePrice) / DECIMAL
-  // console.info('lpTypes', lpBaseTvlBn, lpQuoteTvlBn , lpQuoteTvlBn == lpBaseTvlBn)
-  let lpTvlBn = lpBaseTvlBn + lpQuoteTvlBn
-  if (lpTvlBn === 0n) {
-    lpTvlBn = (bvd.lockedAssetTotal ?? 0n) * (prices[vc.asset] ?? 0n) / DECIMAL;
-  }
+  const lpTvlBn = (bvd.lockedAssetTotal ?? 0n) * (prices[vc.assetSymbol]?.bn ?? 0n) / DECIMAL;
   // const [fmtApy] = useBVaultApy(vc.vault)
   const epochName = `Epoch ${(bvd?.epochCount || 0n).toString()}`
   const settleTime = bvd.epochCount == 0n ? '-- -- --' : fmtDate((bvd.current.startTime + bvd.current.duration) * 1000n, FMT.DATE2)
-  const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(_.now()))
+  const settleDuration = bvd.epochCount == 0n ? '' : fmtDuration((bvd.current.startTime + bvd.current.duration) * 1000n - BigInt(Date.now()))
   const { data: { avrageApy: underlyingApy, items } } = useBVaultUnderlyingAPY(vc)
   const { roi } = useBvaultROI(vc)
   return (
@@ -627,8 +615,6 @@ export function BVaultCard({ vc }: { vc: BVaultConfig }) {
           <div className='text-sm font-medium'>${displayBalance(lpTvlBn, 2)}</div>
         </div>
       </div>
-      {lp && renderToken(token1, lpBase, lpBaseTvlBn)}
-      {lp && renderToken(token2, lpQuote, lpQuoteTvlBn, 18, true)}
       {renderStat(
         'Settlement Time',
         bvd.closed ? 'status-red' : 'status-green',

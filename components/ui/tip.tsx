@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { type ReactNode, useRef, useState } from 'react'
 import { RxQuestionMarkCircled } from 'react-icons/rx'
-import { useClickAway } from 'react-use'
+import { useClickAway } from 'react-use/esm'
 export function Tip({
   children,
   node,

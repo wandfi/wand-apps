@@ -1,11 +1,13 @@
 import { abiAdhocBribesPool, abiBVault } from '@/config/abi'
 import { type BVaultConfig } from '@/config/bvaults'
-import { DECIMAL, YEAR_SECONDS } from '@/src/constants'
+import { fetRouter } from '@/lib/fetRouter'
+import type { fetBVaultUnderlyingAPY } from '@/lib/fetsBVault'
 import { getPC } from '@/providers/publicClient'
 import { useBVault } from '@/providers/useBVaultsData'
+import { DECIMAL, YEAR_SECONDS } from '@/src/constants'
 import { useQuery } from '@tanstack/react-query'
-import _ from 'lodash'
-import { type Address, parseAbi, zeroAddress } from 'viem'
+import { round } from 'es-toolkit'
+import { zeroAddress } from 'viem'
 
 export function useBVaultIPAssets(vc: BVaultConfig) {
   return useQuery({
@@ -19,80 +21,13 @@ export function useBVaultIPAssets(vc: BVaultConfig) {
     },
   })
 }
-
-const abiIPA = parseAbi([
-  'struct UserStakeAmountDetail { address stakeTokenAddress; uint256 amount; uint8 lockup; uint256 lastStakeTimestamp;}',
-  'function getUserStakeAmountForIP(address _ipAsset, address _user) external view returns (UserStakeAmountDetail[][] memory)',
-  'function getTotalStakeWeightedInIPForIP(address _ipAsset) external view returns (uint256)',
-  'function getTotalStakeAmountForIP(address _ipAsset, address[] calldata _stakeTokens) external view returns (uint256[] memory)',
-  'struct RewardPoolState {address rewardToken;uint8 rewardTokenType;uint8 distributionType;uint256 rewardsPerEpoch;uint256 rewardPerToken;uint256 totalRewards;uint256 totalDistributedRewards;uint256 lastEpochBlock;}',
-  'function getRewardPools(address _ipAsset) external view returns (RewardPoolState[][] memory)',
-  'function calculateIPWithdrawal(uint256 _vIPToBurn) external view returns (uint256)',
-])
-
-// const addressRestaking = '0xE884e394218Add9D5972B87291C2743401F88546'
-// const addressIpAssetStaking = '0xe9be8e0Bd33C69a9270f8956507a237884dff3BE'
-export const ipAssetsTit: { [k: Address]: string } = {
-  '0xB1D831271A68Db5c18c8F0B69327446f7C8D0A42': 'IPPY',
-  '0x0a0466c312687027E2BEa065d4Cca0DCEC19bb2C': 'Globkins',
-  '0xCdF104e4F24d593E16B9F6c382cEB1FB5573EEDd': 'Mimboku',
-  '0x8c40Ef7408D6036Dca0b69E67D960dd48014cB16': 'Sofamon',
-  '0x00e23f81e489E43484B0B8Bc109faD6C1F4c28E7': 'Benjamin',
-  '0x42A351E005De1330DeDe69Ca4Ae1B06715a2f4fA': 'WTF',
-  '0xf12b7b0858268F9c726f9eea315eDfec161DA552': 'Drip Drip',
-  '0xE8b4b3828EA3678F9BA975CBccB5D9f0c3c0cA8b': 'Nub Cat',
-  '0x4D31d2417b64597Bf346f278728f3A1C7065907e': 'DaVinci',
-  '0xCE11dD7008494B6b4F9DF01213F77B87A4dab579': 'Terra',
-  '0x9B438f52a0A94d3D7D1325C80711FF4709571054': 'Oaisis',
-  '0x5021F7438ea502b0c346cB59F8E92B749Ecd74B5': 'Variants🧬',
-  '0x816453EbC9b9E55b4faF326614BfFf915e5dCc3d': 'DoubleUp',
-}
-
 export function useBVaultUnderlyingAPY(vc: BVaultConfig) {
-  const vault = vc.vault
-  const { data: ipAssets } = useBVaultIPAssets(vc)
   return useQuery({
     initialData: { avrageApy: 0n, items: [] },
-    queryKey: ['bvualtunderlyingapy', vault, ipAssets],
-    enabled: Boolean(vault) && ipAssets.length > 0 && vc.assetSymbol == 'vIP',
+    queryKey: ['bvualtunderlyingapy', vc.vault],
+    enabled: vc.assetSymbol == 'vIP',
     gcTime: 60 * 60 * 1000,
-    queryFn: async () => {
-      const pc = getPC(vc.chain, 1)
-      const stakeed = await Promise.all(
-        ipAssets.map((ipAsset) =>
-          pc.readContract({
-            abi: abiIPA,
-            functionName: 'getUserStakeAmountForIP',
-            address: vc.ipAssetStaking,
-            args: [ipAsset, vault],
-          }),
-        ),
-      )
-      const staked = stakeed.map((item) => item.find((s) => s.length)?.find((s) => !!s))
-      const apys = await Promise.all(
-        ipAssets.map((ipID) =>
-          pc
-            .readContract({
-              abi: parseAbi(['function ipAssetApy(address ipAsset) public view returns (uint256)']),
-              address: '0xc0685Bb397ECa74763b8B90738ABf868a3502c21',
-              functionName: 'ipAssetApy',
-              args: [ipID],
-            })
-            .then((apy) => apy / 100n),
-        ),
-      )
-
-      const stakedAll = staked.reduce((sum, s) => sum + (s?.amount || 0n), 0n)
-      const avrageApy = stakedAll > 0n ? apys.map((apy, i) => apy * (staked?.[i]?.amount || 0n)).reduce((sum, apy) => sum + apy, 0n) / stakedAll : 0n
-      const items = apys
-        .map((apy, i) => ({ apy, staked: staked?.[i]?.amount || 0n, ipID: ipAssets[i], tit: ipAssetsTit[ipAssets[i]] }))
-        .sort((a, b) => {
-          const sub = b.apy - a.apy
-          return sub > 0n ? 1 : sub < 0n ? -1 : 0
-        })
-      console.info('staked:', vault, staked, avrageApy)
-      return { avrageApy, items }
-    },
+    queryFn: () => fetRouter('/api/bvault', { chain: vc.chain, vault: vc.vault, fet: 'fetBVaultUnderlyingAPY' }) as ReturnType<typeof fetBVaultUnderlyingAPY>
   })
 }
 
@@ -147,7 +82,7 @@ export function useBvaultROI(vc: BVaultConfig, ytchange: bigint = 0n, afterYtPri
   } = useBVaultUnderlyingAPY(vc)
   const ytAmount = bvd.current.yTokenAmountForSwapYT
   const vualtYTokenBalance = bvd.current.vaultYTokenBalance
-  const remainTime = bvd.current.duration + bvd.current.startTime - BigInt(_.round(_.now() / 1000))
+  const remainTime = bvd.current.duration + bvd.current.startTime - BigInt(round(Date.now() / 1000))
   const ptTotal = bvd.pTokenTotal
   const ytAssetPriceBn = vualtYTokenBalance > 0n ? (bvd.Y * DECIMAL) / vualtYTokenBalance : 0n
   const ytPriceChanged = afterYtPriceBn

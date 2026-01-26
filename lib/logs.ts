@@ -1,9 +1,10 @@
 import { abiBvault2Query } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
 import type { BVault2Config } from '@/config/bvaults2'
-import { isPROD } from '@/src/constants'
+
+import { isPROD } from '@/config/env'
 import { getPC } from '@/providers/publicClient'
-import { mapValues } from 'lodash'
+import { mapValues } from 'es-toolkit'
 import { type Address, erc20Abi } from 'viem'
 import { fmtBn, retry } from './utils'
 

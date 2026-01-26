@@ -3,9 +3,9 @@
 import { type Token } from '@/config/tokens'
 import { cn, parseEthers } from '@/lib/utils'
 import { displayBalance } from '@/utils/display'
-import _, { isNil } from 'lodash'
+import { isNil, round } from 'es-toolkit'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useMeasure } from 'react-use'
+import { useMeasure } from 'react-use/esm'
 import { formatUnits } from 'viem'
 import { useBalance } from '../hooks/useToken'
 import { CoinIcon } from './icons/coinicon'
@@ -109,7 +109,7 @@ export function TokenInput({
           ref={inputRef}
           type='number'
           disabled={disable}
-          style={{ paddingLeft: `${_.round((coinSymbolWidth + 32) / 16, 3)}rem` }}
+          style={{ paddingLeft: `${round((coinSymbolWidth + 32) / 16, 3)}rem` }}
           className={cn(
             readonly ? 'bg-slate-50 cursor-not-allowed dark:bg-slate-800' : 'bg-white dark:bg-transparent',
             {

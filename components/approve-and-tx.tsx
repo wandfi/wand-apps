@@ -7,7 +7,6 @@ import { encodeFunctionData, erc20Abi, zeroAddress } from 'viem'
 
 import { getChain } from '@/config/network'
 import { getTokenBy } from '@/config/tokens'
-import { isPROD } from '@/src/constants'
 import { useCurrentChainId, useNetworkWrong } from '@/hooks/useCurrentChainId'
 import { cn, getErrorMsg, handleError, promiseT } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
@@ -19,6 +18,7 @@ import { create } from 'zustand'
 import { SimpleDialog } from './simple-dialog'
 import { BBtn } from './ui/bbtn'
 import { Tip } from './ui/tip'
+import { isPROD } from '@/config/env'
 
 export function SwitchNet({ className }: { className?: string }) {
   const sc = useSwitchChain()
@@ -71,7 +71,7 @@ export function ApproveAndTx<
   const { write: doTx, isDisabled, isLoading: isTxLoading } = useWrapContractWrite(config as any, { onSuccess: () => onTxSuccess && onTxSuccess(), autoToast: toast, skipSimulate, confirmations })
   const txDisabled = disabled || isDisabled || isTxLoading || config.enabled === false
   const { approve, shouldApprove, loading: isApproveLoading, isSuccess: isApproveSuccess } = useApproves(approves || {}, spender, requestAmount)
-  const onApproveSuccessRef = useRef<() => void>()
+  const onApproveSuccessRef = useRef<() => void>(undefined)
   onApproveSuccessRef.current = onApproveSuccess
   useEffect(() => {
     onApproveSuccessRef.current && isApproveSuccess && onApproveSuccessRef.current()

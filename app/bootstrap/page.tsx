@@ -3,12 +3,11 @@ import { BVault2Bootstrap } from "@/components/bvaults2/bootstrap"
 import { Noti } from "@/components/noti"
 import { PageWrap } from "@/components/page-wrap"
 import { ConfigChainsProvider } from "@/components/support-chains"
-import { BVAULTS2CONIG } from "@/config/bvaults2"
-import { ENV } from "@/src/constants"
+import { bvcs2ByEnv } from "@/config/bvaults2"
 
 
 export default function BootstrapPage() {
-    const vcs = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
+    const vcs = bvcs2ByEnv
     return (
         <PageWrap>
             <div className='w-full max-w-[1368px] p-4 flex flex-col gap-5 mx-auto md:pb-8'>

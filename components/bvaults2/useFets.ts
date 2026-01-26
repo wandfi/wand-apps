@@ -1,55 +1,34 @@
-import { abiBVault2, abiBvault2Query } from '@/config/abi/BVault2'
-import { codeBvualt2Query } from '@/config/abi/codes'
 import { type BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
-import { DECIMAL, DECIMAL_10 } from '@/src/constants'
 import { useFet, useFets } from '@/hooks/useFet'
 import { useBalance, useBalances } from '@/hooks/useToken'
-import { aarToNumber, bnRange, getBigint, promiseAll, type UnPromise } from '@/lib/utils'
-import { getPC } from '@/providers/publicClient'
+import type { TVLItem } from '@/hooks/useTVL'
+import { fetRouter } from '@/lib/fetRouter'
+import type { fetBalance } from '@/lib/fetsToken'
+import { aarToNumber, type UnPromise } from '@/lib/utils'
 import { useTokenPrices } from '@/providers/sliceTokenStore'
-import { now } from 'lodash'
+import { DECIMAL, DECIMAL_10 } from '@/src/constants'
 import { useMemo } from 'react'
-import { type Address, erc20Abi, isAddressEqual, parseUnits, type PublicClient } from 'viem'
+import { type Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { FetKEYS } from './fetKeys'
+import type { fetBvault2Epochs, fetBvaut2Data, fetRewardsBy } from './fets'
 import { getLpToken } from './getToken'
 import { useLogs, useLogss } from './useDatas'
-import type { TVLItem } from '@/hooks/useTVL'
 
-export async function getBvault2Epoch(vc: BVault2Config, id: bigint, pc: PublicClient) {
-  return await pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochInfoById', args: [id] })
-}
 
-export async function getBvaut2Data(vc: BVault2Config) {
-  const pc = getPC(vc.chain)
-  const res = await promiseAll({
-    initialized: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'initialized' }),
-    BT: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'BT' }),
-    mintPoolTokenPot: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'mintPoolTokenPot' }),
-    Points: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'points' }),
-    bootstrapStartTime: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapStartTime' }),
-    bootstrapDuration: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapDuration' }),
-    bootstrapThreshold: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapThreshold' }),
-    epochIdCount: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'epochIdCount' }),
-    totalDeposits: pc.readContract({ abi: abiBVault2, address: vc.vault, functionName: 'bootstrapTotalDeposits' }),
-  })
-
-  return { ...res, current: res.epochIdCount > 0n ? await getBvault2Epoch(vc, res.epochIdCount, pc) : undefined }
-}
-
-export type Vault2Data = UnPromise<ReturnType<typeof getBvaut2Data>>
+export type Vault2Data = UnPromise<ReturnType<typeof fetBvaut2Data>>
 export function useBvualt2Data(vc: BVault2Config) {
   return useFet({
     key: FetKEYS.Bvault2Data(vc),
-    fetfn: async () => getBvaut2Data(vc),
+    fetfn: () => fetRouter('/api/bvault2', { chain: vc.chain, vault: vc.vault, fet: 'fetBvaut2Data' }) as ReturnType<typeof fetBvaut2Data>,
   })
 }
 export function useBvualt2sData(vcs: BVault2Config[]) {
   return useFets(
     ...vcs.map((vc) => ({
       key: FetKEYS.Bvault2Data(vc),
-      fetfn: async () => getBvaut2Data(vc),
+      fetfn: () => fetRouter('/api/bvault2', { chain: vc.chain, vault: vc.vault, fet: 'fetBvaut2Data' }) as ReturnType<typeof fetBvaut2Data>,
     })),
   )
 }
@@ -57,7 +36,7 @@ export function useBvualt2sData(vcs: BVault2Config[]) {
 export function getBvault2EpochTimes(vd?: Vault2Data) {
   const startTime = (vd?.current?.startTime ?? 0n) * 1000n
   const endTime = ((vd?.current?.startTime ?? 0n) + (vd?.current?.duration ?? 0n)) * 1000n
-  const reamin = endTime > BigInt(now()) ? endTime - BigInt(now()) : 0n
+  const reamin = endTime > BigInt(Date.now()) ? endTime - BigInt(Date.now()) : 0n
   const duration = (vd?.current?.duration ?? 0n) * 1000n
   const progress = duration > 0n ? Math.round(aarToNumber(((duration - reamin) * DECIMAL_10) / duration, 8)) : 0
   return { startTime, endTime, reamin, duration, progress }
@@ -66,7 +45,7 @@ export function getBvault2EpochTimes(vd?: Vault2Data) {
 export function getBvualt2BootTimes(vd?: Vault2Data) {
   const startTime = (vd?.bootstrapStartTime ?? 0n) * 1000n
   const endTime = ((vd?.bootstrapStartTime ?? 0n) + (vd?.bootstrapDuration ?? 0n)) * 1000n
-  const reamin = endTime > BigInt(now()) ? endTime - BigInt(now()) : 0n
+  const reamin = endTime > BigInt(Date.now()) ? endTime - BigInt(Date.now()) : 0n
   const duration = (vd?.bootstrapDuration ?? 0n) * 1000n
   const progress = duration > 0n ? Math.round(aarToNumber(((duration - reamin) * DECIMAL_10) / duration, 8)) : 0
   return { startTime, endTime, reamin, duration, progress }
@@ -79,18 +58,13 @@ export function getBvualt2Times(vd?: Vault2Data) {
   }
 }
 
-export async function getBvault2Epochs(vc: BVault2Config, epochCount: bigint) {
-  if (epochCount <= 0n) return []
-  const pc = getPC(vc.chain)
-  const epochs = await Promise.all(bnRange(epochCount).map((id) => getBvault2Epoch(vc, id, pc)))
-  return epochs.reverse()
-}
+
 export function useBvault2Epochs(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
   const epochs = useFet({
     key: FetKEYS.Bvault2Epochs(vc, vd.result?.epochIdCount),
     initResult: [],
-    fetfn: () => getBvault2Epochs(vc, vd.result!.epochIdCount),
+    fetfn: () => fetRouter('/api/bvault2', { chain: vc.chain, vault: vc.vault, fet: 'fetBvault2Epochs' }) as ReturnType<typeof fetBvault2Epochs>,
   })
   if (vd.status == 'fetching') {
     epochs.status = 'fetching'
@@ -103,7 +77,7 @@ export function useBvault2sEpochs(vcs: BVault2Config[]) {
     ...vcs.map((vc, i) => ({
       key: FetKEYS.Bvault2Epochs(vc, vds.result[i]?.epochIdCount),
       initResult: [],
-      fetfn: () => getBvault2Epochs(vc, vds.result[i]!.epochIdCount),
+      fetfn: () => fetRouter('/api/bvault2', { chain: vc.chain, vault: vc.vault, fet: 'fetBvault2Epochs' }) as ReturnType<typeof fetBvault2Epochs>,
     })),
   )
   if (vds.status == 'fetching') {
@@ -112,10 +86,9 @@ export function useBvault2sEpochs(vcs: BVault2Config[]) {
   return epochs
 }
 
-export async function getBvualt2PTRedeems(vc: BVault2Config, epochs: UnPromise<typeof getBvault2Epochs>, user: Address) {
+export async function getBvualt2PTRedeems(vc: BVault2Config, epochs: UnPromise<typeof fetBvault2Epochs>, user: Address) {
   if (epochs.length == 0) return []
-  const pc = getPC(vc.chain)
-  return Promise.all(epochs.map((item) => pc.readContract({ abi: erc20Abi, address: item.PT, functionName: 'balanceOf', args: [user] }))).then((datas) =>
+  return Promise.all(epochs.map((item) => fetRouter('/api/token', { token: JSON.stringify({ address: item.PT, chain: vc.chain }), byUser: user, fet: 'fetBalance' }) as ReturnType<typeof fetBalance>)).then((datas) =>
     datas.map((redeemable, i) => ({ ...epochs[i], redeemable })),
   )
 }
@@ -148,16 +121,9 @@ export function useBvualt2sPTRedeems(vcs: BVault2Config[]) {
   return redeems
 }
 
-export async function getRewardsBy(rewradManager: Address, user: Address, pc: PublicClient) {
-  return pc
-    .readContract({ abi: abiBvault2Query, code: codeBvualt2Query, functionName: 'earned', args: [rewradManager, user, parseUnits('1', 28)] })
-    .then((item) => item.map((r) => [r.token, r.value] as [Address, bigint]))
-}
-
-export async function getBvault2YTRewards(vc: BVault2Config, epochs: UnPromise<typeof getBvault2Epochs>, user: Address) {
+export async function getBvault2YTRewards(vc: BVault2Config, epochs: UnPromise<typeof fetBvault2Epochs>, user: Address) {
   if (epochs.length == 0) return []
-  const pc = getPC(vc.chain)
-  return Promise.all(epochs.map((item) => getRewardsBy(item.YT, user, pc))).then((datas) => datas.map((rewrads, i) => ({ ...epochs[i], rewrads })))
+  return Promise.all(epochs.map((item) => fetRouter("/api/bvault2", { rewradManager: item.YT, user, chain: vc.chain, fet: 'fetRewardsBy' }) as ReturnType<typeof fetRewardsBy>)).then((datas) => datas.map((rewrads, i) => ({ ...epochs[i], rewrads })))
 }
 export function useBvault2YTRewards(vc: BVault2Config) {
   const epochs = useBvault2Epochs(vc)
@@ -191,8 +157,9 @@ export function useBvault2sYTRewards(vcs: BVault2Config[]) {
 export async function getBvault2LPBTRewards(vc: BVault2Config, user: Address) {
   const lp = getLpToken(vc)
   const bt = getTokenBy(vc.bt, vc.chain)!
-  const pc = getPC(vc.chain)
-  const [lpRewards, btRewards] = await Promise.all([getRewardsBy(lp.address, user, pc), getRewardsBy(bt.address, user, pc)])
+  const [lpRewards, btRewards] = await Promise.all([
+    fetRouter("/api/bvault2", { rewradManager: lp.address, user, chain: vc.chain, fet: 'fetRewardsBy' }) as ReturnType<typeof fetRewardsBy>,
+    fetRouter("/api/bvault2", { rewradManager: bt.address, user, chain: vc.chain, fet: 'fetRewardsBy' }) as ReturnType<typeof fetRewardsBy>])
   return [
     { token: lp, rewards: lpRewards },
     { token: bt, rewards: btRewards },
@@ -222,8 +189,8 @@ export function useBvault2sLPBTRewards(vcs: BVault2Config[]) {
 export function useBvault2TVL(vc: BVault2Config) {
   const vd = useBvualt2Data(vc)
   const prices = useTokenPrices().data
-  const btPrice = getBigint(prices, vc.bt)
   const bt = getTokenBy(vc.bt, vc.chain)!
+  const btPrice = prices[bt.symbol]?.bn ?? 0n
   const mintPoolBt = useBalance(bt, vd.result?.mintPoolTokenPot)
   const logs = useLogs(vc)
   const totalBt = (logs.result?.BTtp ?? 0n) + mintPoolBt.result
@@ -238,8 +205,8 @@ export function useBvault2sTVL(vcs: BVault2Config[]) {
   return useMemo(() => {
     const items: TVLItem[] = []
     vcs.forEach((vc, i) => {
-      const btPrice = getBigint(prices, vc.bt)
       const bt = getTokenBy(vc.bt, vc.chain)!
+      const btPrice = prices[bt.symbol]?.bn ?? 0n
       const totalBt = (logss.result[i]?.BTtp ?? 0n) + mintPoolBt.result[i]
       console.info('tvl:', logss.result[i]?.BTtp ?? 0n, mintPoolBt.result)
       const usdAmount = (totalBt * btPrice) / DECIMAL

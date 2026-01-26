@@ -1,14 +1,15 @@
 import { getBvault2ChartsData } from "@/config/api";
 import { type BVault2Config } from "@/config/bvaults2";
+import { FMT, fmtDate, formatPercent, type UnPromise } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import EChartsReact from "echarts-for-react";
+import { graphic } from "echarts";
+import EChartsReact, { type EChartsReactProps } from "echarts-for-react";
+import { round } from "es-toolkit";
+import { toNumber } from "es-toolkit/compat";
 import { type ReactNode, useMemo, useState } from "react";
+import { formatUnits } from "viem";
 import { useBvualt2Data } from "./bvaults2/useFets";
 import { SimpleSelect } from "./ui/select";
-import { FMT, fmtDate, formatPercent, type UnPromise } from "@/lib/utils";
-import { round, toNumber } from "lodash";
-import { formatUnits } from "viem";
-import { graphic } from "echarts";
 
 const chartTypes: {
     key: keyof UnPromise<ReturnType<typeof getBvault2ChartsData>>[number]
@@ -92,11 +93,12 @@ export function BVault2Chart({ vc }: { vc: BVault2Config }) {
             ],
         }
     }, [data, ct])
+    const EChartsReactCom = EChartsReact as unknown as React.FC<EChartsReactProps>
     return <div className='animitem card flex flex-col gap-5 w-full min-w-0'>
         <div className='flex justify-between gap-2 items-center'>
             <span className='text-base font-bold'>Chart</span>
             <SimpleSelect className="text-sm" options={chartTypes} value={ct} onChange={setCT} />
         </div>
-        <EChartsReact option={options} style={{ height: 300 }}></EChartsReact>
+        <EChartsReactCom option={options} style={{ height: 300 }} />
     </div>
 }

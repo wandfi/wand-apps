@@ -1,32 +1,38 @@
-import { defineConfig, loadEnv } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 import { devtools } from '@tanstack/devtools-vite'
 import viteReact from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import { defineConfig } from 'vite'
+import { nitro } from 'nitro/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import { fileURLToPath, URL } from 'node:url'
-
+import tsConfigPaths from 'vite-tsconfig-paths'
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const env = { ...process.env, ...loadEnv(mode, process.cwd()) }
-  console.info('envs', { VITE_BASE_URL: env.VITE_BASE_URL, VITE_PUBLIC_ENV: env.VITE_PUBLIC_ENV, DEV: env.DEV, NODE_ENV: env.NODE_ENV })
-  return {
-    base: env.VITE_BASE_URL,
-    appType: 'mpa',
-    plugins: [
-      devtools(),
-      tanstackRouter({
-        target: 'react',
-        routesDirectory: 'routes',
-        autoCodeSplitting: true,
-      }),
-      viteReact(),
-      tailwindcss(),
-    ],
-    resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./', import.meta.url)),
+export default defineConfig({
+  build: {
+    sourcemap: false,
+  },
+  plugins: [
+    devtools(),
+    tailwindcss(),
+    tsConfigPaths({
+      projects: ['./tsconfig.json'],
+    }),
+    tanstackStart({
+      srcDirectory: './',
+      router: {
+        routesDirectory: 'routes'
       },
+      prerender: {
+        concurrency: 1,
+        crawlLinks: true,
+      }
+    }),
+    viteReact(),
+    nitro({ preset: 'node-server' }),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./', import.meta.url)),
     },
-  }
+  },
 })

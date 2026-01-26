@@ -9,7 +9,7 @@ import { getPC } from "@/providers/publicClient"
 import { displayBalance } from "@/utils/display"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { useDebounce, useToggle } from "react-use"
+import { useDebounce, useToggle } from "react-use/esm";
 import { useAccount, useWalletClient } from "wagmi"
 import { useBalance, useTotalSupply } from "../../hooks/useToken"
 import { Txs, withTokenApprove } from "../approve-and-tx"

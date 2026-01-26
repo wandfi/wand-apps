@@ -1,13 +1,14 @@
 import { abiBvault2Query, abiHook } from '@/config/abi/BVault2'
 import { codeBvualt2Query } from '@/config/abi/codes'
-import { getTokenPriceBySymbol } from '@/config/api'
 import { type BVault2Config } from '@/config/bvaults2'
 import { getTokenBy } from '@/config/tokens'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useFet, useFets } from '@/hooks/useFet'
 import { aarToNumber, nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
-import _, { toNumber } from 'lodash'
+import { useTokenPrices } from '@/providers/sliceTokenStore'
+import { round } from 'es-toolkit'
+import { toNumber } from 'es-toolkit/compat'
 import { useMemo, useRef } from 'react'
 import { type Address, formatEther, formatUnits, isAddressEqual, parseUnits } from 'viem'
 import { useBalance, useTotalSupply } from '../../hooks/useToken'
@@ -94,7 +95,7 @@ export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
   const { result: remain } = useEpochRemain(vc)
   // rmain time by year
   const t = remain / YearSeconds
-  const apy = Math.min(apyMax, t > 0 && bt2ptPrice > 0 ? _.round(Math.pow(bt2ptPrice, 1 / t) - 1, 5) : 0)
+  const apy = Math.min(apyMax, t > 0 && bt2ptPrice > 0 ? round(Math.pow(bt2ptPrice, 1 / t) - 1, 5) : 0)
   console.info('ptapy:', bt2ptPrice, t, apy)
   let apyto = apy
   let priceimpact = 0
@@ -102,17 +103,9 @@ export function usePTApy(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
   if (ptChange != 0n && btChange != 0n && logs) {
     const nPrice = calcBt2PtPrice(logs, ptChange, btChange)
     priceimpact = Math.abs(nPrice - bt2ptPrice) / bt2ptPrice
-    apyto = t > 0 ? _.round(Math.pow(nPrice, 1 / t) - 1, 5) : 0
+    apyto = t > 0 ? round(Math.pow(nPrice, 1 / t) - 1, 5) : 0
   }
   return [apy, apyto, priceimpact]
-}
-
-export function useBTPriceUsd(vc: BVault2Config) {
-  return useFet({
-    key: FetKEYS.BTPriceUsd(vc),
-    initResult: vc.btPriceSymbol ? 0 : 1,
-    fetfn: async () => (vc.btPriceSymbol ? getTokenPriceBySymbol(vc.btPriceSymbol) : 1),
-  })
 }
 
 export function useYTPriceBt(vc: BVault2Config) {
@@ -153,13 +146,15 @@ export function useUnderlingApy(vc: BVault2Config) {
 }
 export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: bigint = 0n) {
   const { result: logs } = useLogs(vc)
-  const { result: btPrice } = useBTPriceUsd(vc)
+  const bt = getTokenBy(vc.bt, vc.chain)!
+  const { data: prices } = useTokenPrices()
+  const btPrice = prices[bt.symbol]?.num ?? 0;
   const { result: ytPriceBT } = useYTPriceBt(vc)
   const Pyt = btPrice * ytPriceBT
   const { result: underlingApy } = useUnderlingApy(vc)
   const { result: remain } = useEpochRemain(vc)
   const Y = (underlingApy * remain) / YearSeconds
-  const roi = Pyt != 0 ? _.round(Y / Pyt - 1, 5) : 0
+  const roi = Pyt != 0 ? round(Y / Pyt - 1, 5) : 0
   let roito = roi
   let priceimpact = 0
   if (ptChange != 0n && btChange != 0n && logs) {
@@ -167,7 +162,7 @@ export function useYTRoi(vc: BVault2Config, ptChange: bigint = 0n, btChange: big
     if (nBt2Pt != 0) {
       const nYtPriceBT = calcYt2BtPrice(nBt2Pt)
       const nPyt = btPrice * nYtPriceBT
-      roito = nPyt != 0 ? _.round(Y / nPyt - 1, 5) : 0
+      roito = nPyt != 0 ? round(Y / nPyt - 1, 5) : 0
       priceimpact = ytPriceBT > 0 && nYtPriceBT > 0 ? Math.abs(nYtPriceBT - ytPriceBT) / ytPriceBT : 0
     }
   }
@@ -210,11 +205,11 @@ export function useLpShare(vc: BVault2Config, lpUserChange: bigint) {
   const lp = getLpToken(vc)
   const lpc = useTotalSupply(lp)
   const lpBalance = useBalance(lp)
-  const poolShare = lpc.result > 0 ? _.round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0
+  const poolShare = lpc.result > 0 ? round(aarToNumber(lpBalance.result, lp.decimals) / aarToNumber(lpc.result, lp.decimals), 5) : 0
   const poolShareTo =
     lpUserChange != 0n
       ? lpc.result + lpUserChange > 0n
-        ? _.round(aarToNumber(lpBalance.result + lpUserChange, lp.decimals) / aarToNumber(lpc.result + lpUserChange, lp.decimals), 5)
+        ? round(aarToNumber(lpBalance.result + lpUserChange, lp.decimals) / aarToNumber(lpc.result + lpUserChange, lp.decimals), 5)
         : 0
       : poolShare
   return [poolShare, poolShareTo]

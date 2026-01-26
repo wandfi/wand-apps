@@ -1,13 +1,12 @@
 import { type BVaultConfig } from '@/config/bvaults'
-import { LP_TOKENS } from '@/config/lpTokens'
-import { DECIMAL, YEAR_SECONDS } from '@/src/constants'
 import { fmtPercent, proxyGetDef, retry } from '@/lib/utils'
+import { DECIMAL, YEAR_SECONDS } from '@/src/constants'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useAccount } from 'wagmi'
 import { type BVaultDTO, type BVaultEpochDTO, useBVaultData, useBVaultEpoch, useBVaultsYTokenSythetic } from './sliceBVaultsStore'
 import { useTokenPrices } from './sliceTokenStore'
 import { useBVaultUserData } from './sliceUserBVaults'
-import { useQueryClient } from '@tanstack/react-query'
 
 const defBvault = proxyGetDef<BVaultDTO>({ current: proxyGetDef<BVaultEpochDTO>({}, 0n) }, 0n)
 export function useBVault(vc: BVaultConfig) {
@@ -16,20 +15,11 @@ export function useBVault(vc: BVaultConfig) {
 
 export function useBvaultTVL(vc: BVaultConfig) {
   const bvd = useBVault(vc)
-  const lp = LP_TOKENS[vc.asset]
   const prices = useTokenPrices().data
-  const lpBasePrice = lp ? prices[lp?.base] ?? 0n : 0n
-  const lpQuotePrice = lp ? prices[lp?.quote] ?? 0n : 0n
-  const lpBase = bvd.lpBase || 0n
-  const lpQuote = bvd.lpQuote || 0n
-  const lpBaseTvlBn = (lpBase * lpBasePrice) / DECIMAL
-  const lpQuoteTvlBn = (lpQuote * lpQuotePrice) / DECIMAL
   // console.info('lpTypes', lpBaseTvlBn, lpQuoteTvlBn , lpQuoteTvlBn == lpBaseTvlBn)
-  let vaultTvlBn = lpBaseTvlBn + lpQuoteTvlBn
-  if (vaultTvlBn === 0n) {
-    vaultTvlBn = ((bvd.lockedAssetTotal || 0n) * (prices[vc.asset] || 0n)) / DECIMAL
-  }
-  return [vaultTvlBn, lpBaseTvlBn, lpQuoteTvlBn]
+  let vaultTvlBn = ((bvd.lockedAssetTotal || 0n) * (prices[vc.assetSymbol]?.bn || 0n)) / DECIMAL
+
+  return [vaultTvlBn, 0n, 0n]
 }
 
 export function useBVaultEpoches(vc: BVaultConfig) {

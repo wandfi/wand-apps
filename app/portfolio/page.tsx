@@ -6,10 +6,9 @@ import { CoinIcon } from '@/components/icons/coinicon'
 import { PageWrap } from '@/components/page-wrap'
 import STable, { type TableProps } from '@/components/simple-table'
 import { BvcsByEnv } from '@/config/bvaults'
-import { BVAULTS2CONIG } from '@/config/bvaults2'
+import { bvcs2ByEnv } from '@/config/bvaults2'
 import { LP_TOKENS } from '@/config/lpTokens'
 import { getTokenBy } from '@/config/tokens'
-import { ENV } from '@/src/constants'
 import { useBalance } from '@/hooks/useToken'
 import { fmtDate } from '@/lib/utils'
 import { useBVaultsYTokenSythetic } from '@/providers/sliceBVaultsStore'
@@ -185,7 +184,7 @@ function BoostItem() {
 }
 
 
-const vcsV2 = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
+const vcsV2 = bvcs2ByEnv
 export default function Dashboard() {
   return (
     <PageWrap>

@@ -5,9 +5,8 @@ import * as BVaultN from '@/components/b-vault-new'
 import { BVaultAddReward } from '@/components/bvault-add-reward'
 import BvaultEpochYtPrices from '@/components/bvault-epoch-ytprices'
 import { BVault2Card, BVault2Info, BVault2Swaps } from '@/components/bvaults2'
-import { FetKEYS } from '@/components/bvaults2/fetKeys'
 import { MyPositions } from '@/components/bvaults2/positions'
-import { getBvaut2Data, useBvualt2Data } from '@/components/bvaults2/useFets'
+import { useBvualt2Data, useBvualt2sData } from '@/components/bvaults2/useFets'
 import { BVault2Chart } from '@/components/bvaut2-chart'
 import { Noti } from '@/components/noti'
 import { PageWrap } from '@/components/page-wrap'
@@ -17,23 +16,19 @@ import { ConfigChainsProvider } from '@/components/support-chains'
 import { SimpleSelect } from '@/components/ui/select'
 import { abiBVault } from '@/config/abi'
 import { type BVaultConfig, BvcsByEnv } from '@/config/bvaults'
-import { type BVault2Config, BVAULTS2CONIG } from '@/config/bvaults2'
-import { isError, isLoading, isSuccess, useFets } from '@/hooks/useFet'
+import { type BVault2Config, bvcs2ByEnv } from '@/config/bvaults2'
+import { isError, isLoading, isSuccess } from '@/hooks/useFet'
 import { nowUnix } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useBVaultsData } from '@/providers/sliceBVaultsStore'
 import { useBVault } from '@/providers/useBVaultsData'
-import { ENV } from '@/src/constants'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { Fragment, type ReactNode, useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
 import { isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 import { toBVault } from '../routes'
-function StrongSpan({ children }: { children: ReactNode }) {
-  return <span className='font-extrabold'>{children}</span>
-}
 
 function BVaultPage({ bvc, currentTab }: { bvc: BVaultConfig; currentTab?: string }) {
   const { address } = useAccount()
@@ -136,9 +131,9 @@ type VCItem = (BVault2Config & { type: 'BVault2' }) | (BVaultConfig & { type: 'B
 export default function Vaults() {
   const vcs = useMemo(() => {
     const olds = BvcsByEnv.map(vc => ({ ...vc, type: 'BVault' }) as VCItem)
-    const v2vc = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV)).map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
+    const v2vc = bvcs2ByEnv.map(vc => ({ ...vc, type: 'BVault2' }) as VCItem)
     return [...v2vc, ...olds]
-  }, [ENV])
+  }, [])
   const params = useSearch({ strict: false })
   const paramsVault = params.vault
   const currentTab = params.tab
@@ -149,9 +144,8 @@ export default function Vaults() {
     setFilter(nf)
     sessionStorage.setItem("bvualts-filter", nf)
   }
-  const vc2 = BVAULTS2CONIG.filter(item => item.onEnv.includes(ENV))
-  const vd2Res = useFets(...vc2.map(vc => ({ key: FetKEYS.Bvault2Data(vc), fetfn: async () => getBvaut2Data(vc) })))
-  const vd2 = vd2Res.result.map((vd, i) => ({ vc: vc2[i], ...(vd ?? {}) }))
+  const vd2Res = useBvualt2sData(bvcs2ByEnv)
+  const vd2 = vd2Res.result.map((vd, i) => ({ vc: bvcs2ByEnv[i], ...(vd ?? {}) }))
   const bvaults = useBVaultsData(BvcsByEnv)
   const mloading = bvaults.some(item => item.isLoading) || isLoading(vd2Res)
   const fVcs = (() => {

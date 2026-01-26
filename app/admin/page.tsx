@@ -3,18 +3,19 @@
 import { ApproveAndTx } from '@/components/approve-and-tx'
 import { Expandable, GeneralAction, inputClassname, selectClassNames } from '@/components/general-action'
 import { PageWrap } from '@/components/page-wrap'
+import { ConfigChainsProvider } from '@/components/support-chains'
 import { abiBVault, abiMockERC20, abiProtocolSettings, abiZooProtocol } from '@/config/abi'
 import { abiBVault2, abiHook, abiMockInfraredVault, abiProtocol } from '@/config/abi/BVault2'
 import { getChain } from '@/config/network'
 import { getTokenBy } from '@/config/tokens'
-import { ipAssetsTit } from '@/hooks/useBVaultROI'
 import { useCurrentChainId } from '@/hooks/useCurrentChainId'
 import { useVaultsConfigs } from '@/hooks/useVaultsConfigs'
+import { ipAssetsTit } from '@/lib/fetsBVault'
 import { cn, fmtPercent, parseEthers, promiseAll } from '@/lib/utils'
 import { getPC } from '@/providers/publicClient'
 import { useMemo } from 'react'
 import Select from 'react-select'
-import { useMeasure, useSetState } from 'react-use'
+import { useMeasure, useSetState } from 'react-use/esm'
 import { type Address, erc20Abi, formatUnits, isAddress, parseAbi, parseUnits, stringToHex } from 'viem'
 import { useReadContracts } from 'wagmi'
 
@@ -159,7 +160,7 @@ export default function AdminPage() {
           </div>
           <Select classNames={selectClassNames} defaultValue={options[0]} options={options} onChange={(e: any) => e && setState({ current: e as any })} />
           {current?.type == 'B-Vault' && (
-            <>
+            <ConfigChainsProvider chains={[current.data.chain]}>
               <UpdateVaultParams vault={current.data.vault} paramList={BVaultParams} protocoSettingAddress={current.data.protocolSettingsAddress} />
               {current.data.compney == 'Verio' && <DeleteIpAssets vault={current.data.vault} />}
               {['addIpAsset', 'updateMaxIpAssets', 'updateC', 'close', 'pause', 'unpause', 'pauseRedeemPool', 'unpauseRedeemPool', 'addBribeToken', 'addBribes', 'setBriber'].map((functionName) => (
@@ -167,9 +168,9 @@ export default function AdminPage() {
               ))}
               <GeneralAction tit='transferOwnership' abi={abiZooProtocol} functionName='transferOwnership' address={current.data.protocolAddress} />
               <GeneralAction tit='upsertParamConfig' abi={abiProtocolSettings} functionName='upsertParamConfig' address={current.data.protocolSettingsAddress} />
-            </>
+            </ConfigChainsProvider>
           )}
-          {current?.type == 'B-Vault2' && (<>
+          {current?.type == 'B-Vault2' && (<ConfigChainsProvider chains={[current.data.chain]}>
             <UpdateVaultParams vault={current.data.vault} paramList={BVault2Params} protocoSettingAddress={current.data.protocalSettings} />
             <GeneralAction abi={abiBVault2} functionName="setAutoStartNewEpoch" address={current.data.vault}
               infos={() => promiseAll({ AutoStartNewEpoch: getPC(current.data.chain).readContract({ abi: abiBVault2, address: current.data.vault, functionName: 'autoStartNewEpoch' }) })} />
@@ -194,7 +195,7 @@ export default function AdminPage() {
             </>}
 
             {current.data.mockInfraredVault && <GeneralAction tit={`MockInfraredVault addReward ${current.data.mockInfraredVault}`} abi={abiMockInfraredVault} functionName='addReward' address={current.data.mockInfraredVault} />}
-          </>)}
+          </ConfigChainsProvider>)}
           <Erc20Approve />
         </div>
       </div>

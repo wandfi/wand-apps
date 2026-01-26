@@ -1,13 +1,14 @@
 import { cn, parseEthers, promiseT } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Collapse } from 'react-collapse'
+import { useEffect, useMemo, useState } from 'react'
+import { Collapse, type CollapseProps } from 'react-collapse'
 import { FiArrowDown, FiArrowUp } from 'react-icons/fi'
 import Select from 'react-select'
-import { useSetState } from 'react-use'
+import { useSetState } from 'react-use/esm'
 import { stringToHex, type Abi, type AbiFunction, type AbiParameter, type Address } from 'viem'
 import { Txs } from './approve-and-tx'
 import { Spinner } from './spinner'
+
 
 export const selectClassNames: Parameters<Select>[0]['classNames'] = {
   menu: () => cn('bg-white dark:bg-black dark:border'),
@@ -40,9 +41,9 @@ const convertArgs = (args: string[], inputs: readonly AbiParameter[], ca?: (arg:
 }
 
 
-export function Expandable({ children, tit, disable }: { tit: string; children?: ReactNode; disable?: boolean }) {
+export function Expandable({ children, tit, disable }: { tit: string; children?: React.ReactNode; disable?: boolean }) {
   const [open, setOpen] = useState(false)
-
+  const CollapseCom = Collapse as unknown as React.FC<CollapseProps>
   return (
     <div className='flex flex-col w-full bg-white dark:bg-transparent rounded-lg overflow-hidden border border-solid border-primary/40'>
       <div className='px-4 py-2 flex justify-between items-center text-sm'>
@@ -56,9 +57,9 @@ export function Expandable({ children, tit, disable }: { tit: string; children?:
           </div>
         )}
       </div>
-      <Collapse isOpened={open} theme={{ content: 'bg-gray-200 dark:bg-transparent p-4 flex flex-col gap-2 whitespace-break-spaces' }}>
-        {children}
-      </Collapse>
+      <CollapseCom isOpened={open} theme={{ content: 'bg-gray-200 dark:bg-transparent p-4 flex flex-col gap-2 whitespace-break-spaces' }}>
+        {children as any}
+      </CollapseCom>
     </div>
   )
 }

@@ -1,6 +1,6 @@
-import { ENV } from '@/src/constants'
+
 import { type Address } from 'viem'
-import { type TypeENV } from './env'
+import { ENV, type TypeENV } from './env'
 import { story } from './network'
 
 export type BVaultConfig = {
@@ -40,9 +40,6 @@ export const CrocQueryAddress: { [k: number]: Address } = {
   [story.id]: '0x8685CE9Db06D40CBa73e3d09e6868FE476B5dC89',
 }
 
-export const HONEY_Address: { [k: number]: Address } = {
-  [story.id]: '0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce',
-}
 export const BQueryAddress: { [k: number]: Address } = {
   [story.id]: '0x413a55fe2CFD42799af68Cbd3514a55439B7cf5c',
 }

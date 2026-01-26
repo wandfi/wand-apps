@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import _ from 'lodash';
+import { round } from 'es-toolkit';
 import { type ButtonHTMLAttributes, type HTMLAttributes, useEffect, useRef, useState } from 'react';
 import { AiOutlineSwap } from 'react-icons/ai';
 import { IoIosArrowDown } from 'react-icons/io';
@@ -43,10 +43,10 @@ export function BBtn(p: ButtonHTMLAttributes<HTMLButtonElement> & { borderWidth?
     const path = `M 0 0 L 0 ${height} L ${width} ${height} L ${width} 0 L 0 0 ${holePath} Z`
     clipPath = `path('${path}')`
     const borderBgSize = width * 2
-    const tranX = (pecent: number) => _.round((pecent * width + borderBgSize * 50 - width * 50) / borderBgSize, 2)
-    const tranY = (pecent: number) => _.round((pecent * height + borderBgSize * 50 - height * 50) / borderBgSize, 2)
-    const tranP = (pecent: number) => _.round(pecent / 2, 2)
-    const tranYC = (pecent: number) => _.round(pecent / (width / height), 2)
+    const tranX = (pecent: number) => round((pecent * width + borderBgSize * 50 - width * 50) / borderBgSize, 2)
+    const tranY = (pecent: number) => round((pecent * height + borderBgSize * 50 - height * 50) / borderBgSize, 2)
+    const tranP = (pecent: number) => round(pecent / 2, 2)
+    const tranYC = (pecent: number) => round(pecent / (width / height), 2)
     borderBg = `radial-gradient(122.5% ${tranYC(122.5)}% at ${tranX(52.9)}% ${tranY(16.25)}%, #15d264 0%, #2cbd35 ${tranP(36.26)}%, #dcf45d ${tranP(92.54)}%)`
   }
   useEffect(() => {

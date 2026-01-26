@@ -1,7 +1,5 @@
 'use client'
-  ; (BigInt.prototype as any).toJSON = function () {
-    return this.toString()
-  }
+
 import { TxsStat } from '@/components/approve-and-tx';
 import { Header } from '@/components/header';
 import { useInitAnimRoot } from '@/hooks/useAnim';
