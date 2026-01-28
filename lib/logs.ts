@@ -6,15 +6,16 @@ import { isPROD } from '@/config/env'
 import { getPC } from '@/providers/publicClient'
 import { mapValues } from 'es-toolkit'
 import { type Address, erc20Abi } from 'viem'
+import { fromJson, toJson } from './bnjson'
 import { fmtBn, retry } from './utils'
 
 export function saveLogs(item: any, key: string = 'logs') {
   const str = localStorage.getItem(key)
-  const data: [string, any][] = JSON.parse(str || '[]')
+  const data: [string, any][] = fromJson(str || '[]')
   const date = new Date()
   const time = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
   data.push([time, item])
-  localStorage.setItem(key, JSON.stringify(data))
+  localStorage.setItem(key, toJson(data))
 }
 
 export function getLogsBy(user: Address) {

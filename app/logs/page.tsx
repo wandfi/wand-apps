@@ -1,6 +1,7 @@
 'use client'
 
 import { PageWrap } from "@/components/page-wrap"
+import { toJson } from "@/lib/bnjson"
 import { getLogsBy } from "@/lib/logs"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
@@ -50,7 +51,7 @@ export default function Logs() {
                 }}>{time}</div>)}
             </div>
             <div className="flex flex-col gap-2 h-auto flex-1 pr-3 whitespace-pre-wrap">
-                {infos.map(([time, item], i) => <div className={cn("w-full px-4 py-2 rounded-lg bg-white", { 'bg-primary/30': i === active })} key={time} id={time}>{JSON.stringify(item, undefined, 2)}</div>)}
+                {infos.map(([time, item], i) => <div className={cn("w-full px-4 py-2 rounded-lg bg-white", { 'bg-primary/30': i === active })} key={time} id={time}>{toJson(item, undefined, 2)}</div>)}
             </div>
         </div>
     </PageWrap>

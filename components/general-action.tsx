@@ -8,6 +8,7 @@ import { useSetState } from 'react-use/esm'
 import { stringToHex, type Abi, type AbiFunction, type AbiParameter, type Address } from 'viem'
 import { Txs } from './approve-and-tx'
 import { Spinner } from './spinner'
+import { toJson } from '@/lib/bnjson'
 
 
 export const selectClassNames: Parameters<Select>[0]['classNames'] = {
@@ -132,7 +133,7 @@ export function GeneralAction({
       {
         Boolean(infos) && <div className={cn('whitespace-normal')}>
           {isLoading && <Spinner />}
-          {Boolean(qInfo) && JSON.stringify(qInfo, undefined, 2)}
+          {Boolean(qInfo) && toJson(qInfo, undefined, 2)}
         </div>
       }
       <Txs
