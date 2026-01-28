@@ -13,6 +13,7 @@ jobs:
     if: contains(github.event.head_commit.message, '[docker]') || contains(github.event.head_commit.message, '[all]') || github.event.inputs.job == 'docker' || github.event.inputs.job == 'all'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: write
     steps:
       - name: Checkout
@@ -48,7 +49,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/wandfi/wandfi-app:latest
-            ghcr.io/wnadfi/wandfi-app:${{ env.date }}
+            ghcr.io/wandfi/wandfi-app:${{ env.date }}
   prod:
     if: contains(github.event.head_commit.message, '[prod]') || contains(github.event.head_commit.message, '[all]') || github.event.inputs.job == 'prod' || github.event.inputs.job == 'all'
     runs-on: ubuntu-latest
