@@ -19,20 +19,20 @@ import { isPlainObject } from 'es-toolkit';
 import { ENV } from '@/config/env';
 import { AnimRoot } from '@/components/ui/anim-root';
 
-
+const keyHashFn = (queryKey: readonly unknown[]) => {
+  return JSON.stringify(
+    queryKey,
+    (_, val) => isPlainObject(val) ? Object.keys(val).sort().reduce((result, key) => {
+      result[key] = val[key];
+      return result;
+    }, {} as any) : typeof val == 'bigint' ? val.toString() : val
+  )
+}
 export function getContext() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: 3, refetchOnMount: 'always', staleTime: 1000, queryKeyHashFn: (queryKey) => {
-          return JSON.stringify(
-            queryKey,
-            (_, val) => isPlainObject(val) ? Object.keys(val).sort().reduce((result, key) => {
-              result[key] = val[key];
-              return result;
-            }, {} as any) : typeof val == 'bigint' ? val.toString() : val
-          )
-        }
+        retry: 3, refetchOnMount: 'always', staleTime: 1000, queryKeyHashFn: keyHashFn
       }
     }
   })

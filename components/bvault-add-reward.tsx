@@ -156,7 +156,6 @@ export function BVaultAddReward({ bvc }: { bvc: BVaultConfig }) {
       setInput('')
       toast.success('Transaction success')
     },
-    mutationKey: ['addReward'],
     onError: handleError,
   })
   const disableAdd = !wc.data || !address || inputBn == 0n || inputBn > balance || isPending || bvd.epochCount == 0n

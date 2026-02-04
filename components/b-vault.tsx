@@ -86,7 +86,6 @@ export function BVaultRedeemAll({ bvc }: { bvc: BVaultConfig }) {
   const { data: wc } = useWalletClient()
   const { ids, claimable } = useCalcClaimable(bvc)
   const { mutate, isPending } = useMutation({
-    mutationKey: ['readeemAll', pTokenBalance, claimable, ids],
     mutationFn: async () => {
       if (!wc) throw 'Error';
       const pc = getPC(bvc.chain)

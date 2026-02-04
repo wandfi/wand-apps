@@ -85,15 +85,14 @@ export function BT({ vc }: { vc: BVault2Config }) {
     const onAddPToken = () => {
         walletClient?.watchAsset({ type: 'ERC20', options: bt }).catch(handleError)
     }
-
-    const tokens = useWrapBtTokens(vc, false)
+    const [isToggled, toggle] = useToggle(false)
+    const tokens = useWrapBtTokens(vc, false, !isToggled)
     const [cToken, setCToken] = useState<Token>(tokens[0])
     const assetBalance = useBalance(asset)
     const btBalance = useBalance(bt)
     const btTotalSupply = useTotalSupply(bt)
     const [inputAsset, setInputAsset] = useState('')
     const inputAssetBn = parseEthers(inputAsset)
-    const [isToggled, toggle] = useToggle(false)
     const input = isToggled ? bt : cToken
     const output = isToggled ? cToken : bt
     const inputSetCT = (t: Token) => !isToggled && setCToken(t)
